@@ -1,0 +1,52 @@
+/* Bee Snack Bar styles. Everything is scoped to #bee-game so it cannot clash with Mainmenu.css. */
+#bee-game {
+  --ink:#241d12; --panel:#33291a; --card:#4a3b22; --tile:#e2a93b; --gold:#ffd84d;
+  --f1:#fff1c9; --f2:#f6dd9b; --text:#fff6df; --mute:#cdbb8f; --go:#9ad66b;
+  /* ASSET: swap for your own art, e.g. --kitchen-bg: url('../assets/ui/kitchen.png') center/cover; */
+  --kitchen-bg: var(--tile);
+  --floor-bg: conic-gradient(var(--f1) 25%, var(--f2) 0 50%, var(--f1) 0 75%, var(--f2) 0) 0 0/36px 36px;
+  user-select: none; -webkit-user-select: none;
+
+  & .game-canvas-area { align-items: stretch; min-height: 0; }
+  & .hud-actions { display: flex; align-items: center; gap: 8px; }
+  & #hud-save { font-size: .85rem; color: var(--mute); }
+  & #devbtn { border: 0; background: transparent; font-size: 20px; cursor: pointer; color: #fff; }
+  & [hidden] { display: none !important; }
+
+  & .bee-app { width: 100%; max-width: 440px; height: 100%; display: flex; flex-direction: column; background: var(--ink); color: var(--text); font-family: 'Baloo 2', system-ui, sans-serif; }
+
+  & #dev { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; padding: 6px 10px; background: #17110a; font-size: 12px; }
+  & #dev button { font: inherit; font-size: 12px; border: 0; border-radius: 8px; padding: 3px 7px; background: #6b5a37; color: var(--text); cursor: pointer; }
+  & #dev button.on { background: #e2563b; }
+
+  & #scene { position: relative; flex: 0 0 46%; overflow: hidden; background: var(--floor-bg); }
+  & #kitchen { position: absolute; left: 0; right: 0; top: 0; height: 36%; background: var(--kitchen-bg); border-bottom: 7px solid #8a5a1c; }
+  & .stn { position: absolute; top: 6%; text-align: center; }
+  & .stn.off { opacity: .3; }
+  & .mach { display: inline-block; font-size: 30px; background: #b8821f; border-radius: 10px; padding: 2px 8px; }
+  & .ent { position: absolute; left: 0; top: 0; font-size: 24px; line-height: 1; will-change: transform; }
+  & .acc { position: absolute; right: -7px; bottom: -4px; font-size: 12px; }
+  & .art { width: 1.1em; height: 1.1em; object-fit: contain; vertical-align: middle; }
+  & .bub { position: absolute; left: 50%; bottom: 100%; transform: translateX(-50%); font-size: 14px; background: #fff; color: #000; border-radius: 10px; padding: 0 5px; white-space: nowrap; box-shadow: 0 1px 3px #0004; }
+  & .bub.ok { opacity: .55; }
+  & .bar { position: absolute; left: 50%; bottom: 104%; width: 30px; height: 5px; margin-left: -15px; background: #0005; border-radius: 3px; overflow: hidden; }
+  & .bar i { display: block; height: 100%; background: #e2563b; }
+  & .pop { position: absolute; color: #7a4a00; font-weight: 800; font-size: 15px; pointer-events: none; animation: bee-rise .9s forwards; }
+
+  & #panel { flex: 1; overflow-y: auto; background: var(--panel); padding: 8px 10px; display: flex; flex-direction: column; gap: 8px; }
+  & .upg { display: flex; flex-direction: column; gap: 6px; background: var(--card); border-radius: 12px; padding: 8px; flex: none; }
+  & .uh, & .ur { display: flex; align-items: center; gap: 8px; }
+  & .ic { font-size: 26px; }
+  & .nm { flex: 1; font-weight: 700; font-size: 15px; line-height: 1.1; min-width: 0; }
+  & .nm small { display: block; font-weight: 500; font-size: 12px; color: var(--mute); }
+  & .ds { flex: 1; margin: 0; font-size: 12px; line-height: 1.15; color: var(--mute); }
+  & #panel button { font: inherit; font-weight: 700; font-size: 13px; line-height: 1.1; white-space: pre-line; border: 0; border-radius: 10px; padding: 6px 8px; background: var(--go); color: #1d3308; width: 96px; flex: none; cursor: pointer; }
+  & #panel button:disabled { background: #6b5a37; color: #b9a97f; cursor: default; }
+  & #panel button:active:not(:disabled) { transform: scale(.96); }
+  & #panel button:focus-visible { outline: 3px solid var(--gold); }
+  & #panel #next { background: var(--gold); color: #4a3200; width: 100%; padding: 9px; font-size: 14px; }
+  & #panel #next:disabled { background: #6b5a37; color: #b9a97f; }
+  & .note { font-size: 12px; color: var(--mute); text-align: center; }
+}
+@keyframes bee-rise { to { transform: translateY(-34px); opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { #bee-game .pop { animation-duration: .01s; } }

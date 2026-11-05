@@ -11,6 +11,7 @@ Two layers of testing ship with this branch: dependency-free automated tests and
 - Node.js **20 or newer**
 - PHP **8.0 or newer** (only for the save-validator checks)
 - No Composer, npm packages, or database are required for `npm test`
+- The optional live PostgreSQL test needs a configured `gamefile/db.php` and `pdo_pgsql`
 
 From the repository root:
 
@@ -38,6 +39,20 @@ If PHP is not on your PATH under XAMPP:
 /Applications/XAMPP/xamppfiles/bin/php tests/SaveRepository.test.php
 ```
 
+### Live PostgreSQL check (optional)
+
+```bash
+npm run test:pg
+```
+
+`tests/SaveRepositoryPg.test.php` creates a temporary account, saves twice (exercising `INSERT ... ON CONFLICT DO UPDATE`), verifies every field round-trips, and deletes its rows even if a check fails. It prints `skip` and exits successfully when `gamefile/db.php` is missing or points at MySQL, so it never breaks a XAMPP-only checkout.
+
+Expected result against Supabase:
+
+```text
+13 live PostgreSQL SaveRepository checks passing
+```
+
 ### What the JavaScript tests cover
 
 | File | Coverage |
@@ -59,6 +74,17 @@ If PHP is not on your PATH under XAMPP:
 - clamping of honey, diamonds, upgrades, stations, mission IDs, and cosmetics
 - forced first station with at least one worker
 - malformed payload rejection
+
+### What the PostgreSQL check covers
+
+`tests/SaveRepositoryPg.test.php` runs against a real PostgreSQL/Supabase connection:
+
+- temporary account creation and `lastInsertId()`;
+- v2 payload acceptance and first save (`INSERT`);
+- level, location, currency, station, upgrade, mission, and cosmetic round-trips;
+- second save updating the same row (`ON CONFLICT DO UPDATE`);
+- late-game fields (`recipe_lvl = 10`, `work_lvl`, `profit_x2`, `missions_finished`);
+- cleanup of the temporary user, progress row, and station rows.
 
 ### Syntax checks
 
@@ -82,12 +108,14 @@ node -e "import('./gamefile/js/Game.js').then(() => console.log('modules load'))
 
 ### Setup
 
-1. Start Apache and MySQL (or run `php -S 127.0.0.1:8000 -t gamefile`).
-2. Copy `gamefile/db.example.php` to `gamefile/db.php`.
-3. Import `gamefile/login_db.sql` into MySQL.
-4. Open `gamefile/login.php` or `http://127.0.0.1:8000/login.php`.
-5. Register a fresh test account.
-6. Keep the dev panel enabled (`$devMode = true`) for faster testing.
+1. Start the web server: Apache/XAMPP, or `php -S 127.0.0.1:8000 -t gamefile`.
+2. Choose one database:
+   - **MySQL/MariaDB:** start MySQL in XAMPP, copy `gamefile/db.example.php` to `gamefile/db.php`, and import `gamefile/login_db.sql`.
+   - **PostgreSQL/Supabase:** copy `gamefile/db.postgres.example.php` to `gamefile/db.php`, fill in the pooler credentials, and run `gamefile/login_db_pg.sql` once in the Supabase SQL Editor.
+3. Open `gamefile/login.php` or `http://127.0.0.1:8000/login.php`.
+4. Register a fresh test account.
+5. Keep the dev panel enabled (`$devMode = true`) for faster testing.
+6. If you test against the shared Supabase database, use a throwaway account and delete it plus its `player_progress`/`player_stations` rows when you finish. Never modify the two existing production accounts.
 
 ### A. New game
 
@@ -167,6 +195,12 @@ Test on a copy of a pre-branch database, not your only copy:
 - [ ] Re-run the migration on MariaDB; it should not error.
 - [ ] Load that account in the game; honey/staff/recipe progress is preserved and earlier missions are marked done without duplicate rewards.
 
+PostgreSQL/Supabase:
+
+- [ ] Re-run `gamefile/login_db_pg.sql`; it should not error and seed rows should keep their values.
+- [ ] On an existing row, the script adds any missing columns without touching stored progress.
+- [ ] `npm run test:pg` passes and leaves no temporary rows behind.
+
 ### J. Responsive/layout
 
 - [ ] At roughly 440 px wide, the HUD wraps without covering the level/location.
@@ -203,15 +237,18 @@ The server validates shape and clamps values; it is not intended as a competitiv
 - PHP `SaveRepository` checks passing.
 - PHP lint across every `gamefile/**/*.php`.
 - Fresh MariaDB 10.4 import, including emoji menu rows.
-- Register → login → API save → API load round-trip.
-- Old-schema migration and repeat migration.
-- Headless Chrome (440×900) run:
+- Fresh Supabase import: 5 tables created, 3 locations and 12 menu items seeded, re-import idempotent.
+- Register → login → API save → API load round-trip on MariaDB and on Supabase.
+- Old-schema migration and repeat migration (MariaDB).
+- **13** live PostgreSQL checks passing with cleanup verified (`npm run test:pg`).
+- Logged-out API returns 401; malformed save returns 400; Google login redirects to Google and rejects a bad state.
+- Headless Chrome (440×900) run against Supabase:
   - login and render the saved level-6 Hive Café;
   - mission gate and dev completion;
   - advance to level 7 and Royal Hive;
   - buy/equip a bee cosmetic;
   - exit/re-enter and confirm the server restored level, diamonds, and cosmetic;
-  - no JavaScript errors.
+  - 28/28 checks, no JavaScript errors.
 - Screenshot review caught and fixed the `.cos` CSS collision.
 
-The automated suite does not require MySQL; the browser/API checks above do. Run the manual checklist after changing the schema, save format, or progression.
+The automated suite does not require a database; the browser/API checks above do. Run the manual checklist after changing the schema, save format, or progression.

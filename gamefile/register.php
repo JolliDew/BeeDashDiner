@@ -21,7 +21,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $stmt = $pdo->prepare("SELECT id FROM users WHERE username = ? OR email = ?");
         $stmt->execute([$username, $email]);
         
-        if ($stmt->rowCount() > 0) {
+        if ($stmt->fetch()) {
             $error = "Username or email is already taken.";
         } else {
             // Hash the password securely

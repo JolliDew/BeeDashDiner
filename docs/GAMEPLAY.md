@@ -339,7 +339,10 @@ Where to change things:
 | Global/per-station upgrade unlocks, costs, effects | `gamefile/js/upgrades.js` |
 | Cosmetic prices and definitions | `gamefile/js/cosmetics.js` |
 | Save validation/clamps | `gamefile/src/SaveRepository.php` |
-| Database schema | `gamefile/login_db.sql`, `gamefile/upgrade_db.sql` |
+| Database schema (MySQL/MariaDB) | `gamefile/login_db.sql`, `gamefile/upgrade_db.sql` |
+| Database schema (PostgreSQL/Supabase) | `gamefile/login_db_pg.sql` |
+
+`SaveRepository.php` is driver-aware: MySQL/MariaDB use `ON DUPLICATE KEY UPDATE`, PostgreSQL uses `ON CONFLICT ... DO UPDATE`. Gameplay logic, validation, and clamping are identical on both.
 
 After changing missions or balance, run:
 

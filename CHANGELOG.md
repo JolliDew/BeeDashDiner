@@ -44,8 +44,14 @@ All notable changes to the JolliDew gameplay-expansion branch.
   - New fields: level, diamonds, global upgrades, missions, stats, cosmetics, per-station work level, and profit multiplier.
   - Old location-only saves keep honey, staff, and recipe progress and migrate to the matching tier.
 - **Database migration.**
-  - `gamefile/upgrade_db.sql` upgrades an existing database.
-  - `gamefile/login_db.sql` now creates the full v2 schema for fresh installs.
+  - `gamefile/upgrade_db.sql` upgrades an existing MySQL/MariaDB database.
+  - `gamefile/login_db.sql` now creates the full v2 schema for fresh MySQL installs.
+- **PostgreSQL/Supabase support.**
+  - `gamefile/login_db_pg.sql` creates the full v2 schema, adds missing columns, and seeds reference data. Safe to re-run.
+  - `gamefile/db.postgres.example.php` is the connection template for the Supabase pooler.
+  - `SaveRepository` detects the driver and uses `ON CONFLICT` on PostgreSQL, `ON DUPLICATE KEY` on MySQL/MariaDB.
+  - `register.php` checks duplicates with `fetch()` instead of `rowCount()` so it behaves the same on both drivers.
+  - `npm run test:pg` runs a live PostgreSQL save/load round-trip and skips automatically on MySQL or a missing config.
 - **Documentation.**
   - Rewritten `README.md` with setup, gameplay, migration, troubleshooting, and dev instructions.
   - `docs/GAMEPLAY.md` with formulas, full mission table, upgrade tables, and save format.
@@ -84,6 +90,8 @@ All notable changes to the JolliDew gameplay-expansion branch.
 
 ### Database migration
 
+#### MySQL/MariaDB
+
 If your database existed before this branch:
 
 ```bash
@@ -100,6 +108,16 @@ The migration:
 
 XAMPP’s MariaDB supports `ADD COLUMN IF NOT EXISTS`. On MySQL 8, remove `IF NOT EXISTS` and run the migration once, or add the columns manually. The script is safe to re-run on MariaDB.
 
+#### PostgreSQL/Supabase
+
+Run `gamefile/login_db_pg.sql` once in the Supabase SQL Editor (or with `psql -f`). It covers fresh installs and existing databases in one file:
+
+- creates `player_progress`, `player_stations`, `locations`, and `menu_items` when missing;
+- adds the v2 columns with `ADD COLUMN IF NOT EXISTS` for older installs;
+- seeds the three locations and twelve menu items with `ON CONFLICT DO UPDATE`.
+
+There is no separate PostgreSQL upgrade script, and the file is safe to re-run.
+
 ### Verification summary
 
 Automated:
@@ -107,25 +125,29 @@ Automated:
 ```text
 37 JavaScript tests passing
 PHP SaveRepository checks passing
+13 live PostgreSQL SaveRepository checks passing (npm run test:pg)
 ```
 
-Manual browser/API verification:
+Manual browser/API verification (MariaDB 10.4 and Supabase PostgreSQL):
 
-- fresh schema import with emoji menu data;
-- register → login → save → load API round-trip;
-- v1-shaped row migration and re-running the migration script;
+- fresh schema import with emoji menu data on both engines, plus idempotent re-import;
+- register → login → save → load API round-trip on both engines;
+- v1-shaped row migration and re-running the MySQL migration script;
+- PostgreSQL `ON CONFLICT` update path through a second save;
 - login → play → load level 6 save;
 - mission gating and dev “Missions ✓” completion;
 - advance to level 7 and Royal Hive;
 - buy/equip a cosmetic and see it on bees;
 - exit and re-enter, confirming the server reloaded level, diamonds, and cosmetic;
-- headless Chrome at 440×900 with no JavaScript errors.
+- headless Chrome at 440×900 with no JavaScript errors (28/28 checks);
+- logged-out API returns 401, malformed saves return 400, and Google login redirects or rejects bad state.
 
 See `docs/TESTING.md` for the repeatable checklist.
 
 ### Notes
 
 - The dev panel is enabled by default in `gamefile/in-game.php` (`$devMode = true`). Set it to `false` before a public/release build.
-- `gamefile/db.php` and `gamefile/src/google-config.php` are intentionally ignored by git. Copy them from the provided examples.
+- `gamefile/db.php` and `gamefile/src/google-config.php` are intentionally ignored by git. Copy them from the provided examples (`db.example.php` for MySQL, `db.postgres.example.php` for PostgreSQL).
+- Both database engines stay supported: PostgreSQL/Supabase for the group database, MySQL/MariaDB for XAMPP. Keep `login_db.sql` and `login_db_pg.sql` in sync when the schema changes.
 - Restaurant themes are reserved in the save format but not implemented; only bee accessories ship.
 - No npm runtime dependencies or build step are required.

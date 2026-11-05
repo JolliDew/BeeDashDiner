@@ -1,11 +1,11 @@
 # 🍯 JolliDew (BeeDashDiner)
 
-A small idle restaurant game built with **vanilla JavaScript modules**, **PHP**, and **MySQL/MariaDB**. You run a bee café: hire automatic workers, improve recipes, complete missions, unlock new restaurants, and spend diamonds on cosmetics.
+A small idle restaurant game built with **vanilla JavaScript modules**, **PHP**, and **MySQL/MariaDB or PostgreSQL**. You run a bee café: hire automatic workers, improve recipes, complete missions, unlock new restaurants, and spend diamonds on cosmetics.
 
 > **Branch:** `feature/gameplay-expansion`
 > **Contribution:** 10 progression levels, automatic cross-station workers, tips, milestones, missions, global/per-station upgrades, diamonds, cosmetics, save migration, and tests.
 
-The previous README mentioned Supabase/PostgreSQL. The code in this repository uses **MySQL/MariaDB through PDO**. This README describes what actually ships.
+The backend uses **PDO** and supports both **MySQL/MariaDB** (XAMPP) and **PostgreSQL** (including Supabase). Use whichever database your group already has; the gameplay and API code are identical.
 
 ---
 
@@ -33,9 +33,10 @@ See **[docs/GAMEPLAY.md](docs/GAMEPLAY.md)** for all formulas, mission tables, a
 
 - **Frontend:** HTML5, CSS3, vanilla JavaScript ES modules. No build step and no npm runtime dependencies.
 - **Backend:** PHP 8+ with PDO and session authentication.
-- **Database:** MySQL 5.7+ or MariaDB 10.2+. XAMPP ships MariaDB.
+- **Database:** MySQL 5.7+/MariaDB 10.2+, or PostgreSQL 13+ (Supabase works). XAMPP ships MariaDB.
 - **Server:** Apache/XAMPP, or PHP's built-in development server.
-- **Tests:** Node.js 20+ built-in test runner, plus a dependency-free PHP test script.
+- **PHP extensions:** `pdo_mysql` for MySQL/MariaDB, or `pdo_pgsql` for PostgreSQL/Supabase.
+- **Tests:** Node.js 20+ built-in test runner, plus dependency-free PHP test scripts.
 
 Modern versions of Chrome, Firefox, or Safari are required for CSS nesting and ES modules.
 
@@ -52,6 +53,10 @@ git switch feature/gameplay-expansion
 ```
 
 ### 2. Create the database
+
+Pick **one** database. The game works the same with either.
+
+#### Option A — MySQL/MariaDB (XAMPP)
 
 Start **Apache** and **MySQL** in XAMPP, then import the schema.
 
@@ -70,13 +75,35 @@ The file creates `jollidew_db`, the account tables, the v2 progress columns, and
 
 Import `gamefile/upgrade_db.sql` once instead. It adds the new columns and gives existing saves the correct starting tier. See [Upgrading an existing save](#upgrading-an-existing-save).
 
+#### Option B — PostgreSQL/Supabase
+
+In the Supabase dashboard, open **SQL Editor**, paste the contents of `gamefile/login_db_pg.sql`, and run it. With a direct connection string you can also use:
+
+```bash
+psql "$DATABASE_URL" -f gamefile/login_db_pg.sql
+```
+
+The file creates the game tables, adds any missing v2 columns, and seeds the location/menu reference data. It is safe to re-run (`IF NOT EXISTS` plus `ON CONFLICT`). You do **not** need `upgrade_db.sql` on PostgreSQL; `login_db_pg.sql` handles both fresh and existing installs.
+
 ### 3. Create your local database config
+
+**MySQL/MariaDB:**
 
 ```bash
 cp gamefile/db.example.php gamefile/db.php
 ```
 
-Edit `gamefile/db.php` if your MySQL user/password is not the XAMPP default (`root`, empty password). `gamefile/db.php` is ignored by git, so credentials are never committed.
+Edit `gamefile/db.php` if your MySQL user/password is not the XAMPP default (`root`, empty password).
+
+**PostgreSQL/Supabase:**
+
+```bash
+cp gamefile/db.postgres.example.php gamefile/db.php
+```
+
+Fill in the pooler host, port, database, user, and password from **Supabase → Project Settings → Database**. The template already enables `sslmode=prefer` and handles the `pdo_pgsql` prepare option on PHP 8.5.
+
+`gamefile/db.php` is ignored by git, so credentials are never committed. Never commit a real `db.php` or paste its contents into an issue.
 
 ### 4. Run the game
 
@@ -224,7 +251,7 @@ Missions for the **next** level stay locked until the player presses **Advance**
 
 ## 💾 Save data
 
-Saves are stored per account in MySQL and mirrored to `localStorage` as an offline backup.
+Saves are stored per account in MySQL/MariaDB or PostgreSQL and mirrored to `localStorage` as an offline backup.
 
 New fields:
 
@@ -281,7 +308,15 @@ If `php` is not on your PATH with XAMPP:
 /Applications/XAMPP/xamppfiles/bin/php tests/SaveRepository.test.php
 ```
 
-The automated suite does **not** need a database. A manual browser/API test was also run against MariaDB 10.4 and PHP 8.5; see **[docs/TESTING.md](docs/TESTING.md)**. Run `npm test` after changing balance numbers or mission definitions.
+`npm test` does **not** need a database. To test a live PostgreSQL/Supabase connection, run:
+
+```bash
+npm run test:pg
+```
+
+That script creates a temporary account, saves twice (covering the `ON CONFLICT` update path), checks the loaded values, and deletes its rows. It skips automatically when `gamefile/db.php` is missing or points at MySQL, so it is safe to keep in the suite.
+
+Manual browser/API checks have been run against MariaDB 10.4 and Supabase PostgreSQL with PHP 8.5; see **[docs/TESTING.md](docs/TESTING.md)**. Run `npm test` after changing balance numbers or mission definitions.
 
 ---
 
@@ -328,8 +363,10 @@ Nothing in the game needs a build step; refresh the browser after editing.
 │   ├── login.php / register.php      # Account screens
 │   ├── google-login.php              # Optional Google OAuth
 │   ├── login_db.sql                  # Fresh MySQL schema
-│   ├── upgrade_db.sql                # Existing-save migration
-│   ├── db.example.php                # Copy to db.php
+│   ├── upgrade_db.sql                # Existing MySQL save migration
+│   ├── login_db_pg.sql               # PostgreSQL/Supabase schema + migration
+│   ├── db.example.php                # Copy to db.php (MySQL)
+│   ├── db.postgres.example.php       # Copy to db.php (PostgreSQL)
 │   ├── css/bee-game.css              # Game styles
 │   ├── js/
 │   │   ├── main.js                   # Bootstrapper
@@ -365,13 +402,17 @@ Nothing in the game needs a build step; refresh the browser after editing.
 ## 🩺 Troubleshooting
 
 **"Database connection failed"**
-- Is MySQL running in XAMPP?
-- Does `gamefile/db.php` exist? Copy it from `db.example.php`.
+- Is the database running? MySQL must be started in XAMPP; Supabase is hosted, so check your internet connection instead.
+- Does `gamefile/db.php` exist? Copy it from `db.example.php` (MySQL) or `db.postgres.example.php` (PostgreSQL).
 - Are the host, database name, user, and password correct?
-- Did you import `gamefile/login_db.sql`?
+- Did you import the schema? `gamefile/login_db.sql` for MySQL, `gamefile/login_db_pg.sql` for PostgreSQL/Supabase.
+
+**"could not find driver" on PostgreSQL/Supabase**
+- The `pdo_pgsql` extension is not enabled. Check with `php -m | grep pgsql`. XAMPP's PHP 8.2 build ships it; on other installs enable it in `php.ini` and restart the server.
 
 **"Unknown column `level` / `work_lvl` / `profit_x2`"**
-- Run `gamefile/upgrade_db.sql` against the existing database, or re-import `login_db.sql` for a fresh database.
+- MySQL: run `gamefile/upgrade_db.sql` against the existing database, or re-import `login_db.sql` for a fresh database.
+- PostgreSQL/Supabase: re-run `gamefile/login_db_pg.sql`; it adds missing columns automatically.
 
 **Emoji/menu insert fails during CLI import**
 - Use `mysql --default-character-set=utf8mb4 ...`. `login_db.sql` now sets `SET NAMES utf8mb4` itself, so re-import after pulling this branch.
@@ -394,7 +435,8 @@ Nothing in the game needs a build step; refresh the browser after editing.
 - The integration branch is `feature/gameplay-expansion`; the plan is one branch and one pull request.
 - Commit identity for this contribution: `Klein Rhee P. Sioson <s2010614@usls.edu.ph>`.
 - Do not commit `gamefile/db.php`, `gamefile/src/google-config.php`, `node_modules/`, or local save files; they are ignored.
-- Run `npm test` before committing gameplay changes.
+- The group database is PostgreSQL/Supabase; XAMPP MySQL remains supported for local work. Keep both schemas (`login_db.sql`, `login_db_pg.sql`) in sync when tables change.
+- Run `npm test` before committing gameplay changes, and `npm run test:pg` when you have a PostgreSQL `db.php` configured.
 - Set `$devMode = false` in `gamefile/in-game.php` if you want a release-style demo.
 
 Questions or merge help: open the pull request and tag the group.

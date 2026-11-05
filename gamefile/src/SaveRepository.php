@@ -144,10 +144,18 @@ class SaveRepository
 
     public function save(int $userId, array $s): void
     {
-        $this->pdo->beginTransaction();
-        try {
-            $this->pdo->prepare(
-                'INSERT INTO player_progress
+        $progressSql = $this->isPostgres()
+            ? 'INSERT INTO player_progress
+                    (user_id, honey, location_no, level, diamonds, upgrades,
+                     mission_index, missions_done, missions_finished, stats, cosmetics)
+                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                 ON CONFLICT (user_id) DO UPDATE SET
+                    honey = EXCLUDED.honey, location_no = EXCLUDED.location_no, level = EXCLUDED.level,
+                    diamonds = EXCLUDED.diamonds, upgrades = EXCLUDED.upgrades,
+                    mission_index = EXCLUDED.mission_index, missions_done = EXCLUDED.missions_done,
+                    missions_finished = EXCLUDED.missions_finished, stats = EXCLUDED.stats,
+                    cosmetics = EXCLUDED.cosmetics, updated_at = CURRENT_TIMESTAMP'
+            : 'INSERT INTO player_progress
                     (user_id, honey, location_no, level, diamonds, upgrades,
                      mission_index, missions_done, missions_finished, stats, cosmetics)
                  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
@@ -156,8 +164,11 @@ class SaveRepository
                     diamonds = VALUES(diamonds), upgrades = VALUES(upgrades),
                     mission_index = VALUES(mission_index), missions_done = VALUES(missions_done),
                     missions_finished = VALUES(missions_finished), stats = VALUES(stats),
-                    cosmetics = VALUES(cosmetics)'
-            )->execute([
+                    cosmetics = VALUES(cosmetics), updated_at = CURRENT_TIMESTAMP';
+
+        $this->pdo->beginTransaction();
+        try {
+            $this->pdo->prepare($progressSql)->execute([
                 $userId,
                 $s['honey'],
                 $s['location'] + 1,
@@ -193,6 +204,12 @@ class SaveRepository
             $this->pdo->rollBack();
             throw $e;
         }
+    }
+
+    /** PostgreSQL needs ON CONFLICT; MySQL/MariaDB use ON DUPLICATE KEY. */
+    private function isPostgres(): bool
+    {
+        return $this->pdo->getAttribute(PDO::ATTR_DRIVER_NAME) === 'pgsql';
     }
 
     private static function locationForLevel(int $level): int

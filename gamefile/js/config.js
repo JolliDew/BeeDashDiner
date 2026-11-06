@@ -29,6 +29,28 @@ export const BEES = [
 ];
 export const CUSTOMERS = ['🦋', '🐞', '🐛', '🐜', '🦗'];
 
+/* The 10 progression tiers. Locations still change at levels 5 and 8, so a
+   single run visits all three restaurants. `reward` is paid when that level's
+   missions are finished and the player advances past it. */
+export const LEVELS = [
+  { level: 1,  location: 0, reward: { honey: 150,   diamonds: 1 } },
+  { level: 2,  location: 0, reward: { honey: 250,   diamonds: 1 } },
+  { level: 3,  location: 0, reward: { honey: 400,   diamonds: 1 } },
+  { level: 4,  location: 0, reward: { honey: 750,   diamonds: 2 } },
+  { level: 5,  location: 1, reward: { honey: 1200,  diamonds: 2 } },
+  { level: 6,  location: 1, reward: { honey: 2000,  diamonds: 2 } },
+  { level: 7,  location: 1, reward: { honey: 3500,  diamonds: 3 } },
+  { level: 8,  location: 2, reward: { honey: 6000,  diamonds: 3 } },
+  { level: 9,  location: 2, reward: { honey: 10000, diamonds: 4 } },
+  { level: 10, location: 2, reward: { honey: 20000, diamonds: 10 } },
+];
+export const MAX_LEVEL = LEVELS.length;
+export const LEVEL_LOCATIONS = LEVELS.map(l => l.location);
+export const levelLocation = level =>
+  LEVELS[Math.max(1, Math.min(MAX_LEVEL, level)) - 1].location;
+export const firstLevelForLocation = loc =>
+  LEVELS.find(l => l.location === loc)?.level ?? 1;
+
 export const BALANCE = {
   startHoney: 50,
   basePrice: [4, 10, 26, 60, 140], cookSecs: [2, 3.5, 5, 6.5, 8],
@@ -36,9 +58,15 @@ export const BALANCE = {
   priceX: 5, costX: 6,            // per location: prices x5, costs x6
   nextCost: [6500, 48000],        // honey needed to move on
   seatBase: 15, seatStep: 5, cols: 5, // queue spots: 15, 20, 25
-  maxRecipe: 8, maxBees: 3,
-  recipeGrowth: 1.55, beeGrowth: 2.4,
+  maxRecipe: 10, baseBees: 3, maxBees: 4,
+  milestone5Price: .25,           // recipe 5: +25% profit at that station
+  milestone10Cook: .15,           // recipe 10: -15% cook time at that station
+  recipeGrowth: 1.48, beeGrowth: 2.4, // gentler than v1 because recipes now reach 10
   priceBonus: .3, cookDiscount: .9, // per recipe level: +30% price, -10% cook time
+  tips: { baseChance: .08, chanceStep: .02, maxChance: .25, minPct: .1, maxPct: .3 },
+  queueStep: 2,                   // +2 seats per queue upgrade level
+  walkStep: .05,                  // -5% walking time per speed upgrade level
+  cookStep: .04,                  // -4% cook time per station work upgrade level
   walk: 1.6,                      // every bee walking leg takes exactly this many seconds
   custIn: 1.8, custOut: 1.2,      // customer walk-in / walk-out seconds
   demand: 1.3,                    // arrivals vs bee capacity (>1 keeps bees busy)

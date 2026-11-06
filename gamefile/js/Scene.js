@@ -1,5 +1,6 @@
 import { ASSETS, ITEMS, CUSTOMERS, BALANCE as B, art, fmt } from './config.js';
 import { Bee, Customer } from './entities.js';
+import { pickJob } from './WorkerAI.js';
 
 /** The restaurant: kitchen stations, bees, customers and the queue. */
 export class Scene {
@@ -32,21 +33,41 @@ export class Scene {
     this.spawnTimer = 0;
   }
 
+  /** Grow the waiting area when the queue upgrade is bought. */
+  syncSeats() {
+    while (this.seats.length < this.economy.seats) this.seats.push(null);
+  }
+
   /** Make sure each unlocked station has as many bee sprites as its staff level. */
   syncBees() {
+    // A dev reset or location change can remove stations. Drop their sprites.
+    this.bees = this.bees.filter(b => {
+      const keep = !!this.state.stations[b.homeSlot]?.unlocked;
+      if (!keep) b.el.remove();
+      return keep;
+    });
     this.state.stations.forEach((s, i) => {
       this.stationEls[i].classList.toggle('off', !s.unlocked);
       if (!s.unlocked) return;
-      const mine = this.bees.filter(b => b.slot === i);
+      const mine = this.bees.filter(b => b.homeSlot === i);
       while (mine.length < s.staff) {
         const b = new Bee(this.mk('ent'), i, this.stationX(i), this.kitchenY);
         this.bees.push(b); mine.push(b);
+      }
+      while (mine.length > s.staff) {
+        const b = mine.pop();
+        b.el.remove();
+        this.bees.splice(this.bees.indexOf(b), 1);
       }
       mine.forEach((b, k) => b.offset = (k - (mine.length - 1) / 2) * 7);
     });
   }
 
+  /** First unclaimed customer waiting at a station (kept for compatibility). */
   findWaiting(item) { return this.customers.find(c => c.state === 'wait' && !c.claimedBy && c.item === item); }
+
+  /** Idle worker looks for work: own station first, then the longest wait. */
+  findJob(homeSlot) { return pickJob(this.customers, homeSlot); }
 
   /** New customers join the station with the shortest line for its bee capacity, so queues stay balanced. */
   pickItem() {
@@ -61,6 +82,7 @@ export class Scene {
   }
 
   spawnCustomer() {
+    this.syncSeats();
     const free = this.seats.map((v, k) => v ? -1 : k).filter(k => k >= 0);
     if (!free.length) return;
     const seat = free[Math.random() * free.length | 0], f = Math.random() * CUSTOMERS.length | 0;
@@ -71,15 +93,28 @@ export class Scene {
 
   deliver(bee, customer) {
     const gain = this.economy.price(bee.slot);
-    this.state.honey += gain;
+    this.state.addHoney(gain);
+    this.state.stats.served++;
     this.pop(bee.x, bee.y - 6, '+' + fmt(gain));
+
+    // Tips are a nice surprise, not a guaranteed part of the price.
+    if (Math.random() < this.economy.tipChance) {
+      const tip = this.economy.tipAmount(gain);
+      this.state.addHoney(tip);
+      this.state.stats.tips++;
+      this.state.stats.tipHoney += tip;
+      customer.tip = tip;
+      this.pop(bee.x + 4, bee.y - 11, '🪙 +' + fmt(tip), 'tip');
+    }
+
     customer.state = 'leave';
     this.seats[customer.seat] = null;
   }
 
-  pop(x, y, text) {
+  pop(x, y, text, cls = '') {
     if (this.quiet) return;
-    const d = this.mk('pop', text); d.style.left = x + '%'; d.style.top = y + '%';
+    const d = this.mk('pop' + (cls ? ' ' + cls : ''), text);
+    d.style.left = x + '%'; d.style.top = y + '%';
     setTimeout(() => d.remove(), 900);
   }
 

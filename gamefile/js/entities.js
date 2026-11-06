@@ -1,4 +1,5 @@
 import { ASSETS, BEES, BALANCE as B, art } from './config.js';
+import { equippedCosmetic } from './cosmetics.js';
 
 /** Anything that walks around the scene. Positions are percentages of the scene size. */
 class Walker {
@@ -29,6 +30,8 @@ export class Customer extends Walker {
     this.state = 'in';          // in -> wait -> leave
     this.taken = false;         // order has been taken
     this.claimedBy = null;      // bee handling this customer
+    this.waitTime = 0;          // used to send idle bees to the longest wait
+    this.tip = 0;               // dev/UI only
     this.key = '';
   }
 
@@ -39,6 +42,7 @@ export class Customer extends Walker {
     } else if (this.state === 'leave' && this.walkTo(112, this.y, dt, B.custOut)) {
       return false;
     }
+    if (this.state === 'wait') this.waitTime += dt;
     const k = this.state === 'wait' ? 'w' + (this.taken ? 1 : 0) : this.state === 'in' ? 'i' : 'x';
     if (k !== this.key) {
       this.key = k;
@@ -50,41 +54,67 @@ export class Customer extends Walker {
 }
 
 export class Bee extends Walker {
-  constructor(el, slot, x, y) {
+  constructor(el, homeSlot, x, y) {
     super(el, x, y);
-    this.slot = slot; this.offset = 0;
+    this.homeSlot = homeSlot;
+    this.slot = homeSlot;       // station currently being served (may be another one)
+    this.offset = 0;
     this.state = 'idle';        // idle -> order -> fetch -> cook -> serve -> idle
     this.customer = null; this.t = 0; this.total = 1; this.key = null;
   }
 
-  html() {
-    const kind = BEES[this.slot], asset = ASSETS.bees[this.slot];
-    return `<span style="${asset ? '' : `filter:hue-rotate(${kind.hue}deg)`}">${art(asset, '🐝')}</span><span class="acc">${kind.acc}</span>`;
+  html(scene) {
+    const kind = BEES[this.homeSlot], asset = ASSETS.bees[this.homeSlot];
+    const cos = equippedCosmetic(scene.state, 'bee');
+    return `<span style="${asset ? '' : `filter:hue-rotate(${kind.hue}deg)`}">${art(asset, '🐝')}</span>`
+      + `<span class="acc">${kind.acc}</span>`
+      + (cos ? `<span class="accessory" title="${cos.name}">${cos.icon}</span>` : '');
   }
 
   update(dt, scene) {
-    const hx = scene.stationX(this.slot) + this.offset, hy = scene.kitchenY, c = this.customer;
+    const walk = scene.economy.walkTime;
+    const homeX = scene.stationX(this.homeSlot) + this.offset;
+    const stationX = scene.stationX(this.slot) + this.offset;
+    const hy = scene.kitchenY, c = this.customer;
+
     switch (this.state) {
       case 'idle': {
-        const waiting = scene.findWaiting(this.slot);
-        if (waiting) { waiting.claimedBy = this; this.customer = waiting; this.state = 'order'; }
-        else this.walkTo(hx, hy, dt);
+        // Own station first; if it is empty the bee helps the longest wait
+        // anywhere else. Fully automatic - the player never assigns workers.
+        const job = scene.findJob(this.homeSlot);
+        if (job) {
+          job.claimedBy = this;
+          this.customer = job;
+          this.slot = job.item;
+          this.state = 'order';
+        } else {
+          this.slot = this.homeSlot;
+          this.walkTo(homeX, hy, dt, walk);
+        }
         break;
       }
       case 'order':   // walk to the customer and take the order
-        if (this.walkTo(scene.seatX(c.seat) - 7, scene.seatY(c.seat), dt)) { c.taken = true; this.state = 'fetch'; }
+        if (this.walkTo(scene.seatX(c.seat) - 7, scene.seatY(c.seat), dt, walk)) {
+          c.taken = true;
+          this.state = 'fetch';
+        }
         break;
-      case 'fetch':   // walk back to the station
-        if (this.walkTo(hx, hy, dt)) { this.state = 'cook'; this.t = this.total = scene.economy.cookTime(this.slot); }
+      case 'fetch':   // walk to the station that owns this order
+        if (this.walkTo(stationX, hy, dt, walk)) {
+          this.state = 'cook';
+          this.t = this.total = scene.economy.cookTime(this.slot);
+        }
         break;
       case 'cook':
         this.t -= dt;
         if (this.t <= 0) this.state = 'serve';
         break;
       case 'serve':   // deliver the dish
-        if (this.walkTo(scene.seatX(c.seat) - 7, scene.seatY(c.seat), dt)) {
+        if (this.walkTo(scene.seatX(c.seat) - 7, scene.seatY(c.seat), dt, walk)) {
           scene.deliver(this, c);
-          this.customer = null; this.state = 'idle';
+          this.customer = null;
+          this.slot = this.homeSlot;
+          this.state = 'idle';
         }
         break;
     }
@@ -94,7 +124,10 @@ export class Bee extends Walker {
   paint(scene) {
     const extra = this.state === 'serve' ? `<span class="bub">${scene.itemIcon(this.slot)}</span>`
       : this.state === 'cook' ? '<span class="bar"><i></i></span>' : '';
-    if (extra !== this.key) { this.key = extra; this.el.innerHTML = this.html() + extra; }
+    const cos = equippedCosmetic(scene.state, 'bee')?.id || '';
+    const key = cos + '|' + extra;
+    if (key !== this.key) { this.key = key; this.el.innerHTML = this.html(scene) + extra; }
     if (this.state === 'cook') this.el.querySelector('i').style.width = (1 - this.t / this.total) * 100 + '%';
+    this.el.classList.toggle('helping', this.slot !== this.homeSlot);
   }
 }

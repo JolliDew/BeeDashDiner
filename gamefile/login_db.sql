@@ -1,6 +1,8 @@
 -- phpMyAdmin: Import tab > choose this file > Go.  Safe to re-run (IF NOT EXISTS).
 CREATE DATABASE IF NOT EXISTS jollidew_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 USE jollidew_db;
+-- Make CLI imports (mysql < login_db.sql) use UTF-8 too, not just phpMyAdmin.
+SET NAMES utf8mb4;
 
 -- Accounts (used by login.php, register.php, google-login.php). An existing users table is left untouched.
 CREATE TABLE IF NOT EXISTS users (
@@ -11,21 +13,37 @@ CREATE TABLE IF NOT EXISTS users (
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- One row per account: honey and which location they are on (1 Meadow Stand, 2 Hive Cafe, 3 Royal Hive)
+-- One row per account: honey, tier, currencies and saved gameplay blobs.
+-- location_no: 1 Meadow Stand, 2 Hive Cafe, 3 Royal Hive.
+-- level: 1..10 (see gamefile/js/config.js LEVELS).
+-- upgrades / missions_done / stats / cosmetics are JSON text.
 CREATE TABLE IF NOT EXISTS player_progress (
   user_id INT NOT NULL PRIMARY KEY,
   honey DOUBLE NOT NULL DEFAULT 50,
   location_no TINYINT NOT NULL DEFAULT 1,
+  level TINYINT NOT NULL DEFAULT 1,
+  diamonds INT NOT NULL DEFAULT 0,
+  upgrades TEXT NULL,
+  mission_index INT NOT NULL DEFAULT 0,
+  missions_done TEXT NULL,
+  missions_finished TINYINT NOT NULL DEFAULT 0,
+  stats TEXT NULL,
+  cosmetics TEXT NULL,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
--- Station progress for the current location
+-- Station progress for the current location.
+-- staff max 4 (3 early, 4 after the extra-worker upgrade).
+-- recipe_lvl max 10 (milestones at 5 and 10).
+-- work_lvl and profit_x2 are the two per-station late-game upgrades.
 CREATE TABLE IF NOT EXISTS player_stations (
   user_id INT NOT NULL,
   slot TINYINT NOT NULL,                     -- 0..4
   unlocked BOOLEAN NOT NULL DEFAULT 0,
-  staff TINYINT NOT NULL DEFAULT 0,          -- bees, max 3
-  recipe_lvl TINYINT NOT NULL DEFAULT 0,     -- max 8
+  staff TINYINT NOT NULL DEFAULT 0,          -- bees, max 4
+  recipe_lvl TINYINT NOT NULL DEFAULT 0,     -- max 10
+  work_lvl TINYINT NOT NULL DEFAULT 0,       -- 0..5
+  profit_x2 TINYINT NOT NULL DEFAULT 0,      -- 0 or 1
   PRIMARY KEY (user_id, slot)
 );
 -- Optional (only if users.id is plain INT): 

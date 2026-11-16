@@ -1,0 +1,51 @@
+/* Modals (Bootstrap 4, appended to <body>) get the dark honey theme; dock buttons and station hover live in #bee-game. */
+.modal-dialog { max-width: 440px; }
+.modal-content { background: #33291a; color: #fff6df; border: 1px solid #6b5a37; border-radius: 16px; }
+.modal-header, .modal-footer { border-color: #4a3b22; }
+.modal-title { font-weight: 800; color: #ffd84d; }
+.modal-content .close { color: #fff; text-shadow: none; opacity: .8; }
+.modal-content .list-group-item { background: #4a3b22; color: #fff6df; border-color: #33291a; }
+.modal-content .text-muted { color: #cdbb8f !important; }
+.modal-content .text-success { color: #9ad66b !important; }
+.modal-content h6 { color: #cdbb8f; text-transform: uppercase; letter-spacing: .05em; font-size: 12px; font-weight: 800; }
+
+#bee-game {
+  & .stn .mach { transition: box-shadow .12s; }
+  & .stn:hover .mach { box-shadow: 0 0 0 3px #ffd84d; }
+
+  & .dock { display: flex; gap: 8px; flex: none; }
+  & #panel .dock-btn { flex: 1; width: auto; min-width: 0; padding: 10px 8px; font-size: 14px; line-height: 1.2; white-space: normal; border: 0; border-radius: 12px; }
+  & #panel .dock-btn.btn-primary { background: #d9a21b; color: #241d12; }
+  & #panel .dock-btn.btn-info { background: #5a4929; color: #fff6df; }
+  & #panel .dock-btn .badge { margin-left: 4px; }
+}
+
+/* ---------- level indicators and price buttons (inside the modals) ---------- */
+.modal-content .lvl { display: flex; align-items: center; gap: 8px; margin: 2px 0 4px; font-size: 12px; }
+.modal-content .lvl-label { color: #cdbb8f; min-width: 84px; }
+.modal-content .lvl b { color: #ffd84d; }
+.modal-content .lvl-note { font-size: 12px; color: #cdbb8f; }
+.modal-content .pips { display: inline-flex; flex-wrap: wrap; gap: 3px; }
+.modal-content .pips i { display: inline-block; width: 10px; height: 10px; border-radius: 3px; background: #5a4929; }
+.modal-content .pips i.on { background: #ffd84d; }
+.modal-content .upbtn { min-width: 96px; font-weight: 700; line-height: 1.15; }
+.modal-content .upbtn .cost { display: block; font-size: 13px; }
+.modal-content .upbtn:disabled .cost { opacity: .7; }
+
+/* ---------- station indicators and queue chairs (inside the game) ---------- */
+@keyframes bee-pulse { 50% { transform: scale(1.18); } }
+#bee-game {
+  & .stn.off { opacity: 1; }
+  & .stn.off .mach { opacity: .35; filter: grayscale(.5); }
+  & .mwrap { position: relative; display: inline-block; }
+  & .sup { position: absolute; top: -8px; right: -9px; width: 18px; height: 18px; border-radius: 50%; background: #9ad66b; color: #1d3308; font-size: 12px; font-weight: 900; line-height: 18px; text-align: center; box-shadow: 0 0 0 2px #241d12; animation: bee-pulse 1.2s ease-in-out infinite; }
+  & .sinfo { display: flex; flex-direction: column; align-items: center; gap: 1px; margin-top: 2px; }
+  & .slv, & .swk { font-size: 10px; font-weight: 800; line-height: 1.2; padding: 0 5px; border-radius: 7px; background: #241d12cc; color: #fff6df; white-space: nowrap; }
+  & .swk:empty { display: none; }
+  & .swk.full { background: #9ad66b; color: #1d3308; }
+
+  & .seat { position: absolute; transform: translate(-50%, -50%); font-size: 20px; line-height: 1; opacity: .5; z-index: 0; pointer-events: none; transition: opacity .15s; }
+  & .seat.taken { opacity: .95; }
+  & .ent { z-index: 1; }
+  & .pop { z-index: 2; }
+}

@@ -10,6 +10,23 @@
 -- On MySQL 8, remove "IF NOT EXISTS" and run the file once.
 USE jollidew_db;
 
+-- Admin panel: role on every account + an append-only action log.
+ALTER TABLE users
+  ADD COLUMN IF NOT EXISTS role VARCHAR(20) NOT NULL DEFAULT 'player';
+
+CREATE TABLE IF NOT EXISTS admin_audit (
+  id BIGINT AUTO_INCREMENT PRIMARY KEY,
+  actor_id INT NULL,
+  actor_username VARCHAR(50) NULL,
+  action VARCHAR(40) NOT NULL,
+  target_user_id INT NULL,
+  target_username VARCHAR(50) NULL,
+  details VARCHAR(500) NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  INDEX idx_admin_audit_target (target_user_id),
+  INDEX idx_admin_audit_created (created_at)
+);
+
 ALTER TABLE player_progress
   ADD COLUMN IF NOT EXISTS level TINYINT NOT NULL DEFAULT 1,
   ADD COLUMN IF NOT EXISTS diamonds INT NOT NULL DEFAULT 0,
@@ -29,3 +46,8 @@ ALTER TABLE player_stations
 UPDATE player_progress
 SET level = CASE location_no WHEN 2 THEN 5 WHEN 3 THEN 8 ELSE 1 END
 WHERE level = 1 AND location_no > 1;
+
+-- Queue capacity is now 4 base chairs plus the Bigger waiting area upgrade.
+-- gamefile/js/config.js is the gameplay authority; this keeps the reference
+-- table in step with a fresh login_db.sql install.
+UPDATE locations SET seats = 4;

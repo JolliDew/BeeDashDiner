@@ -1,31 +1,35 @@
 <?php
-session_start();
 require_once 'db.php';
+require_once 'src/Auth.php';
+require_once 'src/Csrf.php';
+Auth::start();
 
 $error = '';
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $identifier = trim($_POST['identifier']); // Username or Email
-    $password = $_POST['password'];
-
-    if (empty($identifier) || empty($password)) {
-        $error = "Please fill in all fields.";
+    if (!Csrf::check($_POST['csrf_token'] ?? null)) {
+        $error = "Your session expired. Please try again.";
     } else {
-        // Check if user exists by username or email
-        $stmt = $pdo->prepare("SELECT * FROM users WHERE username = ? OR email = ?");
-        $stmt->execute([$identifier, $identifier]);
-        $user = $stmt->fetch();
+        $identifier = trim($_POST['identifier'] ?? ''); // Username or Email
+        $password = $_POST['password'] ?? '';
 
-        if ($user && password_verify($password, $user['password'])) {
-            // Password is correct, start session
-            session_regenerate_id(true);
-            $_SESSION['user_id'] = $user['id'];
-            $_SESSION['username'] = $user['username'];
-            
-            // Redirect to your game menu
-            header("Location: Mainmenu.php");
-            exit();
+        if ($identifier === '' || $password === '') {
+            $error = "Please fill in all fields.";
         } else {
+            // Check if user exists by username or email
+            $stmt = $pdo->prepare("SELECT * FROM users WHERE username = ? OR email = ?");
+            $stmt->execute([$identifier, $identifier]);
+            $user = $stmt->fetch();
+
+            if ($user && password_verify($password, $user['password'])) {
+                if (password_needs_rehash($user['password'], PASSWORD_DEFAULT)) {
+                    $pdo->prepare('UPDATE users SET password = ? WHERE id = ?')
+                        ->execute([password_hash($password, PASSWORD_DEFAULT), $user['id']]);
+                }
+                Auth::login($user);
+                header("Location: Mainmenu.php");
+                exit();
+            }
             $error = "Invalid username/email or password.";
         }
     }
@@ -71,6 +75,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         <!-- Login Form -->
         <form action="login.php" method="POST">
+            <?= Csrf::field() ?>
             <div class="input-group">
                 <label for="identifier">Username or Email</label>
                 <input type="text" id="identifier" name="identifier" required placeholder="Enter your username or email">

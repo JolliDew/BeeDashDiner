@@ -1,8 +1,5 @@
 <?php
-session_start();
-session_unset();
-session_destroy();
-header("Location: login.php");
+require_once __DIR__ . '/src/Auth.php';
+Auth::logout();
+header('Location: login.php');
 exit();
-?>
-

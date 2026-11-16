@@ -7,7 +7,7 @@
   "scripts": {
     "test": "npm run test:js && npm run test:php",
     "test:js": "node --test tests/*.test.js",
-    "test:php": "php tests/SaveRepository.test.php",
+    "test:php": "php tests/SaveRepository.test.php && php tests/AdminRepository.test.php",
     "test:pg": "php tests/SaveRepositoryPg.test.php"
   }
 }

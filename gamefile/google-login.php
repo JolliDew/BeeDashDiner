@@ -10,8 +10,9 @@
  * If the config still has placeholder values the page explains what is missing
  * instead of redirecting to Google with an invalid client id.
  */
-session_start();
 require_once 'db.php';
+require_once 'src/Auth.php';
+Auth::start();
 
 $configPath = __DIR__ . '/src/google-config.php';
 if (!is_file($configPath)) {
@@ -21,6 +22,7 @@ $google = require $configPath;
 
 $client_id = trim((string)($google['client_id'] ?? ''));
 $client_secret = trim((string)($google['client_secret'] ?? ''));
+$configured_redirect = trim((string)($google['redirect_uri'] ?? ''));
 
 function google_login_error(string $message, int $code = 400): void
 {
@@ -45,12 +47,14 @@ if (str_starts_with($client_id, 'YOUR_') || str_starts_with($client_secret, 'YOU
     );
 }
 
-// Build the redirect URI from the current request so it works with both
-// `php -S` and XAMPP without hard-coding a port.
+// Prefer the exact URI registered in Google Cloud Console. When it is omitted,
+// build it from the current request (handy for `php -S` and XAMPP demos).
 $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
 $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
 $dir = rtrim(str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'] ?? '/')), '/');
-$redirect_uri = $scheme . '://' . $host . $dir . '/google-login.php';
+$redirect_uri = $configured_redirect !== ''
+    ? $configured_redirect
+    : $scheme . '://' . $host . $dir . '/google-login.php';
 
 if (!isset($_GET['code'])) {
     $_SESSION['oauth_state'] = bin2hex(random_bytes(16));
@@ -115,9 +119,16 @@ if ($userInfo === false) {
 }
 
 $googleUser = json_decode($userInfo, true);
-$email = filter_var($googleUser['email'] ?? '', FILTER_VALIDATE_EMAIL);
+$email = filter_var(strtolower((string)($googleUser['email'] ?? '')), FILTER_VALIDATE_EMAIL);
 if (!$email) {
     google_login_error('Google did not return a usable email address.');
+}
+
+// v2 userinfo calls it verified_email; the OIDC userinfo endpoint calls it
+// email_verified. Accept either, but never trust an unverified address.
+$verified = $googleUser['email_verified'] ?? $googleUser['verified_email'] ?? false;
+if ($verified !== true && $verified !== 'true' && $verified !== 1 && $verified !== '1') {
+    google_login_error('Google has not verified this email address.');
 }
 
 $stmt = $pdo->prepare('SELECT * FROM users WHERE email = ?');
@@ -125,33 +136,53 @@ $stmt->execute([$email]);
 $user = $stmt->fetch();
 
 if ($user) {
-    session_regenerate_id(true);
-    $_SESSION['user_id'] = (int)$user['id'];
-    $_SESSION['username'] = $user['username'];
+    Auth::login($user);
 } else {
     $base = preg_replace('/[^A-Za-z0-9_]/', '', $googleUser['given_name'] ?? '');
     $base = substr($base !== '' ? $base : strstr($email, '@', true), 0, 40) ?: 'player';
-    $username = $base;
 
     $exists = $pdo->prepare('SELECT id FROM users WHERE username = ?');
-    for ($i = 2; ; $i++) {
+    $insert = $pdo->prepare('INSERT INTO users (username, email, password) VALUES (?, ?, ?)');
+    $username = $base;
+    $created = false;
+
+    for ($attempt = 0; $attempt < 6; $attempt++) {
+        $username = $attempt === 0 ? $base : $base . random_int(2, 9999);
         $exists->execute([$username]);
-        if (!$exists->fetch()) {
-            break;
+        if ($exists->fetch()) {
+            continue;
         }
-        $username = $base . $i;
+        try {
+            $insert->execute([
+                $username,
+                $email,
+                password_hash(bin2hex(random_bytes(16)), PASSWORD_DEFAULT),
+            ]);
+            $created = true;
+            break;
+        } catch (PDOException $e) {
+            // Someone may have registered the same email at the same time.
+            // If so, log into that account instead of showing an SQL error.
+            $stmt->execute([$email]);
+            $user = $stmt->fetch();
+            if ($user) {
+                break;
+            }
+        }
     }
 
-    $insert = $pdo->prepare('INSERT INTO users (username, email, password) VALUES (?, ?, ?)');
-    $insert->execute([
-        $username,
-        $email,
-        password_hash(bin2hex(random_bytes(16)), PASSWORD_DEFAULT),
-    ]);
-
-    session_regenerate_id(true);
-    $_SESSION['user_id'] = (int)$pdo->lastInsertId();
-    $_SESSION['username'] = $username;
+    if ($user) {
+        Auth::login($user);
+    } elseif ($created) {
+        $user = [
+            'id' => (int)$pdo->lastInsertId(),
+            'username' => $username,
+            'role' => 'player',
+        ];
+        Auth::login($user);
+    } else {
+        google_login_error('Could not create an account with that email. Please try again.');
+    }
 }
 
 header('Location: Mainmenu.php');

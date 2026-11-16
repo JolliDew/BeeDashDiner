@@ -1,38 +1,47 @@
 <?php
 require_once 'db.php';
+require_once 'src/Auth.php';
+require_once 'src/Csrf.php';
+Auth::start();
 
 $error = '';
 $success = '';
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $email = trim($_POST['email']);
-    $username = trim($_POST['username']);
-    $password = $_POST['password'];
-    $confirm_password = $_POST['confirm_password'];
-
-    if (empty($email) || empty($username) || empty($password) || empty($confirm_password)) {
-        $error = "Please fill in all fields.";
-    } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-        $error = "Please enter a valid email address.";
-    } elseif ($password !== $confirm_password) {
-        $error = "Passwords do not match.";
+    if (!Csrf::check($_POST['csrf_token'] ?? null)) {
+        $error = "Your session expired. Please try again.";
     } else {
-        // Check if username or email already exists
-        $stmt = $pdo->prepare("SELECT id FROM users WHERE username = ? OR email = ?");
-        $stmt->execute([$username, $email]);
-        
-        if ($stmt->fetch()) {
-            $error = "Username or email is already taken.";
-        } else {
-            // Hash the password securely
-            $hashed_password = password_hash($password, PASSWORD_DEFAULT);
+        $email = strtolower(trim($_POST['email'] ?? ''));
+        $username = trim($_POST['username'] ?? '');
+        $password = $_POST['password'] ?? '';
+        $confirm_password = $_POST['confirm_password'] ?? '';
 
-            // Insert new user with explicit email and username
-            $insertStmt = $pdo->prepare("INSERT INTO users (username, email, password) VALUES (?, ?, ?)");
-            if ($insertStmt->execute([$username, $email, $hashed_password])) {
-                $success = "Registration successful! You can now log in.";
+        if ($email === '' || $username === '' || $password === '' || $confirm_password === '') {
+            $error = "Please fill in all fields.";
+        } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            $error = "Please enter a valid email address.";
+        } elseif (!preg_match('/^[A-Za-z0-9_]{3,50}$/', $username)) {
+            $error = "Usernames need 3-50 letters, numbers or underscores.";
+        } elseif (strlen($password) < 8) {
+            $error = "Use a password with at least 8 characters.";
+        } elseif ($password !== $confirm_password) {
+            $error = "Passwords do not match.";
+        } else {
+            // Check if username or email already exists
+            $stmt = $pdo->prepare("SELECT id FROM users WHERE username = ? OR email = ?");
+            $stmt->execute([$username, $email]);
+
+            if ($stmt->fetch()) {
+                $error = "Username or email is already taken.";
             } else {
-                $error = "Something went wrong. Please try again.";
+                try {
+                    $insertStmt = $pdo->prepare("INSERT INTO users (username, email, password) VALUES (?, ?, ?)");
+                    $insertStmt->execute([$username, $email, password_hash($password, PASSWORD_DEFAULT)]);
+                    $success = "Registration successful! You can now log in.";
+                } catch (PDOException $e) {
+                    // The unique indexes are the final race-condition guard.
+                    $error = "Username or email is already taken.";
+                }
             }
         }
     }
@@ -98,6 +107,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         <?php endif; ?>
 
         <form action="register.php" method="POST">
+            <?= Csrf::field() ?>
             <div class="input-group">
                 <label for="email">Email Address</label>
                 <input type="email" id="email" name="email" required placeholder="name@example.com">

@@ -89,6 +89,18 @@ body {
     box-shadow: 0 6px 12px rgba(0, 176, 155, 0.3);
 }
 
+/* Admin Button */
+.admin-btn {
+    background: #ffd84d;
+    color: #241d12;
+}
+
+.admin-btn:hover {
+    background: #f0c53c;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(255, 216, 77, 0.3);
+}
+
 /* Quit Button */
 .quit-btn {
     background: #e63946;

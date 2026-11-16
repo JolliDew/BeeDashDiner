@@ -7,20 +7,40 @@
 SET client_encoding = 'UTF8';
 BEGIN;
 
--- Accounts (login.php, register.php, google-login.php).
+-- Accounts (login.php, register.php, google-login.php, admin.php).
 -- Supabase projects normally already have this table; IF NOT EXISTS keeps it.
 CREATE TABLE IF NOT EXISTS users (
   id SERIAL PRIMARY KEY,
   username VARCHAR(50) NOT NULL UNIQUE,
   email VARCHAR(100) NOT NULL UNIQUE,
   password VARCHAR(255) NOT NULL,
+  role VARCHAR(20) NOT NULL DEFAULT 'player',
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+-- Existing databases created before the admin panel need this column.
+ALTER TABLE users ADD COLUMN IF NOT EXISTS role VARCHAR(20) NOT NULL DEFAULT 'player';
+
+-- Admin action history. Usernames are snapshotted so the log survives a
+-- deleted account.
+CREATE TABLE IF NOT EXISTS admin_audit (
+  id BIGSERIAL PRIMARY KEY,
+  actor_id INTEGER NULL,
+  actor_username VARCHAR(50) NULL,
+  action VARCHAR(40) NOT NULL,
+  target_user_id INTEGER NULL,
+  target_username VARCHAR(50) NULL,
+  details VARCHAR(500) NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX IF NOT EXISTS idx_admin_audit_target ON admin_audit (target_user_id);
+CREATE INDEX IF NOT EXISTS idx_admin_audit_created ON admin_audit (created_at);
 
 -- One row per account: honey, tier, currencies and saved gameplay blobs.
 -- location_no: 1 Meadow Stand, 2 Hive Cafe, 3 Royal Hive.
 -- level: 1..10 (see gamefile/js/config.js LEVELS).
 -- upgrades / missions_done / stats / cosmetics are JSON text.
+-- The current staff count is stored as upgrades.staff (one global hive team).
 CREATE TABLE IF NOT EXISTS player_progress (
   user_id INTEGER NOT NULL PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
   honey DOUBLE PRECISION NOT NULL DEFAULT 50,
@@ -50,9 +70,9 @@ ALTER TABLE player_progress ADD COLUMN IF NOT EXISTS cosmetics TEXT NULL;
 ALTER TABLE player_progress ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP;
 
 -- Station progress for the current location.
--- staff max 4 (3 early, 4 after the extra-worker upgrade).
--- recipe_lvl max 10 (milestones at 5 and 10).
--- work_lvl and profit_x2 are the two per-station late-game upgrades.
+-- Save v3 keeps only unlocked + recipe_lvl here. staff, work_lvl and
+-- profit_x2 are legacy columns kept so old rows still load; new saves write 0.
+-- recipe_lvl max 10: milestones at 2/6/10 add a slot, 4/8 double profit.
 CREATE TABLE IF NOT EXISTS player_stations (
   user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   slot SMALLINT NOT NULL,
@@ -70,6 +90,8 @@ ALTER TABLE player_stations ADD COLUMN IF NOT EXISTS recipe_lvl SMALLINT NOT NUL
 ALTER TABLE player_stations ADD COLUMN IF NOT EXISTS work_lvl SMALLINT NOT NULL DEFAULT 0;
 ALTER TABLE player_stations ADD COLUMN IF NOT EXISTS profit_x2 SMALLINT NOT NULL DEFAULT 0;
 
+CREATE INDEX IF NOT EXISTS idx_player_progress_updated ON player_progress (updated_at);
+
 -- Reference data (mirrors js/config.js).
 CREATE TABLE IF NOT EXISTS locations (
   location_no SMALLINT PRIMARY KEY,
@@ -79,10 +101,12 @@ CREATE TABLE IF NOT EXISTS locations (
   next_cost DOUBLE PRECISION NULL
 );
 
+-- seats is the base queue capacity. The Bigger waiting area upgrade adds one
+-- chair per level; gamefile/js/config.js remains the gameplay authority.
 INSERT INTO locations (location_no, name, cost_multiplier, seats, next_cost) VALUES
-  (1, 'Meadow Stand', 1, 15, 6500),
-  (2, 'Hive Cafe', 6, 20, 48000),
-  (3, 'Royal Hive', 36, 25, NULL)
+  (1, 'Meadow Stand', 1, 4, 6500),
+  (2, 'Hive Cafe', 6, 4, 48000),
+  (3, 'Royal Hive', 36, 4, NULL)
 ON CONFLICT (location_no) DO UPDATE SET
   name = EXCLUDED.name,
   cost_multiplier = EXCLUDED.cost_multiplier,

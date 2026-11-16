@@ -1,21 +1,19 @@
 # JolliDew gameplay design
 
-This document explains how the gameplay-expansion branch works: progression, workers, economy, missions, upgrades, cosmetics, and saves. It is the reference for tuning and code review.
+This is the reference for tuning and code review. The game is an idle bee café:
+the player buys upgrades and the bees serve customers automatically.
 
 ---
 
-## 1. Goals
+## 1. Design rules
 
-The expansion had to add a full progression loop without changing the core fantasy: a bee café where the player builds a menu and hires automatic workers.
-
-Design rules:
-
-- **Workers are automatic.** The player only decides *hire a bee* or *upgrade a recipe*. There is no drag-and-drop or worker assignment.
-- **Ten levels, three restaurants.** The existing three locations are stretched into 10 tiers instead of adding 10 new locations.
-- **Missions gate levels.** Every level has three missions. The advance button is locked until all three are complete.
-- **Already-finished objectives auto-complete.** Missions are checked in order, so an out-of-order upgrade or an early earnings target never traps the player.
-- **Old saves keep progress.** Honey, staff, and recipe levels migrate into the new format.
-- **Diamonds need a use.** Cosmetics provide a diamond sink and a visible late-game reward.
+- **Workers are automatic.** The player only hires bees and upgrades stations/recipes.
+- **Ten levels, three restaurants.** Meadow Stand (1–4), Hive Café (5–7), Royal Hive (8–10).
+- **Missions gate levels.** Each level has three missions; the advance button unlocks only after all three.
+- **Already-finished objectives auto-complete.** The tracker walks missions in order, so an out-of-order purchase never traps the player.
+- **Global means restaurant-wide.** Global upgrades persist across restaurant moves; stations and staff reset so each restaurant is a fresh challenge.
+- **Save v3 is compact.** Per-station worker counts and per-station late-game upgrades were replaced by one global staff count and global cook/profit upgrades.
+- **The server re-validates saves.** Client-side clamps are convenience only; `SaveRepository` is authoritative.
 
 ---
 
@@ -34,338 +32,206 @@ Design rules:
 | 9 | Royal Hive | 5 | 10,000 honey + 4 💎 |
 | 10 | Royal Hive | 5 | 20,000 honey + 10 💎 |
 
-Level rewards for levels 1–9 are paid when the player presses **Advance**. The level 10 reward is paid automatically when the final mission is completed (there is no level 11 to advance to).
+Level rewards 1–9 are paid when the player presses **Advance**. The level 10 reward is paid automatically when the final mission completes.
 
 Moving restaurants:
 
 | Move | Cost | Extra requirement |
 |---|---|---|
-| Meadow Stand → Hive Café | 6,500 honey | Every Meadow station unlocked |
-| Hive Café → Royal Hive | 48,000 honey | Every Hive station unlocked |
+| Meadow → Hive (after level 4) | 6,500 honey | all Meadow stations unlocked |
+| Hive → Royal (after level 7) | 48,000 honey | all Hive stations unlocked |
 
-Honey, diamonds, cosmetics, and **global** upgrade levels carry over. The destination restaurant starts with fresh stations, recipes, and per-station upgrades.
+On a move:
 
----
-
-## 3. Core loop
-
-1. Customers arrive and fill the waiting area.
-2. Each customer orders the menu item from one station.
-3. An idle bee claims work:
-   - its own station first, then
-   - the longest-waiting customer anywhere.
-4. The bee takes the order, walks to the station, cooks, and delivers.
-5. The player earns the dish price, plus a random tip.
-6. Honey is spent on workers, recipes, stations, and global upgrades.
-7. Missions track lifetime stats and current station progress.
-8. When all three missions of the level are complete, **Advance** becomes available.
-9. Moving to a new restaurant resets stations but keeps permanent progress.
-
-The game is idle-friendly: workers keep serving without input, and the page autosaves every 5 seconds.
+- stations reset to the new restaurant's layout (first station unlocked);
+- staff resets to **1 bee**;
+- honey, diamonds, cosmetics, missions, stats, and **all global upgrades** carry over.
 
 ---
 
-## 4. Worker AI
+## 3. Economy formulas
 
-Implemented in `gamefile/js/WorkerAI.js` and used by `Scene.findJob()`.
+All numbers live in `gamefile/js/config.js` and `gamefile/js/upgrades.js`.
 
-`pickJob(customers, homeSlot)`:
-
-1. Keep only customers whose state is `wait` and who are not already claimed.
-2. Prefer customers whose order belongs to the bee's home station.
-3. If there are none, choose the customer with the highest `waitTime`.
-4. Return `null` if there is no work.
-
-A bee's `homeSlot` is fixed when it is hired. Its `slot` changes while it helps another station, so the correct dish and station are used. The scene adds a gold glow while `slot !== homeSlot`.
-
-This is intentionally simple and testable. It keeps queues moving without player micromanagement.
-
----
-
-## 5. Economy formulas
-
-Balance values live in `gamefile/js/config.js` (`BALANCE`). Costs are multiplied by the restaurant's cost multiplier:
+### Dish price
 
 ```text
-costMult = 6 ^ location     // Meadow 1, Hive 6, Royal 36
-priceMult = 5 ^ location    // Meadow 1, Hive 5, Royal 25
-```
-
-### Price
-
-```text
-price = basePrice[station]
-      * 5^location
-      * (1 + 0.30 * recipe)
-      * 1.25  (if recipe >= 5)
-      * 2     (if golden recipe is owned)
+price(station, recipe) =
+  basePrice[station]
+  × 5 ^ location
+  × (1 + 0.30 × recipe)
+  × 2 ^ (profit milestones reached at recipe 4 and 8)
+  × (Golden recipe bought ? 2 : 1)
 ```
 
 ### Cooking time
 
 ```text
-cookTime = baseCook[station]
-         * 0.9^recipe
-         * 0.85  (if recipe >= 10)
-         * (1 - 0.04 * workLvl)
-minimum 0.4 seconds
+cookTime = max(0.4s,
+  baseCook[station]
+  × 0.9 ^ recipe
+  × (1 - 0.04 × cookSpeedLevel)
+)
 ```
-
-### Walking and throughput
-
-```text
-walkTime = max(0.8, 1.6 * (1 - 0.05 * walkSpeedLevel))
-cycle    = 3 * walkTime + cookTime       // order, fetch, serve
-perMin   = 60 * staff / cycle
-```
-
-`Economy.spawnInterval()` uses total station capacity to keep a queue visible without flooding the scene.
 
 ### Tips
 
 ```text
-tipChance = min(0.25, 0.08 + 0.02 * tipChanceLevel)
-tip       = dishPrice * random(0.10, 0.30)
+tipChance = min(0.28, 0.08 + 0.02 × tipJarLevel)
+tipAmount = dishPrice × random(0.10 ... 0.30)
 ```
 
-Tips count toward `stats.tips`, `stats.tipHoney`, and `stats.earned`.
+Tips count toward tip missions and total earnings.
 
-### Workers and seats
+### Walking and queue
 
 ```text
-workerCap = min(4, 3 + extraWorkerUpgrade)   // 3 normally, 4 after level 6 upgrade
-seats     = 15 + 5 * location + 2 * queueLevel
+walkTime = max(0.8s, 1.6s × (1 - 0.05 × wingWorkoutLevel))
+seats    = 4 + biggerWaitingAreaLevel
 ```
 
-### Cost formulas
+The HUD shows `🪑 waiting/seats`. Queue chairs are drawn under every waiting spot.
+
+### Worker slots and staff cap
 
 ```text
-unlockCost   = baseUnlock[station] * 6^location
-recipeCost   = round(baseRecipe[station] * 1.48^recipe * 6^location)
-beeCost      = round(baseBee[station] * 2.4^(staff - 1) * 6^location)
-
-globalCost   = round(baseCost * growth^level * 6^location)
-stationCost  = round(baseCost * growth^level * 6^location * (1 + 0.35 * stationIndex))
+slots(station) = 1 + number of slot milestones reached (2, 6, 10)
+staffCap       = min(20, sum of slots on unlocked stations)
 ```
 
-Recipe growth was reduced from **1.55** to **1.48** because recipes now reach level 10. The extra worker upgrade was reduced to a **1,200** base cost so the level-6 "4 workers" mission is reasonable in the Hive Café.
+Hiring costs `40 × 1.5^(staff-1) × 6^location`. Staff is global; a bee can serve any station.
+
+### Spawning
+
+```text
+capacity(station) = slots / (3 × walkTime + cookTime)
+spawnInterval     = random(0.75 ... 1.25) / (1.3 × totalCapacity)
+```
+
+The first burst is about 40% of the queue capacity.
 
 ---
 
-## 6. Upgrades
-
-### Global upgrades
-
-Stored in `state.upgrades` and shared by the whole restaurant. They are **not** reset when changing location.
-
-| ID | Name | Unlock | Max | Base cost | Growth | Effect |
-|---|---|---|---|---|---|---|
-| `tipChance` | Tip jar | Level 2 | 10 | 150 | ×1.6 | +2% tip chance per level |
-| `queue` | Bigger waiting area | Level 3 | 5 | 250 | ×1.9 | +2 seats per level |
-| `walkSpeed` | Wing workout | Level 4 | 5 | 400 | ×1.9 | −5% walking time per level |
-| `workerSlot` | Extra worker | Level 6 | 1 | 1,200 | — | 4th worker at every station |
-
-Global costs are multiplied by `6^location`, so the same level costs more in the Hive Café and Royal Hive.
-
-### Per-station upgrades
-
-Stored on each station as `workLvl` or `profitX2`. They reset when the restaurant changes.
-
-| ID | Name | Unlock | Max | Base cost | Growth | Effect |
-|---|---|---|---|---|---|---|
-| `cookSpeed` | Kitchen drills | Level 8 | 5 | 8,000 | ×2 | −4% cook time per level |
-| `profitX2` | Golden recipe | Level 9 | 1 | 60,000 | — | Double that station's profit |
-
-Station costs additionally scale with the station slot (`1 + 0.35 * index`), so the later menu items cost more to upgrade.
-
-### Recipe milestones
+## 4. Recipe milestones
 
 | Recipe level | Effect |
 |---|---|
-| 5 | +25% profit at that station |
-| 10 | −15% cook time at that station |
+| 2 | +1 worker slot |
+| 4 | 2× station profit |
+| 6 | +1 worker slot |
+| 8 | 2× station profit |
+| 10 | +1 worker slot |
 
-Recipe upgrades themselves also give +30% price and −10% cook time per level. The cap is 10.
+Recipe upgrades also add +30% price and −10% cooking time per level. The station popup shows the current level, worker slots, price, cook time, milestone list, and the **next milestone**.
+
+---
+
+## 5. Global upgrades
+
+| Id | Name | Unlocks | Max | Effect |
+|---|---|---|---|---|
+| `tipChance` | Tip jar | 2 | 10 | +2% tip chance per level, cap 28% |
+| `queue` | Bigger waiting area | 3 | 10 | +1 queue chair per level |
+| `walkSpeed` | Wing workout | 4 | 5 | −5% walking time per level |
+| `cookSpeed` | Kitchen drills | 8 | 5 | −4% cooking time per level |
+| `profitX2` | Golden recipe | 9 | 1 | every dish worth double |
+
+Costs use `baseCost × growth^level × 6^location`. The tip-jar UI text and `Economy.tipChance` read the same constants, so they cannot drift.
+
+---
+
+## 6. Worker AI
+
+`gamefile/js/WorkerAI.js` is intentionally small:
+
+1. Count how many bees are already committed to each station (`claimedBy`).
+2. Keep customers that are waiting, unclaimed, and below that station's slot count.
+3. Prefer customers at the bee's **home station**.
+4. If home is empty/full, choose the **longest-waiting** eligible customer anywhere.
+5. Ties keep the first customer, which keeps movement stable.
+
+Homes are assigned round-robin over the currently unlocked stations in `Scene.syncBees()`. A bee working away from home gets the `.helping` gold glow. Station badges show `🐝 busy/slots`, and the station modal shows the same count.
 
 ---
 
 ## 7. Missions
 
-Missions live in `gamefile/js/missions.js`. Each level has exactly three, in order. `MissionTracker` gates level advancement and completes already-satisfied missions.
+Three missions per level, checked strictly in order. A mission is paid once; `done` is rebuilt from the mission index when a save loads, so fake/duplicate ids cannot replay a reward.
 
-### Full mission list
+| Level | Mission 1 | Mission 2 | Mission 3 |
+|---|---|---|---|
+| 1 | Serve 5 (100 🍯) | Recipe level 2 (100 🍯 + 1 💎) | 2 bees (80 🍯 + 1 💎) |
+| 2 | Unlock station 2 (150 🍯) | Serve 20 (1 💎) | 3 tips (1 💎) |
+| 3 | Unlock station 3 (250 🍯) | Recipe 5 (2 💎) | Earn 2,000 (1 💎) |
+| 4 | Serve 30 (300 🍯) | 3 bees (2 💎) | Earn 5,000 (1 💎) |
+| 5 | Serve 40 (500 🍯) | Recipe 5 (2 💎) | 10 tips (1 💎) |
+| 6 | Unlock all 4 Hive stations (700 🍯) | 4 bees (3 💎) | Earn 20,000 (2 💎) |
+| 7 | 8 bees (1,000 🍯) | Master any recipe (3 💎) | Earn 50,000 (2 💎) |
+| 8 | Serve 70 (1,500 🍯) | 25 tips (3 💎) | Buy 3 global levels (2 💎) |
+| 9 | Unlock all 5 Royal stations (2,500 🍯) | Master 2 recipes (3 💎) | Earn 250,000 (3 💎) |
+| 10 | Serve 100 (4,000 🍯) | Master 3 recipes (4 💎) | Earn 500,000 (5 💎) |
 
-| Lv | Mission | Target | Reward |
-|---:|---|---:|---|
-| 1 | Serve 5 customers | 5 | 100 honey |
-| 1 | Have 2 workers at one station | 2 | 80 honey + 1 💎 |
-| 1 | Upgrade any recipe to level 2 | 2 | 100 honey + 1 💎 |
-| 2 | Unlock the 2nd station | 2 | 150 honey |
-| 2 | Serve 20 customers in total | 20 | 1 💎 |
-| 2 | Collect 3 tips | 3 | 1 💎 |
-| 3 | Unlock the 3rd station | 3 | 250 honey |
-| 3 | Reach recipe level 5 on a station | 5 | 2 💎 |
-| 3 | Earn 2,000 honey in total | 2,000 | 1 💎 |
-| 4 | Serve 30 customers in total | 30 | 300 honey |
-| 4 | Have 3 workers at one station | 3 | 2 💎 |
-| 4 | Earn 5,000 honey in total | 5,000 | 1 💎 |
-| 5 | Serve 40 customers in total | 40 | 500 honey |
-| 5 | Reach recipe level 5 on a station | 5 | 2 💎 |
-| 5 | Collect 10 tips | 10 | 1 💎 |
-| 6 | Unlock all 4 Hive Café stations | 4 | 700 honey |
-| 6 | Have 4 workers at one station | 4 | 3 💎 |
-| 6 | Earn 20,000 honey in total | 20,000 | 2 💎 |
-| 7 | Have 8 workers across the café | 8 | 1,000 honey |
-| 7 | Master any recipe (level 10) | 10 | 3 💎 |
-| 7 | Earn 50,000 honey in total | 50,000 | 2 💎 |
-| 8 | Serve 70 customers in total | 70 | 1,500 honey |
-| 8 | Collect 25 tips | 25 | 3 💎 |
-| 8 | Buy 3 global upgrade levels | 3 | 2 💎 |
-| 9 | Unlock all 5 Royal Hive stations | 5 | 2,500 honey |
-| 9 | Master 2 different recipes | 2 | 3 💎 |
-| 9 | Earn 250,000 honey in total | 250,000 | 3 💎 |
-| 10 | Serve 100 customers in total | 100 | 4,000 honey |
-| 10 | Master 3 different recipes | 3 | 4 💎 |
-| 10 | Earn 500,000 honey in total | 500,000 | 5 💎 |
-
-Mission diamonds total **43**. Level rewards add **29**, for **72 💎** available in a complete run. All four cosmetics cost **66 💎**, leaving a small surplus.
-
-### Auto-completion rules
-
-The tracker walks the ordered list from `state.missions.index`:
-
-- If the current mission belongs to an **older** level, skip it without paying again.
-- If it belongs to a **future** level, stop; the player must advance first.
-- If it is satisfied, mark it done, pay its reward, advance the index, and loop.
-- When the index reaches the end, mark `missions.finished` and pay the level 10 reward once.
-
-This handles the group's requested case: if station 2 was upgraded before station 1, the later mission still completes as soon as it is checked. It also handles cumulative targets (tips, earnings, workers) that were met before the mission appeared.
-
-`Game.changed()` calls the tracker after every purchase, load, dev action, and level change. The game loop also checks twice per second, so passive progress (served, earned, tips) completes missions without a click.
-
-### Mission ordering and gating
-
-- `MissionTracker.levelComplete()` checks only the current level's three missions.
-- The **Advance** button is disabled until they are all done.
-- The next level's missions are not consumed early.
-- Moving restaurants requires every station in the current restaurant to be unlocked in addition to the honey cost.
+“Earn” counts honey added by serving and tips (dev-panel honey is deliberately excluded). “Master” means recipe level 10.
 
 ---
 
 ## 8. Cosmetics
 
-`gamefile/js/cosmetics.js` defines the shop. Cosmetics are stored in `state.cosmetics`:
+| Item | Kind | Cost | Effect |
+|---|---|---|---|
+| 🎀 Little bow | bee | 6 💎 | bow on every bee |
+| 🕶️ Cool shades | bee | 10 💎 | shades on every bee |
+| 🎩 Tiny top hat | bee | 20 💎 | top hat on every bee |
+| 👑 Royal crown | bee | 30 💎 | crown on every bee |
 
-```js
-{
-  owned: ['bee_bow'],
-  equipped: { bee: 'bee_bow', theme: '' }
-}
-```
-
-The `theme` slot is reserved for future restaurant themes; no themes ship in this branch.
-
-Behaviour:
-
-- Buying a cosmetic costs diamonds and auto-equips it.
-- Clicking an equipped item unequips it.
-- Clicking an owned item equips it.
-- An equipped item only renders if it is also in `owned`, so hand-edited saves cannot show unpaid cosmetics.
-- Every bee wears the same equipped accessory.
-- Cosmetics do not affect income, speed, or missions.
-
-Accessories are emoji overlays for now; the asset slots in `config.js` still support replacing the underlying bee art.
+Only one bee accessory is equipped at a time. Cosmetics are purely visual; they never change income or speed.
 
 ---
 
-## 9. Save format
-
-The JavaScript save is version **2**:
+## 9. Save format v3
 
 ```json
 {
-  "version": 2,
+  "version": 3,
   "level": 6,
-  "honey": 4321.5,
+  "honey": 1234,
   "diamonds": 7,
   "location": 1,
-  "stations": [
-    { "unlocked": true, "staff": 2, "recipe": 4, "workLvl": 1, "profitX2": 0 },
-    { "unlocked": true, "staff": 1, "recipe": 2, "workLvl": 0, "profitX2": 0 },
-    { "unlocked": false, "staff": 0, "recipe": 0, "workLvl": 0, "profitX2": 0 },
-    { "unlocked": false, "staff": 0, "recipe": 0, "workLvl": 0, "profitX2": 0 }
-  ],
-  "upgrades": { "tipChance": 3, "queue": 2, "walkSpeed": 1, "workerSlot": 1 },
-  "missions": {
-    "index": 15,
-    "done": ["l1_serve5", "l1_hire2", "l1_recipe2"],
-    "finished": false
+  "staff": 3,
+  "stations": [{ "unlocked": true, "recipe": 4 }],
+  "upgrades": {
+    "tipChance": 2, "queue": 1, "walkSpeed": 1, "cookSpeed": 0, "profitX2": 0
   },
+  "missions": { "index": 15, "done": [], "finished": false },
   "stats": { "served": 42, "earned": 9000, "tips": 9, "tipHoney": 77 },
   "cosmetics": { "owned": [], "equipped": { "bee": "", "theme": "" } }
 }
 ```
 
-Important:
+- `staff` is global and stored inside the existing `upgrades` JSON column on the server.
+- `stations` contains only `unlocked` and `recipe`.
+- The legacy `player_stations.staff`, `work_lvl`, and `profit_x2` columns are still read for migration but new saves write zeroes.
+- The client clamps staff to open slots; the server clamps it again.
+- The server rejects wrong station counts and repairs skipped station unlocks.
 
-- JavaScript `location` is **0-based** (0, 1, 2). SQL `location_no` is **1-based** (1, 2, 3).
-- The server validates and clamps every value in `SaveRepository::clean()`.
-- `infinite` is a dev-only property and is never serialized.
-- The 5-second autosave and the Exit button push to the server. `localStorage` keeps an offline copy.
+### Migration
 
-### v1 migration
-
-Old saves have no `version`, `level`, missions, or upgrades. On load:
-
-1. The frontend infers the level from the location (`Meadow 1`, `Hive 5`, `Royal 8`).
-2. The server does the same if an old database row has no level.
-3. All missions before the inferred level are marked done without paying retroactive rewards.
-4. Honey, staff, and recipe levels are preserved and clamped to the new limits.
-5. The SQL migration adds the new columns and sets `level` for existing rows.
-
-This avoids losing progress while keeping mission state consistent.
-
----
-
-## 10. Tuning guide
-
-Where to change things:
-
-| Want to change | File |
+| Old data | New location |
 |---|---|
-| Prices, cook times, costs, tips, seats, walking speed, starting honey | `gamefile/js/config.js` |
-| Level rewards and level-to-location mapping | `gamefile/js/config.js` (`LEVELS`) |
-| Mission text, targets, rewards, order | `gamefile/js/missions.js` |
-| Global/per-station upgrade unlocks, costs, effects | `gamefile/js/upgrades.js` |
-| Cosmetic prices and definitions | `gamefile/js/cosmetics.js` |
-| Save validation/clamps | `gamefile/src/SaveRepository.php` |
-| Database schema (MySQL/MariaDB) | `gamefile/login_db.sql`, `gamefile/upgrade_db.sql` |
-| Database schema (PostgreSQL/Supabase) | `gamefile/login_db_pg.sql` |
-
-`SaveRepository.php` is driver-aware: MySQL/MariaDB use `ON DUPLICATE KEY UPDATE`, PostgreSQL uses `ON CONFLICT ... DO UPDATE`. Gameplay logic, validation, and clamping are identical on both.
-
-After changing missions or balance, run:
-
-```bash
-npm test
-```
-
-Then do a fresh-account browser run and an old-save load. The full manual checklist is in `docs/TESTING.md`.
-
-### Balance notes
-
-- Recipe growth is **1.48** because level 10 is now reachable. Raising it toward 1.55 makes late-game mastery significantly slower.
-- The fourth worker is intentionally locked behind a level-6 global upgrade; level 6's "4 workers" mission is the tutorial for that system.
-- Royal Hive missions require mastering multiple recipes. That is the intended late-game honey sink. Use dev tools for quick demos.
-- If playtesting feels slow, lower `recipeGrowth` or the Royal Hive `nextCost` rather than removing missions.
-- Do not lower the worker cap below the mission targets without also changing `l4_staff3`, `l6_staff4`, and `l7_staff8`.
+| v1 location-only save | matching starting level (Hive = 5, Royal = 8) |
+| per-station staff | summed into global `staff` |
+| per-station `workLvl` | max becomes global `cookSpeed` |
+| per-station `profitX2` | max becomes global `profitX2` |
+| old `workerSlot` upgrade | dropped (slots now come from recipe milestones) |
 
 ---
 
-## 11. Deliberate limitations
+## 10. Tuning checklist
 
-- No manual worker assignment; that is the point of the automatic design.
-- Restaurant themes are not implemented; only bee accessories ship.
-- Art is still emoji-based, with optional asset slots in `config.js`.
-- No server-side anti-cheat beyond validation and clamping. This is a class project, not a competitive game.
-- The dev panel is enabled by default in `in-game.php`; set `$devMode = false` for a release-style demo.
+When changing balance:
+
+1. Update `gamefile/js/config.js` first (it is the authority).
+2. Keep `gamefile/src/SaveRepository.php` clamps in sync (recipe max, slot milestones, global max levels).
+3. Update the docs tables above.
+4. Run `npm test`.
+5. If you change the schema, update both `login_db.sql` and `login_db_pg.sql`, plus `upgrade_db.sql`.

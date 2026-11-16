@@ -1,153 +1,109 @@
 # Changelog
 
-All notable changes to the JolliDew gameplay-expansion branch.
+All notable changes to JolliDew.
 
-## [2.0.0] — gameplay expansion
+## [2.1.0] — Emman redesign fixes + admin CRUD
 
-**Branch:** `feature/gameplay-expansion`
-**Scope:** 10-level progression, automatic workers, tips, missions, upgrades, diamonds, cosmetics, save migration, documentation, tests.
+**Branch:** `fix/emman-redesign-admin`
+
+This branch promotes Emman's newer redesign into the repository root, fixes its
+regressions, and adds the full account administration required by the project
+brief.
 
 ### Added
 
-- **10-level progression** across the three existing restaurants:
-  - levels 1–4: Meadow Stand
-  - levels 5–7: Hive Café
-  - levels 8–10: Royal Hive
-- **Mission system** with three ordered missions per level and 30 total.
-  - Missions gate the **Advance** button.
-  - Already-satisfied missions auto-complete in order.
-  - Out-of-order upgrades (for example, station 2 before station 1) are handled correctly.
-  - Mission rewards include honey and diamonds.
-- **Automatic cross-station workers.**
-  - Workers always prefer their home station.
-  - When home is empty, they help the longest-waiting customer anywhere.
-  - “Helping” workers get a gold glow.
-- **Tips.**
-  - Base 8% chance, +2% per Tip jar level, capped at 25%.
-  - Tip value is 10–30% of the dish price.
-  - Tips and tip earnings are tracked for missions.
-- **Recipe milestones and a higher recipe cap.**
-  - Recipes now reach level 10.
-  - Level 5 milestone: +25% station profit.
-  - Level 10 milestone: −15% station cook time.
-- **Global upgrades.**
-  - Tip jar, bigger waiting area, faster walking, and a 4th worker slot.
-  - Global upgrades persist across restaurant changes.
-- **Per-station upgrades.**
-  - Kitchen drills (faster cooking, unlocked at level 8).
-  - Golden recipe (2× station profit, unlocked at level 9).
-- **Diamonds and cosmetics.**
-  - Four bee accessories: little bow, cool shades, tiny top hat, and royal crown.
-  - Buy with diamonds, equip/unequip from the panel, and see the accessory on every bee.
-  - Cosmetics are saved and survive restaurant changes/reloads.
-- **Save format v2.**
-  - New fields: level, diamonds, global upgrades, missions, stats, cosmetics, per-station work level, and profit multiplier.
-  - Old location-only saves keep honey, staff, and recipe progress and migrate to the matching tier.
-- **Database migration.**
-  - `gamefile/upgrade_db.sql` upgrades an existing MySQL/MariaDB database.
-  - `gamefile/login_db.sql` now creates the full v2 schema for fresh MySQL installs.
-- **PostgreSQL/Supabase support.**
-  - `gamefile/login_db_pg.sql` creates the full v2 schema, adds missing columns, and seeds reference data. Safe to re-run.
-  - `gamefile/db.postgres.example.php` is the connection template for the Supabase pooler.
-  - `SaveRepository` detects the driver and uses `ON CONFLICT` on PostgreSQL, `ON DUPLICATE KEY` on MySQL/MariaDB.
-  - `register.php` checks duplicates with `fetch()` instead of `rowCount()` so it behaves the same on both drivers.
-  - `npm run test:pg` runs a live PostgreSQL save/load round-trip and skips automatically on MySQL or a missing config.
-- **Documentation.**
-  - Rewritten `README.md` with setup, gameplay, migration, troubleshooting, and dev instructions.
-  - `docs/GAMEPLAY.md` with formulas, full mission table, upgrade tables, and save format.
-  - `docs/TESTING.md` with automated and manual QA coverage.
-- **Automated tests.**
-  - 37 Node.js tests for economy, saves, workers, missions, and cosmetics.
-  - PHP save-validator checks with no database needed.
-- **Local development setup improvements.**
-  - `gamefile/db.example.php` template.
-  - `gamefile/src/google-config.example.php` template.
-  - `.gitignore` for local DB/credentials, OS files, and dependencies.
-  - Google login falls back to a friendly “not configured” page.
-  - `gamefile/src/.htaccess` blocks direct source access under Apache.
+- **Admin panel (`admin.php`)**
+  - account search and pagination;
+  - create player/admin accounts;
+  - edit username, email, and role;
+  - reset passwords;
+  - reset a player's saved progress;
+  - delete an account and all of its rows;
+  - audit log with actor/target username snapshots;
+  - self-delete and last-admin guards.
+- **First-admin CLI:** `php gamefile/bin/make-admin.php <username>`.
+- **Roles and audit schema:** `users.role`, `admin_audit`, indexes; both MySQL
+  and PostgreSQL files updated. `upgrade_db.sql` performs the MySQL migration.
+- **CSRF protection** for login, registration, and every admin POST.
+- **Secure session cookies:** `HttpOnly`, `SameSite=Lax`, `Secure` on HTTPS.
+- **`Auth::refresh()`**: deleted users and changed roles take effect immediately.
+- **Queue HUD:** `🪑 waiting/seats`.
+- **Station keyboard access:** stations are focusable and open with Enter/Space.
+- **Next-milestone text** in the station popup.
+- **Docs:** `docs/ADMIN.md`, `docs/ARCHITECTURE.md`, rewritten `docs/GAMEPLAY.md`,
+  `docs/TESTING.md`, README, and this changelog.
+- **Tests:** rewritten JavaScript suite (45 tests), SaveRepository v3 checks, and
+  an in-memory SQLite AdminRepository suite.
 
 ### Changed
 
-- Recipe cap increased from 8 to **10**.
-- Recipe cost growth reduced from 1.55 to **1.48** to keep level 10 reachable.
-- Tip chance base increased from 5% to **8%**.
-- Worker cap is now **3 by default**, with a level-6 global upgrade for a **4th** worker.
-- Queue size, walking speed, cook speed, and station profit are now upgradeable.
-- The game HUD shows the current level and restaurant plus a diamond counter.
-- The mission card and **Advance** button are at the top of the panel so the level gate is visible.
-- Moving restaurants resets that restaurant’s stations and per-station upgrades; honey, diamonds, cosmetics, and global upgrades carry over.
-- The level 10 reward is paid automatically when the final mission is completed.
-- Game screen HUD wraps on narrow/mobile widths.
+- **Save format v3.**
+  - `stations` now store only `unlocked` + `recipe`.
+  - `staff` is one global number stored in the `upgrades` JSON.
+  - `cookSpeed` and `profitX2` are global upgrades.
+  - Old v1/v2 saves migrate automatically; per-station staff is summed and
+    late-game per-station upgrades become global.
+- **Global upgrades survive restaurant moves.** Stations and staff reset.
+- **Tip jar cap is 28%.** The UI and `Economy.tipChance` read the same constants.
+- **Queue:** starts at 4 chairs, +1 per *Bigger waiting area* level (max 10 levels).
+- **Worker AI:** home-station preference, then longest-waiting customer anywhere.
+- **CSS is flattened** (no native nesting) for wider browser support and reliable
+  XAMPP demos.
+- **Save validation:** stations must open in order; staff is clamped to open
+  slots; missions `done` is rebuilt from the index to prevent duplicate rewards.
+- **Google OAuth:** requires a verified email, uses the configured/exact redirect
+  URI when supplied, generates unique usernames safely, and stores the role in
+  the session.
 
 ### Fixed
 
-- Fresh CLI imports of `login_db.sql` now set `utf8mb4`, so emoji menu data no longer fails under latin1 connections.
-- Old saves no longer lose station progress when the level and location disagree; the location wins and the level is repaired.
-- Unlocked stations are normalized to at least one worker on load.
-- Bees removed by a reset/location change no longer leave stale sprites behind.
-- The Google OAuth config is no longer committed; a placeholder template is used instead.
-- A local `gamefile/db.php` is no longer required to be committed or shared.
+- Station popup could point at a station index that no longer exists after a move.
+- Staff could exceed the number of open worker slots in old saves.
+- A locked station could keep a recipe or be unlocked out of order.
+- Tip UI showed 28% while the simulation capped at 25%.
+- Native CSS nesting could fail on older demo browsers.
+- Google login no longer relies on any hardcoded client secret.
+- Admin deletion works on databases without cascade foreign keys.
+- Deleted users can no longer keep using an old session.
 
-### Database migration
+### Security
 
-#### MySQL/MariaDB
+- Never commit `gamefile/db.php` or `gamefile/src/google-config.php`.
+- **Rotate** the Supabase database password and Google client secret if they were
+  ever committed. Removing them from the latest commit does not invalidate them.
+- The admin page checks the role from the database on every request; the hidden
+  menu link is not a security boundary.
 
-If your database existed before this branch:
-
-```bash
-mysql -u root -p jollidew_db < gamefile/upgrade_db.sql
-```
-
-Or import `gamefile/upgrade_db.sql` in phpMyAdmin. Fresh installs should import `gamefile/login_db.sql` instead.
-
-The migration:
-
-- adds `level`, `diamonds`, `upgrades`, mission fields, `stats`, and `cosmetics`;
-- adds `work_lvl` and `profit_x2` to stations;
-- sets old Hive/Royal saves to levels 5/8 so they do not replay earlier restaurants.
-
-XAMPP’s MariaDB supports `ADD COLUMN IF NOT EXISTS`. On MySQL 8, remove `IF NOT EXISTS` and run the migration once, or add the columns manually. The script is safe to re-run on MariaDB.
-
-#### PostgreSQL/Supabase
-
-Run `gamefile/login_db_pg.sql` once in the Supabase SQL Editor (or with `psql -f`). It covers fresh installs and existing databases in one file:
-
-- creates `player_progress`, `player_stations`, `locations`, and `menu_items` when missing;
-- adds the v2 columns with `ADD COLUMN IF NOT EXISTS` for older installs;
-- seeds the three locations and twelve menu items with `ON CONFLICT DO UPDATE`.
-
-There is no separate PostgreSQL upgrade script, and the file is safe to re-run.
-
-### Verification summary
-
-Automated:
+### Verification
 
 ```text
-37 JavaScript tests passing
+45 JavaScript tests passing
 PHP SaveRepository checks passing
-13 live PostgreSQL SaveRepository checks passing (npm run test:pg)
+PHP AdminRepository checks passing (in-memory SQLite)
+PHP lint clean
 ```
 
-Manual browser/API verification (MariaDB 10.4 and Supabase PostgreSQL):
+Also verified on 2026-11-17:
 
-- fresh schema import with emoji menu data on both engines, plus idempotent re-import;
-- register → login → save → load API round-trip on both engines;
-- v1-shaped row migration and re-running the MySQL migration script;
-- PostgreSQL `ON CONFLICT` update path through a second save;
-- login → play → load level 6 save;
-- mission gating and dev “Missions ✓” completion;
-- advance to level 7 and Royal Hive;
-- buy/equip a cosmetic and see it on bees;
-- exit and re-enter, confirming the server reloaded level, diamonds, and cosmetic;
-- headless Chrome at 440×900 with no JavaScript errors (28/28 checks);
-- logged-out API returns 401, malformed saves return 400, and Google login redirects or rejects bad state.
+- isolated MariaDB 10.4.28: schema imported twice, `upgrade_db.sql` applied to
+  the live `origin/main` schema, register/login/admin CRUD/audit checks, and an
+  API save round-trip;
+- headless Chrome at 440×900: main menu → game → station modal (mouse and
+  keyboard) → global/cosmetics modals → autosave → exit, with no JavaScript
+  exceptions, console errors, or failed requests.
 
-See `docs/TESTING.md` for the repeatable checklist.
+Manual checks are listed in `docs/TESTING.md`.
 
-### Notes
+---
 
-- The dev panel is enabled by default in `gamefile/in-game.php` (`$devMode = true`). Set it to `false` before a public/release build.
-- `gamefile/db.php` and `gamefile/src/google-config.php` are intentionally ignored by git. Copy them from the provided examples (`db.example.php` for MySQL, `db.postgres.example.php` for PostgreSQL).
-- Both database engines stay supported: PostgreSQL/Supabase for the group database, MySQL/MariaDB for XAMPP. Keep `login_db.sql` and `login_db_pg.sql` in sync when the schema changes.
-- Restaurant themes are reserved in the save format but not implemented; only bee accessories ship.
-- No npm runtime dependencies or build step are required.
+## [2.0.0] — initial gameplay expansion
+
+Historical branch `feature/gameplay-expansion` (PR #1):
+
+- 10 levels across three restaurants;
+- missions, tips, diamonds, cosmetics;
+- automatic workers;
+- MySQL + PostgreSQL saves;
+- initial tests and docs.
+
+Its per-station worker/upgrade model was replaced by the global model in 2.1.0.

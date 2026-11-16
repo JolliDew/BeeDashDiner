@@ -1,6 +1,7 @@
 # Testing checklist
 
-Two layers of testing ship with this branch: dependency-free automated tests and a manual browser/API checklist.
+There are two layers: dependency-free automated tests and a manual browser/API
+checklist.
 
 ---
 
@@ -9,9 +10,9 @@ Two layers of testing ship with this branch: dependency-free automated tests and
 ### Requirements
 
 - Node.js **20 or newer**
-- PHP **8.0 or newer** (only for the save-validator checks)
+- PHP **8.0 or newer**
 - No Composer, npm packages, or database are required for `npm test`
-- The optional live PostgreSQL test needs a configured `gamefile/db.php` and `pdo_pgsql`
+- Optional: `pdo_pgsql` + a configured `gamefile/db.php` for the live PostgreSQL test
 
 From the repository root:
 
@@ -24,231 +25,176 @@ This runs:
 ```text
 npm run test:js     -> node --test tests/*.test.js
 npm run test:php    -> php tests/SaveRepository.test.php
+                       php tests/AdminRepository.test.php
 ```
 
-Expected result:
+Expected:
 
 ```text
-37 JavaScript tests passing
+45 JavaScript tests passing
 PHP SaveRepository checks passing
+PHP AdminRepository checks passing (in-memory SQLite)
 ```
+
+The PHP admin test creates its own SQLite schema, so it never touches the real
+database.
 
 If PHP is not on your PATH under XAMPP:
 
 ```bash
 /Applications/XAMPP/xamppfiles/bin/php tests/SaveRepository.test.php
+/Applications/XAMPP/xamppfiles/bin/php tests/AdminRepository.test.php
 ```
 
-### Live PostgreSQL check (optional)
+### Optional live PostgreSQL round-trip
 
 ```bash
 npm run test:pg
 ```
 
-`tests/SaveRepositoryPg.test.php` creates a temporary account, saves twice (exercising `INSERT ... ON CONFLICT DO UPDATE`), verifies every field round-trips, and deletes its rows even if a check fails. It prints `skip` and exits successfully when `gamefile/db.php` is missing or points at MySQL, so it never breaks a XAMPP-only checkout.
-
-Expected result against Supabase:
-
-```text
-13 live PostgreSQL SaveRepository checks passing
-```
-
-### What the JavaScript tests cover
-
-| File | Coverage |
-|---|---|
-| `tests/economy.test.js` | prices, recipe milestones, cook time, tips, worker cap, seats, walking speed, upgrade cost growth |
-| `tests/gamestate.test.js` | fresh state, v2 round-trip, v1 migration, invalid data, level/location repair, clamping, mission repair, level transitions, serialization |
-| `tests/workerai.test.js` | home-station priority, longest wait, claimed/departing/walking customers, stable selection |
-| `tests/missions.test.js` | exactly 3 missions × 10 levels, unique IDs, ordering, safe progress functions |
-| `tests/missiontracker.test.js` | cascade completion, next-level gating, out-of-order upgrades, final reward once, clamped progress, old index repair |
-| `tests/cosmetics.test.js` | unique definitions, ownership-gated rendering, buy/unequip/re-equip, insufficient diamonds |
-
-### What the PHP checks cover
-
-`tests/SaveRepository.test.php` calls `SaveRepository::clean()` directly:
-
-- complete v2 payload acceptance
-- old location-only payload defaults
-- level/location repair
-- clamping of honey, diamonds, upgrades, stations, mission IDs, and cosmetics
-- forced first station with at least one worker
-- malformed payload rejection
-
-### What the PostgreSQL check covers
-
-`tests/SaveRepositoryPg.test.php` runs against a real PostgreSQL/Supabase connection:
-
-- temporary account creation and `lastInsertId()`;
-- v2 payload acceptance and first save (`INSERT`);
-- level, location, currency, station, upgrade, mission, and cosmetic round-trips;
-- second save updating the same row (`ON CONFLICT DO UPDATE`);
-- late-game fields (`recipe_lvl = 10`, `work_lvl`, `profit_x2`, `missions_finished`);
-- cleanup of the temporary user, progress row, and station rows.
-
-### Syntax checks
-
-PHP:
-
-```bash
-find gamefile -name '*.php' -print0 | xargs -0 -n1 php -l
-```
-
-JavaScript modules are imported by the tests. A quick import smoke test is:
-
-```bash
-node -e "import('./gamefile/js/Game.js').then(() => console.log('modules load'))"
-```
-
-`Game` imports the UI modules, but no DOM is touched until a `Game` instance is created.
+It uses `gamefile/db.php` and skips when the configured driver is not PostgreSQL.
+Do not point it at a database you cannot write to.
 
 ---
 
-## 2. Manual browser checklist
+## 2. JavaScript coverage
+
+| File | What it protects |
+|---|---|
+| `gamestate.test.js` | v3 shape, v1/v2 migration, station chains, mission rebuild, global-upgrade persistence, staff clamping |
+| `workerai.test.js` | home preference, global help, claimed/leaving customers, slot limits, stable ties |
+| `economy.test.js` | prices, milestones, cook times, tip cap, seats, walk floor, staff cap, costs |
+| `missions.test.js` | 30 ordered missions, unique ids, safe progress reads |
+| `missiontracker.test.js` | one-time rewards, level gating, out-of-order completion, final reward |
+| `cosmetics.test.js` | ids/prices, equip rules, diamond spending |
+
+## 3. PHP coverage
+
+| File | What it protects |
+|---|---|
+| `SaveRepository.test.php` | v3 save cleaning, legacy migration, unlock chain, staff/slot clamp, malformed payload rejection |
+| `AdminRepository.test.php` | create/update/search/paginate/password/progress reset/delete, last-admin and self-delete guards, audit snapshots |
+
+---
+
+## 4. Manual browser checklist
+
+Use a throwaway account and a throwaway database when possible.
 
 ### Setup
 
-1. Start the web server: Apache/XAMPP, or `php -S 127.0.0.1:8000 -t gamefile`.
-2. Choose one database:
-   - **MySQL/MariaDB:** start MySQL in XAMPP, copy `gamefile/db.example.php` to `gamefile/db.php`, and import `gamefile/login_db.sql`.
-   - **PostgreSQL/Supabase:** copy `gamefile/db.postgres.example.php` to `gamefile/db.php`, fill in the pooler credentials, and run `gamefile/login_db_pg.sql` once in the Supabase SQL Editor.
-3. Open `gamefile/login.php` or `http://127.0.0.1:8000/login.php`.
-4. Register a fresh test account.
-5. Keep the dev panel enabled (`$devMode = true`) for faster testing.
-6. If you test against the shared Supabase database, use a throwaway account and delete it plus its `player_progress`/`player_stations` rows when you finish. Never modify the two existing production accounts.
+- [ ] Import `login_db.sql` (MySQL) or `login_db_pg.sql` (PostgreSQL).
+- [ ] Import it a **second** time to prove it is safe to re-run.
+- [ ] Copy `db.php` from an example; confirm it is ignored by `git status`.
+- [ ] Start Apache/XAMPP or `php -S 127.0.0.1:8000 -t gamefile`.
+- [ ] Register a new account.
 
-### A. New game
+### Player flow
 
-- [ ] Login succeeds and **Play Game** opens the café.
-- [ ] HUD shows `Level 1/10 · Meadow Stand`, 🍯 50, 💎 0.
-- [ ] Mission card shows **Serve 5 customers**, progress `0/5`.
-- [ ] **Advance** is disabled and says “Complete all Level 1 missions”.
-- [ ] The first station has one bee and customers begin arriving.
-- [ ] A served customer adds honey and the mission counter increases.
+- [ ] Login with username and with email.
+- [ ] Main menu shows the player name; no Admin Panel link for a player.
+- [ ] Play Game loads the HUD, scene, mission card, and station buttons.
+- [ ] Queue HUD starts at `🪑 x/4`; buying *Bigger waiting area* adds a chair.
+- [ ] Station popup opens by mouse and by keyboard (`Tab` to a station, `Enter`).
+- [ ] Station popup shows recipe pips, worker slots, price, cook time, milestone list, and next milestone.
+- [ ] Station badges show `Lv`, `🐝 busy/slots`, and the green upgrade arrow when affordable.
+- [ ] Hire bees from **Staff & global upgrades**; staff is shared by all stations.
+- [ ] A bee at a non-home station gets the gold `.helping` glow.
+- [ ] Tip jar level 10 shows **28%**, matching the simulation.
+- [ ] Each recipe milestone at 2/6/10 adds a slot; 4/8 doubles profit.
+- [ ] Buy a cosmetic, equip/unequip it, and see it on every bee.
+- [ ] Complete level 1 missions; Advance unlocks only after all three.
+- [ ] Move to Hive Café: stations and staff reset, global upgrades remain.
+- [ ] Reload the page: honey, level, staff, upgrades, cosmetics, and missions persist.
+- [ ] Exit to menu and re-enter; the server save is loaded.
 
-### B. Hiring, recipes, stations
+### Admin flow
 
-- [ ] **Hire bee** increases staff and the bee count in the scene.
-- [ ] The 4th hire is blocked until the level-6 Extra worker upgrade.
-- [ ] **Recipe** increases price and reduces cook time in the description.
-- [ ] Reaching recipe 5 shows the +25% profit milestone toast and card text.
-- [ ] Reaching recipe 10 shows the −15% cook-time milestone toast and card text.
-- [ ] Unlocking station 2 works; station 3 requires station 2 first.
+- [ ] Run `php gamefile/bin/make-admin.php <username>`.
+- [ ] Reload the main menu; **Admin Panel** appears.
+- [ ] Open `admin.php`; stats, accounts, and audit sections render.
+- [ ] Create a player and an admin.
+- [ ] Search by username and by email; pagination works.
+- [ ] Edit username/email/role; changes appear in the table.
+- [ ] Reset a password; log in with the new password.
+- [ ] Reset progress; the target starts a new game on next load.
+- [ ] Delete a player; their progress rows are gone.
+- [ ] Try to delete yourself: blocked with a message.
+- [ ] Try to demote/delete the last admin: blocked with a message.
+- [ ] Check the audit log records create/update/password/reset/delete.
+- [ ] Open `admin.php` as a player: 403.
+- [ ] Log in as a deleted user in an old tab: next API call returns 401 and the menu redirects.
 
-### C. Tips
+### Google login (optional)
 
-- [ ] Deliveries occasionally show a `🪙 +N` pop.
-- [ ] Tip chance is 8% at level 0 and increases with the Tip jar upgrade.
-- [ ] The level-2 “Collect 3 tips” mission progresses from tips only.
-- [ ] Tip honey counts toward earned-honey missions.
+- [ ] Add the exact redirect URI in Google Cloud Console.
+- [ ] `google-config.php` has real values and is ignored.
+- [ ] Google login creates an account on first use and reuses it on the second.
+- [ ] An unverified Google email is rejected.
+- [ ] Bad/missing `state` is rejected.
+- [ ] The redirected username is unique.
 
-### D. Automatic cross-station help
+### Security checks
 
-- [ ] Open two stations and hire bees at both.
-- [ ] When one station has no waiting customer, its bee walks to the other station’s queue.
-- [ ] A helping bee has a gold glow (`.helping`).
-- [ ] The customer is never served by two bees at once.
+- [ ] `git status` does not show `gamefile/db.php` or `gamefile/src/google-config.php`.
+- [ ] `git grep` finds no real Supabase password or Google secret.
+- [ ] Logged-out `api.php?action=load` returns 401 JSON.
+- [ ] A malformed save returns 400.
+- [ ] POSTing an admin form without a CSRF token is rejected.
+- [ ] Session cookie is `HttpOnly` and `SameSite=Lax` (check DevTools).
 
-### E. Mission gating and auto-completion
+### Responsive/accessibility
 
-- [ ] Finishing all three current missions enables **Advance**.
-- [ ] Pressing **Advance** pays the level reward and moves to the next level.
-- [ ] If a level’s missions are already satisfied when it starts, they complete immediately in a cascade.
-- [ ] Pre-satisfied lifetime targets (served, earned, tips) auto-complete.
-- [ ] **Out-of-order station check:** use dev tools/money to make station 2 recipe 10 before station 1. When the matching mastery mission becomes current, it completes without asking the player to redo it.
-- [ ] Missions for the next level stay locked until **Advance** is pressed.
-
-### F. Level transitions
-
-- [ ] Level 4 → 5 moves to Hive Café only after all Meadow stations are open and 6,500 honey is paid.
-- [ ] Level 5 starts with a fresh 4-station Hive Café; honey, diamonds, cosmetics, and global upgrades remain.
-- [ ] Level 7 → 8 moves to Royal Hive after all Hive stations are open and 48,000 honey is paid.
-- [ ] Royal Hive has 5 stations.
-- [ ] Per-station upgrades reset on a move; global upgrades do not.
-- [ ] Completing the level-10 missions sets `missions.finished` and pays the final reward once.
-
-### G. Diamonds and cosmetics
-
-- [ ] Mission/level rewards increase the 💎 counter.
-- [ ] The Cosmetics section is below Global upgrades.
-- [ ] A cosmetic cannot be bought without enough diamonds.
-- [ ] Buying deducts diamonds and auto-equips the item.
-- [ ] Every bee shows the accessory.
-- [ ] Clicking the equipped item unequips it; clicking an owned item re-equips it.
-- [ ] The cosmetic survives a restaurant move, Exit/Play, and a page reload.
-
-### H. Save and load
-
-- [ ] The HUD save status shows `Loaded`, `Saved`, or `Offline copy`.
-- [ ] Wait 5 seconds or press **Exit**, then re-enter; level, honey, diamonds, staff, recipes, missions, and cosmetics are restored.
-- [ ] Refreshing the browser restores the same state.
-- [ ] Logging out and back in restores the same state.
-- [ ] A different account gets its own fresh save.
-
-### I. Old-save migration
-
-Test on a copy of a pre-branch database, not your only copy:
-
-- [ ] Import the old schema and create a row with `location_no = 2` (Hive) or `3` (Royal).
-- [ ] Run `gamefile/upgrade_db.sql` once.
-- [ ] Confirm the old row now has `level = 5` or `8`.
-- [ ] Re-run the migration on MariaDB; it should not error.
-- [ ] Load that account in the game; honey/staff/recipe progress is preserved and earlier missions are marked done without duplicate rewards.
-
-PostgreSQL/Supabase:
-
-- [ ] Re-run `gamefile/login_db_pg.sql`; it should not error and seed rows should keep their values.
-- [ ] On an existing row, the script adds any missing columns without touching stored progress.
-- [ ] `npm run test:pg` passes and leaves no temporary rows behind.
-
-### J. Responsive/layout
-
-- [ ] At roughly 440 px wide, the HUD wraps without covering the level/location.
-- [ ] The mission card and **Advance** button are visible near the top of the panel.
-- [ ] Stations, global upgrades, and cosmetics scroll cleanly.
-- [ ] The cosmetics shop does not float over the HUD (a CSS class collision we fixed during testing).
+- [ ] 440×900 browser: HUD wraps, panel scrolls, modals fit.
+- [ ] Keyboard: station buttons have a visible focus ring; modal close buttons work.
+- [ ] `prefers-reduced-motion` disables the rise/toast animations.
+- [ ] No JavaScript errors in the console during a 2-minute idle run.
 
 ---
 
-## 3. API smoke test (optional)
+## 5. Regression commands
 
-The game uses:
+```bash
+# PHP syntax
+find gamefile tests -name '*.php' -print0 | xargs -0 -n1 php -l
 
-```text
-GET  api.php?action=load
-POST api.php?action=save   (JSON body, requires login session)
+# JavaScript syntax (Node)
+for f in gamefile/js/*.js; do node --check "$f"; done
+
+# Whitespace / conflict markers
+git diff --check
+git grep -nE '<<<<<<<|=======|>>>>>>>' || true
 ```
 
-To test by hand:
-
-1. Log in through the browser.
-2. Open DevTools → Network.
-3. Watch the `load` and `save` calls while playing.
-4. A logged-out request to `api.php?action=load` should return **401**.
-5. A malformed save should return **400** with `{"error":"bad data"}`.
-
-The server validates shape and clamps values; it is not intended as a competitive anti-cheat system.
-
 ---
 
-## 4. What was tested for this branch
+## 6. Last verified
 
-- **37** Node.js tests passing.
-- PHP `SaveRepository` checks passing.
-- PHP lint across every `gamefile/**/*.php`.
-- Fresh MariaDB 10.4 import, including emoji menu rows.
-- Fresh Supabase import: 5 tables created, 3 locations and 12 menu items seeded, re-import idempotent.
-- Register → login → API save → API load round-trip on MariaDB and on Supabase.
-- Old-schema migration and repeat migration (MariaDB).
-- **13** live PostgreSQL checks passing with cleanup verified (`npm run test:pg`).
-- Logged-out API returns 401; malformed save returns 400; Google login redirects to Google and rejects a bad state.
-- Headless Chrome (440×900) run against Supabase:
-  - login and render the saved level-6 Hive Café;
-  - mission gate and dev completion;
-  - advance to level 7 and Royal Hive;
-  - buy/equip a bee cosmetic;
-  - exit/re-enter and confirm the server restored level, diamonds, and cosmetic;
-  - 28/28 checks, no JavaScript errors.
-- Screenshot review caught and fixed the `.cos` CSS collision.
+On **2026-11-17**, the branch was checked with:
 
-The automated suite does not require a database; the browser/API checks above do. Run the manual checklist after changing the schema, save format, or progression.
+- PHP 8.5.0 and Node.js 24.21.0;
+- an isolated **MariaDB 10.4.28** instance (XAMPP binaries, temporary data dir);
+- **Chrome headless** at 440×900.
+
+Results:
+
+- `npm test`: 45 JavaScript tests and both PHP suites pass;
+- `login_db.sql` imports cleanly twice;
+- `upgrade_db.sql` applies to the live `origin/main` schema and is re-runnable;
+- register → login → CLI promotion → admin create/edit/password/reset/delete,
+  CSRF rejection, player 403, last-admin guards, audit rows, API save round-trip;
+- main menu → game → station modal (mouse and keyboard) → global/cosmetics
+  modals → autosave → exit, with no JavaScript exceptions or failed requests;
+- an unmigrated database still plays the game, while `admin.php` shows the
+  migration message instead of a misleading 403.
+
+The live Supabase database was **not** modified. Run the migration there before
+deploying.
+
+## 7. Known test limitations
+
+- `npm test` does not start a browser; the manual checklist covers rendering.
+- The admin repository test uses SQLite for speed. The SQL is portable, but the
+  live PostgreSQL/MySQL paths should still be checked before a release.
+- Google OAuth needs real credentials and a registered redirect URI; it cannot
+  be exercised by the dependency-free suite.

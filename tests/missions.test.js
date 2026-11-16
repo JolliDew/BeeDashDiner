@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 
 import { MISSIONS, missionsForLevel, firstMissionIndex } from '../gamefile/js/missions.js';
 import { GameState } from '../gamefile/js/GameState.js';
-import { MAX_LEVEL } from '../gamefile/js/config.js';
+import { MAX_LEVEL, BALANCE as B } from '../gamefile/js/config.js';
 
 test('there are exactly three ordered missions for each of the ten levels', () => {
   assert.equal(MAX_LEVEL, 10);
@@ -33,14 +33,12 @@ test('every mission can read a fresh and a maxed state without throwing', () => 
   const maxed = new GameState();
   maxed.jumpToLevel(MAX_LEVEL);
   maxed.stats = { served: 1e9, earned: 1e12, tips: 1e9, tipHoney: 1e9 };
-  maxed.upgrades = { tipChance: 10, queue: 5, walkSpeed: 5, workerSlot: 1 };
+  maxed.upgrades = { tipChance: 10, queue: 10, walkSpeed: 5, cookSpeed: 5, profitX2: 1 };
   maxed.stations.forEach(s => {
     s.unlocked = true;
-    s.staff = 4;
-    s.recipe = 10;
-    s.workLvl = 5;
-    s.profitX2 = 1;
+    s.recipe = B.maxRecipe;
   });
+  maxed.staff = 20;
 
   for (const mission of MISSIONS) {
     for (const state of [fresh, maxed]) {

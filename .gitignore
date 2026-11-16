@@ -11,4 +11,6 @@ gamefile/src/google-config.php
 
 # Dependency folders (not used yet, but keeps future tooling out)
 node_modules/
-vendor/
+
+# The game ships its small front-end libraries in gamefile/vendor so it can run
+# offline under XAMPP. Do not ignore that folder.

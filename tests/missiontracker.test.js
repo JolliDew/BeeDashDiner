@@ -27,7 +27,7 @@ test('already-finished level 1 missions auto-complete and pay out once', () => {
   const { game, tracker } = trackerFor(state);
 
   state.stats.served = 5;
-  state.stations[0].staff = 2;
+  state.staff = 2;
   state.stations[0].recipe = 2;
 
   assert.equal(tracker.check(), true);
@@ -35,7 +35,7 @@ test('already-finished level 1 missions auto-complete and pay out once', () => {
   assert.deepEqual(state.missions.done, MISSIONS.slice(0, 3).map(m => m.id));
   assert.equal(tracker.levelComplete(1), true);
   assert.equal(state.diamonds, 2);
-  assert.equal(state.honey, 50 + 100 + 80 + 100);
+  assert.equal(state.honey, 50 + 100 + 100 + 80);
   assert.equal(game.rewards.length, 3);
 
   assert.equal(tracker.check(), false);
@@ -51,12 +51,10 @@ test('missions for the next level wait until the player advances', () => {
   state.stats.tips = 1e6;
   state.stations.forEach(s => {
     s.unlocked = true;
-    s.staff = 4;
     s.recipe = 10;
-    s.workLvl = 5;
-    s.profitX2 = 1;
   });
-  state.upgrades = { tipChance: 10, queue: 5, walkSpeed: 5, workerSlot: 1 };
+  state.staff = 12;
+  state.upgrades = { tipChance: 10, queue: 10, walkSpeed: 5, cookSpeed: 5, profitX2: 1 };
 
   tracker.check();
   assert.equal(state.missions.index, 3);
@@ -88,9 +86,9 @@ test('a station upgraded out of order still completes its mission automatically'
   // The player mastered stations 2, 3 and 4 before station 1.
   state.stations.forEach((s, i) => {
     s.unlocked = true;
-    s.staff = 4;
     if (i >= 1) s.recipe = 10;
   });
+  state.staff = 12;
   state.stats.served = 100;
   state.stats.earned = 500000;
 
@@ -109,9 +107,9 @@ test('finishing the last level pays the final reward exactly once', () => {
 
   state.stations.forEach(s => {
     s.unlocked = true;
-    s.staff = 4;
     s.recipe = 10;
   });
+  state.staff = 12;
   state.stats.served = 1e6;
   state.stats.earned = 1e9;
 

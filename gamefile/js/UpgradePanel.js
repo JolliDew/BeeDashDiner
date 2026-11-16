@@ -1,19 +1,105 @@
-import { ITEMS, LOCATIONS, BEES, BALANCE as B, LEVELS, MAX_LEVEL, MAX_SLOTS, levelLocation, nextMilestone, ASSETS, art, fmt } from './config.js';
+import { ITEMS, LOCATIONS, BEES, BALANCE as B, LEVELS, MAX_LEVEL, MAX_SLOTS, MILESTONES, nextMilestone, levelLocation, ASSETS, art, fmt } from './config.js';
 import { GLOBAL_UPGRADES } from './upgrades.js';
 import { COSMETICS } from './cosmetics.js';
 
+const BTN = 'style="white-space:pre-line;min-width:96px"';
+const honey = () => art(ASSETS.honeyIcon, '🍯');
+/** Currency shown inside upgrade buttons. */
+const cost = c => `<span class="cost">${honey()} ${fmt(c)}</span>`;
+/** Level indicator: a row of pips. Kept separate from the buttons. */
+const pips = (n, max) => `<span class="pips">${Array.from({ length: max }, (_, i) => `<i class="${i < n ? 'on' : ''}"></i>`).join('')}</span>`;
+const lvl = (label, n, max) => `<span class="lvl-label">${label}</span>${pips(n, max)}<b>${n}/${max}</b>`;
+
+const modalShell = (id, title, body) => `
+<div class="modal fade" id="${id}" tabindex="-1" role="dialog" aria-labelledby="${id}Title" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="${id}Title">${title}</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">${body}</div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>`;
+
 export class UpgradePanel {
   constructor(el, game) {
-    this.el = el; this.game = game; this._missionSig = ''; this._cosSig = '';
+    this.el = el; this.game = game;
+    this.selected = null;
+    this._missionSig = ''; this._cosSig = ''; this._stationSig = ''; this._milesSig = '';
     el.addEventListener('click', e => this.onClick(e));
+    game.scene.host.addEventListener('click', e => {
+      const stn = e.target.closest('.stn');
+      if (stn) this.selectStation(+stn.dataset.station);
+    });
+    // Stations are divs, so give keyboard users the same click behaviour.
+    game.scene.host.addEventListener('keydown', e => {
+      if (e.key !== 'Enter' && e.key !== ' ') return;
+      const stn = e.target.closest('.stn');
+      if (!stn) return;
+      e.preventDefault();
+      this.selectStation(+stn.dataset.station);
+      stn.click();
+    });
+    this.mountModals();
   }
   get state() { return this.game.state; }
   get eco() { return this.game.economy; }
   get tracker() { return this.game.tracker; }
   icon(i) { const it = ITEMS[this.state.location][i]; return art(ASSETS.items[it[1]], it[0]); }
 
+  /** Station, global (staff + restaurant upgrades) and cosmetics modals live on <body>. */
+  mountModals() {
+    document.querySelectorAll('[data-bee-modals]').forEach(x => x.remove());
+    const row = (icon, name, levelId, descId, btnId, action) => `
+      <div class="list-group-item">
+        <div class="d-flex justify-content-between align-items-center">
+          <div class="mr-3 flex-grow-1">
+            <span class="mr-2">${icon}</span><strong>${name}</strong>
+            <div class="lvl" id="${levelId}"></div>
+            <p class="small text-muted mb-0" id="${descId}"></p>
+          </div>
+          <button type="button" class="btn btn-sm btn-warning upbtn" data-a="${action}" id="${btnId}" ${BTN}></button>
+        </div>
+      </div>`;
+    const staffRow = row('🐝', 'Hive bees', 'staff-lvl', 'dh', 'bh', 'h');
+    const rows = GLOBAL_UPGRADES.map(def => row(def.icon, def.name, 'lg' + def.id, 'dg' + def.id, 'bg' + def.id, 'g' + def.id)).join('');
+    this.modals = document.createElement('div');
+    this.modals.setAttribute('data-bee-modals', '');
+    this.modals.innerHTML =
+      modalShell('stationModal', 'Station', '<div id="sm-body"></div>') +
+      modalShell('globalModal', '✨ Global upgrades',
+        `<p class="small text-muted">Shared by the whole restaurant.</p>
+         <h6>Staff</h6><div class="list-group mb-3">${staffRow}</div>
+         <h6>Upgrades</h6><div class="list-group">${rows}</div>`) +
+      modalShell('cosmeticsModal', '🎨 Cosmetics',
+        `<p class="small mb-2" id="cm-dia"></p><div class="list-group" id="cosmetics"></div>`);
+    document.body.appendChild(this.modals);
+    this.modals.addEventListener('click', e => this.onClick(e));
+  }
+
+  destroy() {
+    this.modals?.remove();
+    document.querySelectorAll('.modal-backdrop').forEach(x => x.remove());
+    document.body.classList.remove('modal-open');
+  }
+
+  selectStation(i) {
+    this.selected = i;
+    this.refreshStationModal();
+  }
+
   build() {
-    this._missionSig = ''; this._cosSig = '';
+    this._missionSig = ''; this._cosSig = ''; this._stationSig = '';
+    // Moving to a restaurant with fewer stations must not leave the modal
+    // pointed at an index that no longer exists.
+    if (this.selected !== null && this.selected >= this.state.stations.length) this.selected = 0;
     let h = `<div class="mission" id="mission">
       <div class="m-head"><span class="m-kicker">Mission</span><b id="m-title"></b></div>
       <div class="m-text" id="m-text"></div>
@@ -22,61 +108,25 @@ export class UpgradePanel {
       <div class="m-list" id="m-list"></div>
     </div>`;
     h += `<button id="next" data-a="n"></button><div class="note" id="next-note"></div>`;
-
-    h += '<div class="section-title">Staff <small>bees work at any station</small></div>';
-    h += `<div class="upg global">
-      <div class="uh"><div class="ic">🐝</div><div class="nm">Hive bees<small id="staff-info"></small></div></div>
-      <div class="ur"><button data-a="h" id="bh"></button><p class="ds" id="dh"></p></div>
+    h += '<div class="section-title">Upgrades</div>';
+    h += `<div class="dock">
+      <button type="button" class="btn btn-primary dock-btn" data-toggle="modal" data-target="#globalModal">✨ Staff &amp; global upgrades <span class="badge badge-success" id="dot-global" hidden>!</span></button>
+      <button type="button" class="btn btn-info dock-btn" data-toggle="modal" data-target="#cosmeticsModal">🎨 Cosmetics <span class="badge badge-success" id="dot-cos" hidden>!</span></button>
     </div>`;
-
-    h += '<div class="section-title">Stations</div>';
-    this.state.stations.forEach((s, i) => {
-      const name = ITEMS[this.state.location][i][1];
-      const head = `<div class="uh"><div class="ic">${this.icon(i)}</div><div class="nm">${name}<small id="i${i}"></small></div></div>`;
-      if (s.unlocked) {
-        h += `<div class="upg">${head}
-          <div class="ur"><button data-a="s${i}" id="bs${i}"></button><p class="ds" id="ds${i}"></p></div>
-          <small class="ms" id="dm${i}"></small>
-        </div>`;
-      } else {
-        h += `<div class="upg">${head}
-          <div class="ur"><button data-a="u${i}" id="bu${i}"></button><p class="ds" id="du${i}"></p></div>
-        </div>`;
-      }
-    });
-
-    h += '<div class="section-title">Global upgrades <small>shared by the whole restaurant</small></div>';
-    GLOBAL_UPGRADES.forEach(def => {
-      h += `<div class="upg global" id="ug${def.id}">
-        <div class="uh"><div class="ic">${def.icon}</div><div class="nm">${def.name}<small id="lg${def.id}"></small></div></div>
-        <div class="ur"><button data-a="g${def.id}" id="bg${def.id}"></button><p class="ds" id="dg${def.id}"></p></div>
-      </div>`;
-    });
-
-    h += '<div class="section-title">Cosmetics <small>spend diamonds</small></div>';
-    h += '<div class="cosmetics" id="cosmetics"></div>';
-
+    h += '<div class="note">Tap a station in the kitchen to upgrade it.</div>';
     this.el.innerHTML = h;
     this.refresh();
   }
 
-  text(id, t) {
-    const e = document.getElementById(id);
-    if (e && e.textContent !== t) e.textContent = t;
-  }
-
-  html(id, h) {
-    const e = document.getElementById(id);
-    if (e && e.innerHTML !== h) e.innerHTML = h;
-  }
-
-  button(id, t, disabled) {
+  text(id, t) { const e = document.getElementById(id); if (e && e.textContent !== t) e.textContent = t; }
+  html(id, h) { const e = document.getElementById(id); if (e && e.innerHTML !== h) e.innerHTML = h; }
+  /** Upgrade button: only the action and its price (with the currency icon). */
+  btn(id, h, disabled) {
     const b = document.getElementById(id);
     if (!b) return;
-    this.text(id, t);
+    if (b.innerHTML !== h) b.innerHTML = h;
     b.disabled = !!disabled;
   }
-
   rewardText(r) {
     const parts = [];
     if (r?.honey) parts.push(`+${fmt(r.honey)} honey`);
@@ -87,9 +137,10 @@ export class UpgradePanel {
   refresh() {
     this.refreshMission();
     this.refreshStaff();
-    this.refreshStations();
+    this.refreshStationModal();
     this.refreshGlobal();
     this.refreshCosmetics();
+    this.refreshDots();
     this.refreshNext();
   }
 
@@ -133,46 +184,80 @@ export class UpgradePanel {
     }
   }
 
+  /** Global staff: lives inside the Global upgrades modal. */
   refreshStaff() {
     const st = this.state, eco = this.eco, cap = eco.staffCap();
-    this.text('staff-info', `${st.staff} bees · ${cap} worker slots open`);
+    this.html('staff-lvl', `<span class="lvl-label">Bees hired</span><b>${st.staff}/${cap}</b><span class="lvl-note">worker slots open</span>`);
     if (st.staff >= cap) {
-      this.button('bh', `Bees ${st.staff}/${cap}\nMAX`, true);
+      this.btn('bh', 'MAX', true);
       this.text('dh', cap >= B.maxBees
         ? 'The whole hive is working.'
-        : 'Every worker slot has a bee. Reach recipe milestones to open more slots.');
+        : 'Every worker slot has a bee. Upgrade recipes or unlock stations to open more slots.');
     } else {
-      const cost = eco.staffCost();
-      this.button('bh', `Hire bee ${st.staff}/${cap}\n${fmt(cost)}`, !st.canAfford(cost));
+      const c = eco.staffCost();
+      this.btn('bh', `Hire${cost(c)}`, !st.canAfford(c));
       this.text('dh', `Bees work at any station. Serves ${eco.perMinute()} → ${eco.perMinute(st.staff + 1)} customers per minute.`);
     }
   }
 
-  refreshStations() {
-    const st = this.state, eco = this.eco;
-    st.stations.forEach((s, i) => {
-      const kind = BEES[i], name = ITEMS[st.location][i][1];
-      if (!s.unlocked) {
-        this.text('i' + i, 'New station');
-        this.button('bu' + i, `Unlock\n${fmt(eco.unlockCost(i))}`,
-          (i > 0 && !st.stations[i - 1].unlocked) || !st.canAfford(eco.unlockCost(i)));
-        this.text('du' + i, `Opens a ${name} station with one worker slot. Needs the previous station first.`);
-        return;
-      }
+  refreshStationModal() {
+    const i = this.selected, st = this.state, eco = this.eco;
+    const s = i === null ? null : st.stations[i];
+    if (!s) return;
+    const kind = BEES[i], name = ITEMS[st.location][i][1];
 
-      this.text('i' + i, `${kind.acc} ${kind.name} station · ${fmt(eco.price(i))} honey · ${eco.cookTime(i).toFixed(1)}s cook · ${eco.slots(i)}/${MAX_SLOTS} slots`);
+    const sig = `${st.location}|${i}|${s.unlocked}`;
+    if (sig !== this._stationSig) {
+      this._stationSig = sig; this._milesSig = '';
+      this.html('stationModalTitle', `${this.icon(i)} ${name}`);
+      this.html('sm-body', s.unlocked
+        ? `<p class="mb-2" id="sm-info"></p>
+           <div class="lvl" id="sm-lvl"></div>
+           <div class="lvl" id="sm-slots"></div>
+           <div class="lvl-note" id="sm-work"></div>
+           <div class="lvl-note mb-3" id="sm-next"></div>
+           <div class="d-flex justify-content-between align-items-center mb-4">
+             <p class="small text-muted mb-0 mr-3" id="sm-recipe-d"></p>
+             <button type="button" class="btn btn-warning upbtn" data-a="s${i}" id="sm-recipe" ${BTN}></button>
+           </div>
+           <h6>Milestones</h6>
+           <ul class="list-unstyled mb-0" id="sm-miles"></ul>`
+        : `<div class="d-flex justify-content-between align-items-center">
+             <p class="small text-muted mb-0 mr-3" id="sm-unlock-d"></p>
+             <button type="button" class="btn btn-warning upbtn" data-a="u${i}" id="sm-unlock" ${BTN}></button>
+           </div>`);
+    }
 
-      const maxedRecipe = s.recipe >= B.maxRecipe;
-      this.button('bs' + i, maxedRecipe ? `Recipe ${s.recipe}/${B.maxRecipe}\nMAX` : `Recipe ${s.recipe}/${B.maxRecipe}\n${fmt(eco.recipeCost(i))}`,
-        maxedRecipe || !st.canAfford(eco.recipeCost(i)));
-      this.text('ds' + i, maxedRecipe ? 'Recipe fully perfected.'
-        : `Better recipe: +30% price (${fmt(eco.price(i))} → ${fmt(eco.price(i, s.recipe + 1))}) and 10% faster cooking (${eco.cookTime(i).toFixed(1)}s → ${eco.cookTime(i, s.recipe + 1).toFixed(1)}s).`);
+    if (!s.unlocked) {
+      const c = eco.unlockCost(i);
+      this.btn('sm-unlock', `Unlock${cost(c)}`, (i > 0 && !st.stations[i - 1].unlocked) || !st.canAfford(c));
+      this.text('sm-unlock-d', `Opens a ${name} station with one worker slot. Needs the previous station first.`);
+      return;
+    }
 
-      const next = nextMilestone(s.recipe);
-      this.text('dm' + i, next
-        ? `Next milestone at recipe ${next.recipe}: ${next.type === 'slot' ? '+1 worker slot' : 'x2 profit'}`
-        : 'All milestones reached.');
-    });
+    const slots = eco.slots(i), busy = Math.min(this.game.scene.workingAt(i), slots);
+    this.text('sm-info', `${kind.acc} ${kind.name} station · ${fmt(eco.price(i))} honey per dish · ${eco.cookTime(i).toFixed(1)}s cook`);
+    this.html('sm-lvl', lvl('Recipe level', s.recipe, B.maxRecipe));
+    this.html('sm-slots', lvl('Worker slots', slots, MAX_SLOTS));
+    this.text('sm-work', `🐝 ${busy}/${slots} bees working here right now`);
+
+    const next = nextMilestone(s.recipe);
+    this.text('sm-next', next
+      ? `Next milestone at recipe ${next.recipe}: ${next.type === 'slot' ? '+1 worker slot' : '2x profit'}.`
+      : 'All recipe milestones reached.');
+
+    const maxed = s.recipe >= B.maxRecipe, c = eco.recipeCost(i);
+    this.btn('sm-recipe', maxed ? 'MAX' : `Upgrade${cost(c)}`, maxed || !st.canAfford(c));
+    this.text('sm-recipe-d', maxed ? 'Recipe fully perfected.'
+      : `Better recipe: +30% price (${fmt(eco.price(i))} → ${fmt(eco.price(i, s.recipe + 1))}) and 10% faster cooking (${eco.cookTime(i).toFixed(1)}s → ${eco.cookTime(i, s.recipe + 1).toFixed(1)}s).`);
+
+    if (this._milesSig !== String(s.recipe)) {
+      this._milesSig = String(s.recipe);
+      this.html('sm-miles', MILESTONES.map(m => {
+        const got = s.recipe >= m.recipe;
+        return `<li class="${got ? 'text-success' : 'text-muted'}">${got ? '✓' : '○'} Recipe ${m.recipe}: ${m.type === 'slot' ? '+1 worker slot' : 'x2 profit'}</li>`;
+      }).join(''));
+    }
   }
 
   refreshGlobal() {
@@ -181,16 +266,16 @@ export class UpgradePanel {
       const level = st.upgrades[def.id] || 0;
       const unlocked = st.level >= def.unlockLevel;
       const maxed = level >= def.maxLevel;
-      this.text('lg' + def.id, `Lv ${level}/${def.maxLevel}`);
+      this.html('lg' + def.id, lvl('Level', level, def.maxLevel));
       if (!unlocked) {
-        this.button('bg' + def.id, `Unlocks Lv ${def.unlockLevel}`, true);
+        this.btn('bg' + def.id, `🔒 Lv ${def.unlockLevel}`, true);
         this.text('dg' + def.id, `Unlocks at level ${def.unlockLevel}. ${def.describe(level)}`);
       } else if (maxed) {
-        this.button('bg' + def.id, `Lv ${level}/${def.maxLevel}\nMAX`, true);
+        this.btn('bg' + def.id, 'MAX', true);
         this.text('dg' + def.id, 'Fully upgraded.');
       } else {
-        const cost = eco.globalCost(def);
-        this.button('bg' + def.id, `Lv ${level}/${def.maxLevel}\n${fmt(cost)}`, !st.canAfford(cost));
+        const c = eco.globalCost(def);
+        this.btn('bg' + def.id, `Upgrade${cost(c)}`, !st.canAfford(c));
         this.text('dg' + def.id, `Now: ${def.effect(level)} → ${def.effect(level + 1)}. ${def.describe(level + 1)}`);
       }
     });
@@ -199,22 +284,37 @@ export class UpgradePanel {
   refreshCosmetics() {
     const cos = this.state.cosmetics;
     const owned = new Set(cos.owned);
-    const equipped = cos.equipped.bee || '';
-    const sig = `${this.state.diamonds}|${[...owned].sort().join(',')}|${equipped}`;
+    this.text('cm-dia', `💎 ${fmt(this.state.diamonds)} diamonds to spend`);
+    const sig = `${this.state.diamonds}|${[...owned].sort().join(',')}|${JSON.stringify(cos.equipped)}`;
     if (sig === this._cosSig) return;
     this._cosSig = sig;
 
     this.html('cosmetics', COSMETICS.map(def => {
       const isOwned = owned.has(def.id);
-      const isEquipped = equipped === def.id;
+      const isOn = (cos.equipped[def.kind] || '') === def.id;
       const canBuy = this.state.diamonds >= def.cost;
-      const label = isEquipped ? 'Unequip' : isOwned ? 'Equip' : `Buy\n💎 ${def.cost}`;
-      return `<div class="cos${isEquipped ? ' on' : ''}">
-        <span class="ci">${def.icon}</span>
-        <div class="cn">${def.name}<small>${isOwned ? (isEquipped ? 'Equipped by every bee' : 'Owned') : def.blurb}</small></div>
-        <button data-a="c${def.id}" ${!isOwned && !canBuy ? 'disabled' : ''}>${label}</button>
+      const label = isOn ? 'Unequip' : isOwned ? 'Equip' : `Buy<span class="cost">💎 ${def.cost}</span>`;
+      const cls = isOn ? 'btn-outline-warning' : isOwned ? 'btn-success' : 'btn-warning';
+      return `<div class="list-group-item d-flex justify-content-between align-items-center">
+        <div class="d-flex align-items-center">
+          <span class="mr-3" style="font-size:26px">${def.icon}</span>
+          <div><strong>${def.name}</strong>
+            <div class="small text-muted">${isOwned ? (isOn ? 'Equipped by every bee' : 'Owned') : def.blurb}</div></div>
+        </div>
+        <button type="button" class="btn btn-sm upbtn ${cls}" data-a="c${def.id}" ${BTN} ${!isOwned && !canBuy ? 'disabled' : ''}>${label}</button>
       </div>`;
     }).join(''));
+  }
+
+  /** "!" badges on the modal buttons when something inside is affordable. */
+  refreshDots() {
+    const st = this.state, eco = this.eco;
+    const hire = st.staff < eco.staffCap() && st.canAfford(eco.staffCost());
+    const g = hire || GLOBAL_UPGRADES.some(d => eco.globalUnlocked(d) && (st.upgrades[d.id] || 0) < d.maxLevel && st.canAfford(eco.globalCost(d)));
+    const c = COSMETICS.some(d => !st.cosmetics.owned.includes(d.id) && st.diamonds >= d.cost);
+    const eg = document.getElementById('dot-global'), ec = document.getElementById('dot-cos');
+    if (eg) eg.hidden = !g;
+    if (ec) ec.hidden = !c;
   }
 
   refreshNext() {
@@ -223,36 +323,36 @@ export class UpgradePanel {
     const nextLoc = levelLocation(nextLevel);
     const moving = st.level < MAX_LEVEL && nextLoc !== st.location;
     const note = document.getElementById('next-note');
+    const set = (label, disabled) => {
+      const b = document.getElementById('next');
+      if (b) { if (b.textContent !== label) b.textContent = label; b.disabled = disabled; }
+    };
 
     if (st.level >= MAX_LEVEL) {
       const done = st.missions.finished;
-      this.button('next', done ? 'Game complete 🎉' : 'Finish the final missions', true);
+      set(done ? 'Game complete 🎉' : 'Finish the final missions', true);
       if (note) note.textContent = done ? 'Thanks for playing!' : 'The Royal Hive still has work to do.';
       return;
     }
-
     if (!this.tracker.levelComplete()) {
-      this.button('next', `Complete all Level ${st.level} missions`, true);
+      set(`Complete all Level ${st.level} missions`, true);
       if (note) note.textContent = 'Missions are your guide. Finish them to unlock the next level.';
       return;
     }
-
     if (moving && !st.stations.every(s => s.unlocked)) {
-      this.button('next', 'Unlock every station first', true);
+      set('Unlock every station first', true);
       if (note) note.textContent = `Every station must be open before moving to ${LOCATIONS[nextLoc]}.`;
       return;
     }
-
-    const cost = moving ? this.eco.nextCost() : 0;
-    if (moving && !st.canAfford(cost)) {
-      this.button('next', `Need ${fmt(cost)} honey to move`, true);
+    const c = moving ? this.eco.nextCost() : 0;
+    if (moving && !st.canAfford(c)) {
+      set(`Need ${fmt(c)} honey to move`, true);
       if (note) note.textContent = `Save up for the move to ${LOCATIONS[nextLoc]}.`;
       return;
     }
-
-    this.button('next', `Advance to Level ${nextLevel}${moving ? ` · Move to ${LOCATIONS[nextLoc]}` : ''}`, false);
+    set(`Advance to Level ${nextLevel}${moving ? ` · Move to ${LOCATIONS[nextLoc]}` : ''}`, false);
     if (note) note.textContent = moving
-      ? `Moving resets station recipes. Honey, bees and global upgrades carry over.`
+      ? 'A new restaurant starts with fresh stations and one bee. Honey, diamonds, cosmetics, missions and global upgrades carry over.'
       : `Level ${st.level} reward is paid when you advance.`;
   }
 

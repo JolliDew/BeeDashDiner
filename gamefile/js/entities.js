@@ -68,6 +68,7 @@ export class Bee extends Walker {
   constructor(el, x, y) {
     super(el, x, y);
     this.slot = 0;
+    this.home = 0;
     this.offset = 0;
     this.state = 'idle';
     this.customer = null; this.t = 0; this.total = 1; this.key = null;
@@ -84,18 +85,19 @@ export class Bee extends Walker {
   update(dt, scene) {
     const walk = scene.economy.walkTime;
     const stationX = scene.stationX(this.slot) + this.offset;
+    const homeX = scene.stationX(this.home ?? this.slot) + this.offset;
     const hy = scene.kitchenY, c = this.customer;
 
     switch (this.state) {
       case 'idle': {
-        const job = scene.findJob();
+        const job = scene.findJob(this);
         if (job) {
           job.claimedBy = this;
           this.customer = job;
           this.slot = job.item;
           this.state = 'order';
         } else {
-          this.walkTo(stationX, hy, dt, walk);
+          this.walkTo(homeX, hy, dt, walk);
         }
         break;
       }
@@ -132,6 +134,7 @@ export class Bee extends Walker {
     const cos = equippedCosmetic(scene.state, 'bee')?.id || '';
     const key = `${cos}|${this.slot}|${extra}`;
     if (key !== this.key) { this.key = key; this.el.innerHTML = this.html(scene) + extra; }
+    this.el.classList.toggle('helping', this.state !== 'idle' && this.slot !== this.home);
     if (this.state === 'cook') this.el.querySelector('i').style.width = (1 - this.t / this.total) * 100 + '%';
   }
 }

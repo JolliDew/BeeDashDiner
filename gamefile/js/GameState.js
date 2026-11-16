@@ -1,4 +1,4 @@
-import { ITEMS, BALANCE as B, MAX_LEVEL, levelLocation, firstLevelForLocation } from './config.js';
+import { ITEMS, BALANCE as B, MAX_LEVEL, levelLocation, firstLevelForLocation, slotsAt } from './config.js';
 import { MISSIONS, firstMissionIndex } from './missions.js';
 
 const int = (v, min, max) => {
@@ -31,11 +31,15 @@ export class GameState {
     this.location = 0;
     this.staff = B.startStaff;
     this.stations = GameState.freshStations(0);
-    this.upgrades = { tipChance: 0, queue: 0, walkSpeed: 0, cookSpeed: 0, profitX2: 0 };
+    this.upgrades = GameState.freshUpgrades();
     this.missions = { index: 0, done: [], finished: false };
     this.stats = { served: 0, earned: 0, tips: 0, tipHoney: 0 };
     this.cosmetics = { owned: [], equipped: { bee: '', theme: '' } };
     this.infinite = false;
+  }
+
+  static freshUpgrades() {
+    return { tipChance: 0, queue: 0, walkSpeed: 0, cookSpeed: 0, profitX2: 0 };
   }
 
   static freshStations(loc) {
@@ -65,11 +69,17 @@ export class GameState {
     s.honey = num(d.honey, 0, 1e15);
     s.diamonds = int(d.diamonds, 0, 1e9);
 
-    s.stations = d.stations.map(x => new Station(!!x.unlocked, int(x.recipe, 0, B.maxRecipe)));
-    s.stations[0].unlocked = true;
+    // Stations open in order. Repair a crafted/partial save the same way the
+    // server does, and clear recipes on stations that are still locked.
+    let previousOpen = true;
+    s.stations = d.stations.map((x, i) => {
+      const unlocked = i === 0 || (!!x.unlocked && previousOpen);
+      previousOpen = unlocked;
+      return new Station(unlocked, unlocked ? int(x.recipe, 0, B.maxRecipe) : 0);
+    });
 
     const legacyStaff = d.stations.reduce(
-      (n, x) => n + (x.unlocked ? int(x.staff, 0, B.maxBees) : 0), 0);
+      (n, x, i) => n + (s.stations[i]?.unlocked ? int(x.staff, 0, B.maxBees) : 0), 0);
     s.staff = int(d.staff !== undefined ? d.staff : legacyStaff, 1, B.maxBees);
 
     const up = isV2 && d.upgrades && typeof d.upgrades === 'object' ? d.upgrades : {};
@@ -85,20 +95,15 @@ export class GameState {
     const first = firstMissionIndex(s.level);
     const src = isV2 && d.missions && typeof d.missions === 'object' ? d.missions : null;
     let index = src ? int(src.index, 0, MISSIONS.length) : first;
-    let done = src && Array.isArray(src.done)
-      ? [...new Set(src.done.map(x => cleanString(x)).filter(Boolean))].slice(0, index)
-      : MISSIONS.slice(0, index).map(m => m.id);
+    if (index < first) index = first;
 
-    if (index < first) {
-      index = first;
-      done = MISSIONS.slice(0, first).map(m => m.id);
-    }
-    while (done.length < index) done.push(MISSIONS[done.length].id);
-
+    // Missions complete in one fixed order, so `done` is always exactly the
+    // first `index` ids. Rebuilding it ignores fake/duplicate ids in old saves
+    // and makes it impossible to replay a mission reward.
     s.missions = {
       index,
-      done,
-      finished: !!(src && src.finished) || index >= MISSIONS.length,
+      done: MISSIONS.slice(0, index).map(m => m.id),
+      finished: index >= MISSIONS.length,
     };
 
     const st = isV2 && d.stats && typeof d.stats === 'object' ? d.stats : {};
@@ -119,6 +124,11 @@ export class GameState {
         theme: cleanString(cos.equipped?.theme),
       },
     };
+
+    // Never keep more bees than there are worker slots. Heals saves hurt by the old
+    // location-change bug (e.g. 12 bees but only 2 slots).
+    const slots = s.stations.reduce((n, x) => n + (x.unlocked ? slotsAt(x.recipe) : 0), 0);
+    s.staff = Math.max(1, Math.min(s.staff, B.maxBees, slots));
 
     return s;
   }
@@ -163,7 +173,11 @@ export class GameState {
     const l = int(loc, 0, ITEMS.length - 1);
     if (l === this.location) return;
     this.location = l;
+    // A new restaurant starts with fresh stations and one bee. Global upgrades
+    // were bought for the whole hive, so they survive the move along with honey,
+    // diamonds, cosmetics, missions and stats.
     this.stations = GameState.freshStations(l);
+    this.staff = B.startStaff;
   }
 
   advanceLevel() {

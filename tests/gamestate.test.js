@@ -3,7 +3,11 @@ import assert from 'node:assert/strict';
 
 import { GameState, Station } from '../gamefile/js/GameState.js';
 import { BALANCE as B, firstLevelForLocation } from '../gamefile/js/config.js';
-import { firstMissionIndex } from '../gamefile/js/missions.js';
+import { MISSIONS, firstMissionIndex } from '../gamefile/js/missions.js';
+
+const upgrades = (over = {}) => ({
+  tipChance: 0, queue: 0, walkSpeed: 0, cookSpeed: 0, profitX2: 0, ...over,
+});
 
 function v1Save(location, stations) {
   return {
@@ -15,64 +19,75 @@ function v1Save(location, stations) {
 
 test('a new game starts at level 1 with one worker and no upgrades', () => {
   const s = new GameState();
-  assert.equal(s.version, 2);
+  assert.equal(s.version, 3);
   assert.equal(s.level, 1);
   assert.equal(s.location, 0);
   assert.equal(s.diamonds, 0);
+  assert.equal(s.staff, 1);
   assert.equal(s.missions.index, 0);
-  assert.deepEqual(s.upgrades, { tipChance: 0, queue: 0, walkSpeed: 0, workerSlot: 0 });
+  assert.deepEqual(s.upgrades, upgrades());
   assert.deepEqual(s.stats, { served: 0, earned: 0, tips: 0, tipHoney: 0 });
   assert.equal(s.stations[0].unlocked, true);
-  assert.equal(s.stations[0].staff, 1);
+  assert.deepEqual(s.stations[0].toJSON(), { unlocked: true, recipe: 0 });
 });
 
-test('a v2 save round-trips through JSON without losing anything', () => {
+test('a v3 save round-trips through JSON without losing anything', () => {
   const s = new GameState();
   s.level = 6;
-  s.setLocation(1); // creates the four Hive Cafe stations
+  s.setLocation(1);
   s.honey = 4321.5;
   s.diamonds = 7;
-  s.upgrades = { tipChance: 3, queue: 2, walkSpeed: 1, workerSlot: 1 };
-  s.missions = { index: 15, done: ['fake'], finished: false };
+  s.staff = 3;
+  s.upgrades = upgrades({ tipChance: 3, queue: 2, walkSpeed: 1, cookSpeed: 2, profitX2: 1 });
+  s.missions = { index: 15, done: MISSIONS.slice(0, 15).map(m => m.id), finished: false };
   s.stats = { served: 42, earned: 9000, tips: 9, tipHoney: 77 };
-  s.cosmetics = { owned: ['hat_gold'], equipped: { bee: 'hat_gold', theme: '' } };
-  s.stations[0].staff = 3;
+  s.cosmetics = { owned: ['bee_bow'], equipped: { bee: 'bee_bow', theme: '' } };
   s.stations[0].recipe = 4;
-  s.stations[0].workLvl = 2;
-  s.stations[0].profitX2 = 1;
+  s.stations[1].unlocked = true;
+  s.stations[1].recipe = 2;
 
   const copy = GameState.fromJSON(JSON.parse(JSON.stringify(s)));
   assert.equal(copy.level, 6);
   assert.equal(copy.location, 1);
   assert.equal(copy.honey, 4321.5);
   assert.equal(copy.diamonds, 7);
+  assert.equal(copy.staff, 3);
   assert.deepEqual(copy.upgrades, s.upgrades);
   assert.deepEqual(copy.stats, s.stats);
   assert.deepEqual(copy.cosmetics, s.cosmetics);
   assert.equal(copy.stations.length, 4);
-  assert.equal(copy.stations[0].staff, 3);
   assert.equal(copy.stations[0].recipe, 4);
-  assert.equal(copy.stations[0].workLvl, 2);
-  assert.equal(copy.stations[0].profitX2, 1);
+  assert.deepEqual(copy.stations[0].toJSON(), { unlocked: true, recipe: 4 });
 });
 
-test('old location-only saves migrate to the matching tier and keep progress', () => {
+test('old per-station saves migrate staff and late-game upgrades to the global model', () => {
   const hive = GameState.fromJSON(v1Save(1, [[true, 2, 3], [true, 1, 1], [false, 0, 0], [false, 0, 0]]));
   assert.equal(hive.level, firstLevelForLocation(1));
   assert.equal(hive.location, 1);
   assert.equal(hive.honey, 1234);
-  assert.equal(hive.stations[0].staff, 2);
+  assert.equal(hive.staff, 3);
   assert.equal(hive.stations[0].recipe, 3);
   assert.equal(hive.missions.index, firstMissionIndex(hive.level));
-  assert.equal(hive.missions.done.length, firstMissionIndex(hive.level));
-  assert.deepEqual(hive.upgrades, { tipChance: 0, queue: 0, walkSpeed: 0, workerSlot: 0 });
+  assert.deepEqual(hive.upgrades, upgrades());
 
-  const royal = GameState.fromJSON(v1Save(2, [
-    [true, 3, 8], [true, 2, 5], [true, 1, 4], [true, 1, 2], [false, 0, 0]
-  ]));
-  assert.equal(royal.level, firstLevelForLocation(2));
-  assert.equal(royal.stations[0].recipe, 8);
-  assert.equal(royal.missions.index, firstMissionIndex(royal.level));
+  const legacyV2 = GameState.fromJSON({
+    version: 2,
+    level: 6,
+    location: 1,
+    honey: 10,
+    stations: [
+      { unlocked: true, staff: 2, recipe: 6, workLvl: 2, profitX2: 1 },
+      { unlocked: true, staff: 1, recipe: 2, workLvl: 4, profitX2: 0 },
+      { unlocked: false, staff: 0, recipe: 0 },
+      { unlocked: false, staff: 0, recipe: 0 },
+    ],
+    upgrades: { tipChance: 2, queue: 1, walkSpeed: 1, workerSlot: 1 },
+  });
+  assert.equal(legacyV2.staff, 3);
+  assert.equal(legacyV2.upgrades.tipChance, 2);
+  assert.equal(legacyV2.upgrades.cookSpeed, 4);
+  assert.equal(legacyV2.upgrades.profitX2, 1);
+  assert.equal('workerSlot' in legacyV2.upgrades, false);
 });
 
 test('invalid saves fall back to a fresh game instead of throwing', () => {
@@ -86,14 +101,14 @@ test('invalid saves fall back to a fresh game instead of throwing', () => {
 
 test('a level that does not match its location is repaired from the location', () => {
   const s = GameState.fromJSON({
-    version: 2,
+    version: 3,
     level: 8,
     location: 0,
     honey: 10,
     stations: [
-      { unlocked: true, staff: 3, recipe: 9 },
-      { unlocked: true, staff: 1, recipe: 2 },
-      { unlocked: true, staff: 1, recipe: 1 }
+      { unlocked: true, recipe: 9 },
+      { unlocked: true, recipe: 2 },
+      { unlocked: true, recipe: 1 }
     ]
   });
   assert.equal(s.level, 1);
@@ -101,17 +116,18 @@ test('a level that does not match its location is repaired from the location', (
   assert.equal(s.stations[0].recipe, 9);
 });
 
-test('open stations always get at least one worker and values are clamped', () => {
+test('stations open in order and staff never exceeds the open worker slots', () => {
   const s = GameState.fromJSON({
-    version: 2,
+    version: 3,
     level: 1,
     location: 0,
     honey: -50,
     diamonds: -2,
+    staff: 99,
     stations: [
-      { unlocked: false, staff: 0, recipe: 99, workLvl: 99, profitX2: 9 },
-      { unlocked: true, staff: 0, recipe: -5, workLvl: -5, profitX2: -1 },
-      { unlocked: false, staff: 9, recipe: 4, workLvl: 2, profitX2: 1 }
+      { unlocked: true, recipe: 10 },
+      { unlocked: false, recipe: 9 },
+      { unlocked: true, recipe: 10 }
     ],
     stats: { served: -1, earned: -1, tips: -1, tipHoney: -1 }
   });
@@ -119,37 +135,55 @@ test('open stations always get at least one worker and values are clamped', () =
   assert.equal(s.honey, 0);
   assert.equal(s.diamonds, 0);
   assert.equal(s.stations[0].unlocked, true);
-  assert.equal(s.stations[0].staff, 1);
   assert.equal(s.stations[0].recipe, B.maxRecipe);
-  assert.equal(s.stations[0].workLvl, 5);
-  assert.equal(s.stations[0].profitX2, 1);
-  assert.equal(s.stations[1].staff, 1);
-  assert.equal(s.stations[2].staff, 0);
+  assert.equal(s.stations[1].unlocked, false);
+  assert.equal(s.stations[1].recipe, 0);
+  assert.equal(s.stations[2].unlocked, false, 'a later station cannot skip a locked one');
+  assert.equal(s.staff, 4, 'recipe 10 opens 4 slots');
   assert.deepEqual(s.stats, { served: 0, earned: 0, tips: 0, tipHoney: 0 });
 });
 
-test('a stale mission index below the current level is repaired without duplicate rewards', () => {
+test('mission ids are rebuilt from the index so old fake ids cannot repay a reward', () => {
   const s = GameState.fromJSON({
-    version: 2,
+    version: 3,
     level: 3,
     location: 0,
     stations: [
-      { unlocked: true, staff: 1, recipe: 1 },
-      { unlocked: true, staff: 1, recipe: 1 },
-      { unlocked: true, staff: 1, recipe: 1 }
+      { unlocked: true, recipe: 1 },
+      { unlocked: true, recipe: 1 },
+      { unlocked: true, recipe: 1 }
+    ],
+    missions: { index: 7, done: ['fake', 'l1_serve5', 'fake'], finished: true }
+  });
+  assert.equal(s.missions.index, 7);
+  assert.deepEqual(s.missions.done, MISSIONS.slice(0, 7).map(m => m.id));
+  assert.equal(s.missions.finished, false);
+});
+
+test('a stale mission index below the current level is repaired', () => {
+  const s = GameState.fromJSON({
+    version: 3,
+    level: 3,
+    location: 0,
+    stations: [
+      { unlocked: true, recipe: 1 },
+      { unlocked: true, recipe: 1 },
+      { unlocked: true, recipe: 1 }
     ],
     missions: { index: 0, done: [] }
   });
   assert.equal(s.missions.index, firstMissionIndex(3));
-  assert.equal(s.missions.done.length, firstMissionIndex(3));
   assert.equal(s.missions.finished, false);
 });
 
-test('advancing levels follows the 3-location layout and resets the restaurant', () => {
+test('moving restaurants resets stations and staff but keeps global upgrades', () => {
   const s = new GameState();
-  assert.equal(s.advanceLevel(), true);
-  assert.equal(s.level, 2);
-  assert.equal(s.location, 0);
+  s.honey = 100;
+  s.diamonds = 4;
+  s.staff = 3;
+  s.upgrades = upgrades({ queue: 2, walkSpeed: 1 });
+  s.stations[0].recipe = 4;
+  s.cosmetics.owned.push('bee_bow');
 
   s.level = 4;
   assert.equal(s.advanceLevel(), true);
@@ -157,12 +191,12 @@ test('advancing levels follows the 3-location layout and resets the restaurant',
   assert.equal(s.location, 1);
   assert.equal(s.stations.length, 4);
   assert.equal(s.stations[0].unlocked, true);
-
-  s.level = 7;
-  assert.equal(s.advanceLevel(), true);
-  assert.equal(s.level, 8);
-  assert.equal(s.location, 2);
-  assert.equal(s.stations.length, 5);
+  assert.equal(s.stations[0].recipe, 0);
+  assert.equal(s.staff, B.startStaff);
+  assert.deepEqual(s.upgrades, upgrades({ queue: 2, walkSpeed: 1 }));
+  assert.equal(s.honey, 100);
+  assert.equal(s.diamonds, 4);
+  assert.deepEqual(s.cosmetics.owned, ['bee_bow']);
 
   s.level = 10;
   assert.equal(s.advanceLevel(), false);
@@ -183,12 +217,10 @@ test('saving never includes the dev-only infinite money flag', () => {
   s.infinite = true;
   const json = s.toJSON();
   assert.equal('infinite' in json, false);
-  assert.equal(json.version, 2);
+  assert.equal(json.version, 3);
 });
 
-test('station serialization includes the new per-station fields', () => {
+test('station serialization only contains unlocked and recipe', () => {
   const st = new Station(true, 2, 3, 4, 1);
-  assert.deepEqual(st.toJSON(), {
-    unlocked: true, staff: 2, recipe: 3, workLvl: 4, profitX2: 1
-  });
+  assert.deepEqual(st.toJSON(), { unlocked: true, recipe: 2 });
 });

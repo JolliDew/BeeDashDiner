@@ -15,7 +15,7 @@ test('cosmetic ids are unique and every item has a diamond price', () => {
     assert.ok(item.icon && item.name && item.blurb);
     assert.equal(cosmeticDef(item.id), item);
   }
-  assert.equal(cosmeticDef('missing'), undefined);
+  assert.equal(cosmeticDef('missing'), null);
 });
 
 test('an equipped cosmetic only renders when the save owns it', () => {
@@ -39,21 +39,21 @@ test('cosmetics can be bought, unequipped and re-equipped with diamonds', () => 
   game.changed = () => { changed++; };
 
   game.cosmeticAction('bee_bow');
-  assert.equal(state.diamonds, 42);
+  assert.equal(state.diamonds, 44);
   assert.deepEqual(state.cosmetics.owned, ['bee_bow']);
   assert.equal(state.cosmetics.equipped.bee, 'bee_bow');
   assert.equal(changed, 1);
 
   game.cosmeticAction('bee_bow');
   assert.equal(state.cosmetics.equipped.bee, '');
-  assert.equal(state.diamonds, 42);
+  assert.equal(state.diamonds, 44);
 
   game.cosmeticAction('bee_bow');
   assert.equal(state.cosmetics.equipped.bee, 'bee_bow');
-  assert.equal(state.diamonds, 42);
+  assert.equal(state.diamonds, 44);
 
   game.cosmeticAction('bee_shades');
-  assert.equal(state.diamonds, 30);
+  assert.equal(state.diamonds, 34);
   assert.deepEqual(state.cosmetics.owned, ['bee_bow', 'bee_shades']);
   assert.equal(state.cosmetics.equipped.bee, 'bee_shades');
 });

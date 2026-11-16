@@ -40,24 +40,25 @@ $email = 'jolli.test.' . $suffix . '@example.com';
 $userId = null;
 
 try {
-    $insert = $pdo->prepare('INSERT INTO users (username, email, password) VALUES (?, ?, ?)');
+    $insert = $pdo->prepare('INSERT INTO users (username, email, password) VALUES (?, ?, ?) RETURNING id');
     $insert->execute([$username, $email, password_hash(bin2hex(random_bytes(8)), PASSWORD_DEFAULT)]);
-    $userId = (int)$pdo->lastInsertId();
+    $userId = (int)$insert->fetchColumn();
     check($userId > 0, 'a temporary PostgreSQL user can be created');
 
     $payload = [
-        'version'  => 2,
+        'version'  => 3,
         'level'    => 6,
         'honey'    => 4321.5,
         'diamonds' => 7,
         'location' => 1,
+        'staff'    => 3,
         'stations' => [
-            ['unlocked' => true, 'staff' => 2, 'recipe' => 4, 'workLvl' => 1, 'profitX2' => 0],
-            ['unlocked' => true, 'staff' => 1, 'recipe' => 2, 'workLvl' => 0, 'profitX2' => 0],
-            ['unlocked' => false, 'staff' => 0, 'recipe' => 0, 'workLvl' => 0, 'profitX2' => 0],
-            ['unlocked' => false, 'staff' => 0, 'recipe' => 0, 'workLvl' => 0, 'profitX2' => 0],
+            ['unlocked' => true, 'recipe' => 4],
+            ['unlocked' => true, 'recipe' => 2],
+            ['unlocked' => false, 'recipe' => 0],
+            ['unlocked' => false, 'recipe' => 0],
         ],
-        'upgrades' => ['tipChance' => 3, 'queue' => 2, 'walkSpeed' => 1, 'workerSlot' => 1],
+        'upgrades' => ['tipChance' => 3, 'queue' => 2, 'walkSpeed' => 1, 'cookSpeed' => 1, 'profitX2' => 0],
         'missions' => [
             'index'    => 15,
             'done'     => ['l1_serve5', 'l1_hire2'],
@@ -71,27 +72,31 @@ try {
     ];
 
     $clean = SaveRepository::clean($payload);
-    check(is_array($clean), 'the v2 payload passes validation');
+    check(is_array($clean), 'the v3 payload passes validation');
 
     $repo = new SaveRepository($pdo);
     $repo->save($userId, $clean);
     $loaded = $repo->load($userId);
 
     check($loaded !== null, 'the save can be loaded back');
+    check($loaded['version'] === 3, 'the loaded save is version 3');
     check($loaded['level'] === 6 && $loaded['location'] === 1, 'level and location round-trip');
     check(abs($loaded['honey'] - 4321.5) < 1e-9 && $loaded['diamonds'] === 7, 'currencies round-trip');
-    check($loaded['stations'][0]['staff'] === 2 && $loaded['stations'][0]['recipe'] === 4, 'station progress round-trips');
-    check($loaded['upgrades']['workerSlot'] === 1, 'global upgrades round-trip');
+    check($loaded['staff'] === 3, 'global staff round-trips');
+    check($loaded['stations'][0] === ['unlocked' => true, 'recipe' => 4], 'station progress round-trips');
+    check($loaded['upgrades']['cookSpeed'] === 1 && $loaded['upgrades']['profitX2'] === 0, 'global upgrades round-trip');
     check($loaded['missions']['done'] === ['l1_serve5', 'l1_hire2'], 'mission state round-trips');
     check($loaded['cosmetics']['equipped']['bee'] === 'bee_bow', 'equipped cosmetic round-trips');
 
     $clean['honey'] = 9999.5;
     $clean['diamonds'] = 12;
     $clean['level'] = 7;
-    $clean['stations'][0]['staff'] = 3;
+    $clean['staff'] = 5;
     $clean['stations'][0]['recipe'] = 10;
-    $clean['stations'][0]['workLvl'] = 5;
-    $clean['stations'][0]['profitX2'] = 1;
+    $clean['stations'][1]['unlocked'] = true;
+    $clean['stations'][1]['recipe'] = 2;
+    $clean['upgrades']['cookSpeed'] = 5;
+    $clean['upgrades']['profitX2'] = 1;
     $clean['missions']['index'] = 18;
     $clean['missions']['finished'] = true;
     $clean['cosmetics']['owned'][] = 'bee_shades';
@@ -100,7 +105,9 @@ try {
     $updated = $repo->load($userId);
 
     check($updated['level'] === 7 && abs($updated['honey'] - 9999.5) < 1e-9, 'the ON CONFLICT update path works');
-    check($updated['stations'][0]['recipe'] === 10 && $updated['stations'][0]['profitX2'] === 1, 'late-game station fields round-trip');
+    check($updated['staff'] === 5, 'global staff updates');
+    check($updated['stations'][0]['recipe'] === 10, 'recipe progress updates');
+    check($updated['upgrades']['cookSpeed'] === 5 && $updated['upgrades']['profitX2'] === 1, 'late-game global upgrades update');
     check($updated['missions']['finished'] === true, 'the finished flag round-trips');
     check(count($updated['cosmetics']['owned']) === 2, 'new cosmetics are appended');
 } catch (Throwable $e) {

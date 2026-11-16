@@ -3,6 +3,7 @@ export const ASSETS = {
   customers: ['', '', '', '', ''],
   stations: ['', '', '', '', ''],
   items: {},
+  seat: '',   // queue chair drawn under every waiting customer (replaces the 🪑 emoji)
   honeyIcon: ''
 };
 export const art = (path, emoji) => path ? `<img class="art" src="${path}" alt="">` : emoji;
@@ -53,7 +54,9 @@ export const BALANCE = {
   recipeGrowth: 1.48,
   priceBonus: .3, cookDiscount: .9,
   milestoneProfit: 2,
-  tips: { baseChance: .08, chanceStep: .02, maxChance: .25, minPct: .1, maxPct: .3 },
+  // The tip-jar upgrade reads these same numbers, so the UI and simulation
+  // cannot drift apart (level 10 = 8% + 10 x 2% = 28%).
+  tips: { baseChance: .08, chanceStep: .02, maxChance: .28, minPct: .1, maxPct: .3 },
   queueStep: 1,
   walkStep: .05,
   cookStep: .04,

@@ -1,3 +1,9 @@
+import { BALANCE as B } from './config.js';
+
+/** The actual tip chance shown in the UI, using the same formula as Economy. */
+const tipChanceAt = level =>
+  Math.round(Math.min(B.tips.maxChance, B.tips.baseChance + B.tips.chanceStep * level) * 100);
+
 export const GLOBAL_UPGRADES = [
   {
     id: 'tipChance',
@@ -7,8 +13,8 @@ export const GLOBAL_UPGRADES = [
     maxLevel: 10,
     baseCost: 150,
     growth: 1.6,
-    effect: l => `+${l * 2}% tip chance`,
-    describe: l => `Tip chance is now ${8 + l * 2}%.`,
+    effect: l => `${tipChanceAt(l)}% tip chance`,
+    describe: l => `Tip chance is now ${tipChanceAt(l)}%.`,
   },
   {
     id: 'queue',

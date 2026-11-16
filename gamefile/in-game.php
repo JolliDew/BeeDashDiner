@@ -5,10 +5,12 @@ $userId = Auth::requireLogin(true);
 $devMode = true; // set to false for release: hides the 🛠 dev tools
 ?>
 <link rel="stylesheet" href="css/bee-game.css">
+<link rel="stylesheet" href="css/bee-modals.css">
 <div class="game-screen" id="bee-game" data-dev="<?= $devMode ? '1' : '0' ?>" data-user="<?= (int)$userId ?>">
     <div class="game-hud">
         <div class="hud-item" id="hud-honey">🍯 0</div>
         <div class="hud-item" id="hud-diamonds">💎 0</div>
+        <div class="hud-item" id="hud-queue">🪑 0/4</div>
         <div class="hud-item" id="hud-location"></div>
         <div class="hud-item" id="hud-save">Loading…</div>
         <div class="hud-actions">

@@ -1,6 +1,20 @@
 let currentGame = null;
 
+function showMenuError(message) {
+    let el = document.getElementById('menu-error');
+    if (!el) {
+        el = document.createElement('p');
+        el.id = 'menu-error';
+        el.style.cssText = 'margin-top:14px;color:#ff8a8a;font-size:.9rem;';
+        document.querySelector('.menu-buttons').after(el);
+    }
+    el.textContent = message;
+}
+
 function startGame() {
+    const old = document.getElementById('menu-error');
+    if (old) old.textContent = '';
+
     // Fetch the in-game.php markup, inject it, then boot the OOP game (js/main.js)
     fetch('in-game.php', { credentials: 'same-origin' })
         .then(response => {
@@ -25,6 +39,10 @@ function startGame() {
         .catch(error => {
             console.error('Error loading game:', error);
             returnToMenu();
+            // Show the reason instead of silently bouncing back to the menu
+            if (error && error.message !== 'Login required') {
+                showMenuError('Could not start the game: ' + error.message + ' (see the browser console, F12, for details)');
+            }
         });
 }
 

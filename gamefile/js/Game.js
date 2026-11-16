@@ -14,6 +14,7 @@ export class Game {
     this.hud = {
       honey: root.querySelector('#hud-honey'),
       diamonds: root.querySelector('#hud-diamonds'),
+      queue: root.querySelector('#hud-queue'),
       location: root.querySelector('#hud-location'),
       save: root.querySelector('#hud-save')
     };
@@ -49,6 +50,7 @@ export class Game {
     if (this.acc > .2) {
       this.acc = 0;
       this.tracker.check();
+      this.scene.refreshStations();
       this.panel.refresh();
       this.refreshHud();
     }
@@ -58,6 +60,10 @@ export class Game {
   refreshHud() {
     this.hud.honey.innerHTML = art(ASSETS.honeyIcon, '🍯') + ' ' + (this.state.infinite ? '∞' : fmt(this.state.honey));
     if (this.hud.diamonds) this.hud.diamonds.textContent = '💎 ' + fmt(this.state.diamonds);
+    if (this.hud.queue) {
+      const waiting = this.scene.customers.filter(c => c.state === 'wait').length;
+      this.hud.queue.textContent = `🪑 ${waiting}/${this.economy.seats}`;
+    }
     this.hud.location.textContent = `Level ${this.state.level}/${MAX_LEVEL} · ${LOCATIONS[this.state.location]}`;
   }
 
@@ -170,8 +176,10 @@ export class Game {
     const oldLocation = this.state.location;
     this.state.advanceLevel();
 
-    if (this.state.location !== oldLocation) this.scene.build();
-    else { this.scene.syncBees(); this.scene.syncSeats(); }
+    if (this.state.location !== oldLocation) {
+      this.scene.build();
+      this.toast(`Welcome to the ${LOCATIONS[this.state.location]}! Stations and staff reset; global upgrades carried over.`);
+    } else { this.scene.syncBees(); this.scene.syncSeats(); }
     this.panel.build();
     this.changed();
   }
@@ -214,6 +222,7 @@ export class Game {
     this.tracker.check();
     this.scene.syncBees();
     this.scene.syncSeats();
+    this.scene.refreshStations();
     this.panel.refresh();
     this.refreshHud();
     this.saves.saveLocal(this.state);
@@ -223,6 +232,7 @@ export class Game {
     this.running = false;
     cancelAnimationFrame(this.raf);
     clearInterval(this.autosave);
+    this.panel?.destroy();
     if (this.state) this.saves.push(this.state, true);
   }
 }

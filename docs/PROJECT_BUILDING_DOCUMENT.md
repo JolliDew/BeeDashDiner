@@ -1,6 +1,7 @@
 ---
 title: "BeeDashDiner — Project Building Document"
 subtitle: "CC106 CLE: Cloud-Based Web Application Group Project"
+author: "Group AQM · University of St. La Salle"
 date: "November 2026"
 ---
 
@@ -15,11 +16,11 @@ date: "November 2026"
 
 | Member | Main role | Approx. contribution |
 |---|---|---|
-| Klein Rhee Pagulong Sioson | Backend, sound engineering, game logic, integration | 35% |
+| Klein Rhee Pagulong Sioson | Backend, sound engineering, game logic, integration | 20% |
 | John David Pascua Morandante | Backend, database, Google Cloud, GitHub repository owner | 20% |
-| Emman Glen Mendoza Wong Yan | Game mechanics, documentation, design, QA | 15% |
+| Emman Glen Mendoza Wong Yan | Game mechanics, documentation, design, QA | 20% |
 | Ardion Nicolas Dela Cruz Tamagos | Design, frontend, art, QA | 20% |
-| Iszen Paul Masculino Ventura | Group leader, ideas, documentation, QA | 10% |
+| Iszen Paul Masculino Ventura | Group leader, ideas, documentation, QA | 20% |
 
 **Group name:** AQM.
 
@@ -341,8 +342,8 @@ Problems met and solutions:
 
 # 8. Individual reflections
 
-> These are role-based drafts. Each member should edit their own section, add a
-> personal detail and submit it in their own voice.
+> These sections describe each member's actual area of work. Each member should
+> review their own section and add any personal detail they want before submission.
 
 ## Klein Rhee Pagulong Sioson — Backend, audio, game logic, integration
 
@@ -403,11 +404,11 @@ backups for every critical task and hold a short stand-up each work session.
 
 | Member | Main tasks | Files/pages | Approx. % |
 |---|---|---|---|
-| Klein | Game logic, saves, audio, integration, deployment package | `gamefile/js/*`, `in-game.php`, `Dockerfile`, `render.yaml` | 35% |
+| Klein | Game logic, saves, audio, integration, deployment package | `gamefile/js/*`, `in-game.php`, `Dockerfile`, `render.yaml` | 20% |
 | John David | Database, PDO/Supabase, repository, cloud/Google setup | `src/SaveRepository.php`, `db.container.php`, GitHub | 20% |
-| Emman | Mechanics, balance, documentation, QA | `js/config.js`, `js/Scene.js`, `docs/`, tests | 15% |
+| Emman | Mechanics, balance, documentation, QA | `js/config.js`, `js/Scene.js`, `docs/`, tests | 20% |
 | Ardion | Visual design, frontend, art, responsive QA | `css/*`, menu, station/door styling | 20% |
-| Iszen | Leadership, ideas, documentation, QA | requirements, review, presentation | 10% |
+| Iszen | Leadership, ideas, documentation, QA | requirements, review, presentation | 20% |
 
 ## 9.2 Test credentials
 

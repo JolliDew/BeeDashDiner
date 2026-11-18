@@ -5,19 +5,19 @@ A small idle restaurant game built with **vanilla JavaScript modules**, **PHP**,
 > **Branch:** `feat/scene-first-ui`
 > **What it contains:** the scene-first UI (food-stall stations, café entrance, desktop playfield, procedural audio) on top of Emman's redesign, plus bug fixes, security hardening, full admin CRUD, save format v3, and tests.
 > **Name:** **BeeDashDiner** is the product name. The GitHub repository and local XAMPP folder remain `JolliDew` for continuity and submission paths.
-> **Group:** **AQM**.
+> **Group:** **AQM** · University of St. La Salle
 
 The backend uses **PDO** and supports both **MySQL/MariaDB** (XAMPP) and **PostgreSQL** (including Supabase). The gameplay and API code are identical on both engines.
 
 ## 👥 AQM — group members
 
-| Member | Contribution |
-|---|---|
-| Klein Rhee Pagulong Sioson | Backend, sound engineering, game logic, integration |
-| John David Pascua Morandante | Backend, database, Google Cloud, GitHub repository owner |
-| Emman Glen Mendoza Wong Yan | Game mechanics, documentation, design, QA |
-| Ardion Nicolas Dela Cruz Tamagos | Design, frontend, art, QA |
-| Iszen Paul Masculino Ventura | Group leader, ideas, documentation, QA |
+| Member | Contribution | Share |
+|---|---|---|
+| Klein Rhee Pagulong Sioson | Backend, sound engineering, game logic, integration | 20% |
+| John David Pascua Morandante | Backend, database, Google Cloud, GitHub repository owner | 20% |
+| Emman Glen Mendoza Wong Yan | Game mechanics, documentation, design, QA | 20% |
+| Ardion Nicolas Dela Cruz Tamagos | Design, frontend, art, QA | 20% |
+| Iszen Paul Masculino Ventura | Group leader, ideas, documentation, QA | 20% |
 
 ## 🌐 Live demo and test accounts
 
@@ -339,7 +339,7 @@ limitations are in **[docs/DEPLOY_RENDER.md](docs/DEPLOY_RENDER.md)**.
 ## 📦 Submission files
 
 - **Database export:** `database.sql` (PostgreSQL/Supabase schema, reference data and demo accounts)
-- **Building document:** `docs/PROJECT_BUILDING_DOCUMENT.docx` (SWOT, ER diagram, role matrix, page flow, development log, testing, security/scalability, deployment, reflections)
+- **Building document:** `docs/PROJECT_BUILDING_DOCUMENT.docx` and `.pdf` (SWOT, ER diagram, role matrix, page flow, development log, testing, security/scalability, deployment, reflections)
 - **Demo video script:** `docs/DEMO_SCRIPT.md`
 - **Deployment guide:** `docs/DEPLOY_RENDER.md`
 - **Game rules:** [How to play](docs/GAMEPLAY.md) and the in-game **How to play** page

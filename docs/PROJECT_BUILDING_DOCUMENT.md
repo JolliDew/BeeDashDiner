@@ -266,6 +266,11 @@ JolliDew/
 **Database:** Supabase PostgreSQL (managed)  
 **Runtime:** PHP 8.2 + Apache, PDO PostgreSQL, HTTPS terminated by Render
 
+The Docker image was built locally and run on a Render-style non-root port
+against the live Supabase database. Login, the game, all four modals, autosave,
+Exit, avatar upload, admin access and the 403 page all passed inside the
+container, with no console errors.
+
 Deployment steps:
 
 1. Push the repository branch to GitHub.

@@ -18,7 +18,20 @@ export class Game {
       location: root.querySelector('#hud-location'),
       save: root.querySelector('#hud-save')
     };
-    this.saves = new SaveService({ url: apiUrl, userId, onStatus: s => { this.hud.save.textContent = s; } });
+    this.saveTimer = 0;
+    this.saves = new SaveService({ url: apiUrl, userId, onStatus: s => this.setSaveStatus(s) });
+  }
+
+  /** Show save feedback briefly, but keep errors on screen. */
+  setSaveStatus(text) {
+    const el = this.hud.save;
+    if (!el) return;
+    el.textContent = text;
+    el.classList.remove('is-idle');
+    clearTimeout(this.saveTimer);
+    if (['Loaded', 'New game', 'Offline copy', 'Saved'].includes(text)) {
+      this.saveTimer = setTimeout(() => el.classList.add('is-idle'), 2200);
+    }
   }
 
   async start() {
@@ -232,6 +245,7 @@ export class Game {
     this.running = false;
     cancelAnimationFrame(this.raf);
     clearInterval(this.autosave);
+    clearTimeout(this.saveTimer);
     this.panel?.destroy();
     if (this.state) this.saves.push(this.state, true);
   }

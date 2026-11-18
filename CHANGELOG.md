@@ -2,6 +2,54 @@
 
 All notable changes to JolliDew.
 
+## [2.2.0] — scene-first UI
+
+**Branch:** `feat/scene-first-ui`
+
+The playfield is now the main screen, with the persistent UI reduced to a small
+HUD and a three-button dock.
+
+### Added
+
+- **Guest lifecycle:** guests walk in through the bottom-left door, sit, order,
+  celebrate when served, and walk back out. Chairs are reserved while a guest
+  walks in and freed when a leaving guest reaches the aisle.
+- **Mission modal:** the mission card moved off the playfield into a dedicated
+  sheet/dialog. The dock shows a notification dot when a mission is complete.
+- **Kitchen depth:** warm counter lighting and a front counter edge make the
+  larger scene read as a room rather than a flat board.
+- **Seat-layout tests** for full and short chair rows.
+
+### Changed
+
+- **Scene-first layout:** the scene fills about 86% of a phone screen (85% at
+  440×900) and the app is capped at 600px wide on desktop.
+- **Compact dock:** Mission, Upgrades and Shop replace the old inline upgrade
+  rows. Panels open as bottom sheets on phones and centered dialogs on desktop.
+- **Dynamic chair rows:** four chairs fill the first row evenly; a short last
+  row is centered instead of left-aligned.
+- **Bee spacing:** bees get small vertical offsets so a full hive does not form
+  one overlapping line.
+- **Save feedback:** `Saving…` → `Saved`, then fades out after 2.2 seconds.
+  Errors stay on screen.
+
+### Fixed
+
+- Reward toasts no longer inherit Bootstrap's `flex-basis: 350px` (which made a
+  one-line toast 350px tall) and no longer fade out when the entrance animation
+  ends.
+- Toasts sit above the dock instead of covering it.
+
+### Verification
+
+- 48 JavaScript tests and all PHP checks pass.
+- XAMPP (Apache) at 390×844, 440×900 and 1440×900: scene 86.4%/85.7%/85.1%,
+  dock fits, mission sheet on phones, centered desktop dialog, no JS errors.
+- Reduced motion disables guest bobbing; a served guest reaches `happy`, then
+  leaves and frees its chair.
+- Temporary visual-test account and save rows were removed; the live database
+  is back to 6 users, 1 admin and 5 saves.
+
 ## [2.1.0] — Emman redesign fixes + admin CRUD
 
 **Branch:** `fix/emman-redesign-admin`

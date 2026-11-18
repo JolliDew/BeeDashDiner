@@ -28,6 +28,19 @@ const modalShell = (id, title, body) => `
   </div>
 </div>`;
 
+const missionBody = `
+<div class="mission" id="mission">
+  <div class="m-head"><span class="m-kicker">Mission</span><b id="m-title"></b></div>
+  <div class="m-text" id="m-text"></div>
+  <div class="m-bar"><i id="m-bar"></i></div>
+  <div class="m-meta"><span id="m-progress"></span><span id="m-reward"></span></div>
+  <div class="m-list" id="m-list"></div>
+</div>
+<div class="mission-actions">
+  <button type="button" id="next" data-a="n"></button>
+  <div class="note" id="next-note"></div>
+</div>`;
+
 export class UpgradePanel {
   constructor(el, game) {
     this.el = el; this.game = game;
@@ -74,11 +87,12 @@ export class UpgradePanel {
     this.modals.setAttribute('data-bee-modals', '');
     this.modals.innerHTML =
       modalShell('stationModal', 'Station', '<div id="sm-body"></div>') +
-      modalShell('globalModal', '✨ Global upgrades',
-        `<p class="small text-muted">Shared by the whole restaurant.</p>
+      modalShell('missionModal', '🎯 Mission', missionBody) +
+      modalShell('globalModal', '⬆️ Upgrades',
+        `<p class="small text-muted">Tap a station in the kitchen to upgrade it. Staff and global upgrades below are shared by the whole restaurant.</p>
          <h6>Staff</h6><div class="list-group mb-3">${staffRow}</div>
-         <h6>Upgrades</h6><div class="list-group">${rows}</div>`) +
-      modalShell('cosmeticsModal', '🎨 Cosmetics',
+         <h6>Global upgrades</h6><div class="list-group">${rows}</div>`) +
+      modalShell('cosmeticsModal', '🛍️ Shop',
         `<p class="small mb-2" id="cm-dia"></p><div class="list-group" id="cosmetics"></div>`);
     document.body.appendChild(this.modals);
     this.modals.addEventListener('click', e => this.onClick(e));
@@ -100,21 +114,20 @@ export class UpgradePanel {
     // Moving to a restaurant with fewer stations must not leave the modal
     // pointed at an index that no longer exists.
     if (this.selected !== null && this.selected >= this.state.stations.length) this.selected = 0;
-    let h = `<div class="mission" id="mission">
-      <div class="m-head"><span class="m-kicker">Mission</span><b id="m-title"></b></div>
-      <div class="m-text" id="m-text"></div>
-      <div class="m-bar"><i id="m-bar"></i></div>
-      <div class="m-meta"><span id="m-progress"></span><span id="m-reward"></span></div>
-      <div class="m-list" id="m-list"></div>
+    this.el.innerHTML = `<div class="dock" role="group" aria-label="Game menus">
+      <button type="button" class="dock-btn" data-toggle="modal" data-target="#missionModal">
+        <span class="dock-ico" aria-hidden="true">🎯</span><span class="dock-label">Mission</span>
+        <span class="badge badge-success dock-dot" id="dot-mission" hidden>!</span>
+      </button>
+      <button type="button" class="dock-btn" data-toggle="modal" data-target="#globalModal">
+        <span class="dock-ico" aria-hidden="true">⬆️</span><span class="dock-label">Upgrades</span>
+        <span class="badge badge-success dock-dot" id="dot-global" hidden>!</span>
+      </button>
+      <button type="button" class="dock-btn" data-toggle="modal" data-target="#cosmeticsModal">
+        <span class="dock-ico" aria-hidden="true">🛍️</span><span class="dock-label">Shop</span>
+        <span class="badge badge-success dock-dot" id="dot-cos" hidden>!</span>
+      </button>
     </div>`;
-    h += `<button id="next" data-a="n"></button><div class="note" id="next-note"></div>`;
-    h += '<div class="section-title">Upgrades</div>';
-    h += `<div class="dock">
-      <button type="button" class="btn btn-primary dock-btn" data-toggle="modal" data-target="#globalModal">✨ Staff &amp; global upgrades <span class="badge badge-success" id="dot-global" hidden>!</span></button>
-      <button type="button" class="btn btn-info dock-btn" data-toggle="modal" data-target="#cosmeticsModal">🎨 Cosmetics <span class="badge badge-success" id="dot-cos" hidden>!</span></button>
-    </div>`;
-    h += '<div class="note">Tap a station in the kitchen to upgrade it.</div>';
-    this.el.innerHTML = h;
     this.refresh();
   }
 
@@ -312,9 +325,12 @@ export class UpgradePanel {
     const hire = st.staff < eco.staffCap() && st.canAfford(eco.staffCost());
     const g = hire || GLOBAL_UPGRADES.some(d => eco.globalUnlocked(d) && (st.upgrades[d.id] || 0) < d.maxLevel && st.canAfford(eco.globalCost(d)));
     const c = COSMETICS.some(d => !st.cosmetics.owned.includes(d.id) && st.diamonds >= d.cost);
+    const m = this.tracker.levelComplete();
     const eg = document.getElementById('dot-global'), ec = document.getElementById('dot-cos');
+    const em = document.getElementById('dot-mission');
     if (eg) eg.hidden = !g;
     if (ec) ec.hidden = !c;
+    if (em) em.hidden = !m;
   }
 
   refreshNext() {

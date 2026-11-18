@@ -32,6 +32,7 @@ export class SaveService {
 
   async push(state, keepalive = false) {
     this.saveLocal(state);
+    this.onStatus('Saving…');
     try {
       const r = await fetch(this.url + '?action=save', {
         method: 'POST', credentials: 'same-origin', keepalive,

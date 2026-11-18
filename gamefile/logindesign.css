@@ -275,6 +275,14 @@ body {
     margin-right: 8px;
 }
 
+.login-note {
+    margin-top: 10px;
+    text-align: center;
+    font-size: 12px;
+    line-height: 1.4;
+    color: #6b7280;
+}
+
 .footer-text {
     text-align: center;
     font-size: 14px;

@@ -55,18 +55,80 @@
 #bee-game #kitchen .lamp::after { content: ''; position: absolute; left: 50%; bottom: -7px; transform: translateX(-50%); width: 22px; height: 12px; border-radius: 50% 50% 35% 35%; background: radial-gradient(ellipse at 50% 25%, #fff6c2, #f0b23c); box-shadow: 0 0 16px #ffdf8a99; }
 #bee-game #kitchen .shelf { position: absolute; left: 3%; right: 3%; top: 26%; height: 4px; border-radius: 2px; background: #7d4b12; box-shadow: 0 2px 0 #5b380e; pointer-events: none; }
 #bee-game #kitchen .shelf::before { content: ''; position: absolute; left: 4%; right: 4%; bottom: 4px; height: 14px; border-radius: 5px 5px 0 0; background: repeating-linear-gradient(90deg, transparent 0 7%, #e8b24c 7% 11%, #c98a2b 11% 12%, transparent 12% 18%); opacity: .8; }
-#bee-game #kitchen .menu-board { position: absolute; left: 50%; top: 7px; transform: translateX(-50%); padding: 2px 9px 3px; border: 2px solid #7d4b12; border-radius: 3px; background: #3a2a17; color: var(--gold); font-size: clamp(7px, 1.4vw, 11px); font-weight: 900; letter-spacing: .14em; white-space: nowrap; box-shadow: 0 3px 6px #0004; }
 #bee-game #kitchen .hive { position: absolute; left: 1%; top: 4%; width: 30px; height: 26px; border: 2px solid #5b380e; border-radius: 50% 50% 43% 43%; background: repeating-linear-gradient(0deg, #e2a93b 0 6px, #c98a2b 6px 9px); box-shadow: 0 4px 8px #0004; pointer-events: none; }
 #bee-game #kitchen .hive::before { content: ''; position: absolute; left: 50%; top: 42%; width: 7px; height: 5px; transform: translateX(-50%); border-radius: 50%; background: #4a2c0b; box-shadow: 0 1px 0 #ffffff33; }
 #bee-game #kitchen .hive-label { position: absolute; left: 50%; top: 100%; transform: translateX(-50%); margin-top: 2px; padding: 1px 3px; border-radius: 3px; background: #5b380e; color: var(--text); font-size: 6px; font-weight: 900; letter-spacing: .08em; white-space: nowrap; }
 
+/* ---------- Meadow Stand: outdoor market ---------- */
+#bee-game #scene[data-map="meadow"] { background: conic-gradient(#eaf7d2 25%, #d8edb5 0 50%, #eaf7d2 0 75%, #d8edb5 0) 0 0 / 40px 40px; }
+#bee-game #scene[data-map="meadow"] #kitchen { background: linear-gradient(180deg, #bfe8f7 0%, #dff4c6 64%, #b6d98d 100%); border-bottom-color: #698a42; }
+#bee-game #scene[data-map="meadow"] #kitchen::before { background: repeating-linear-gradient(90deg, #ffffff12 0 46px, #00000008 46px 48px), radial-gradient(ellipse at 76% 8%, #fff2a4aa, transparent 36%); }
+#bee-game #scene[data-map="meadow"] #kitchen::after { height: 13%; background: repeating-linear-gradient(90deg, #a97531 0 26px, #8f6024 26px 30px); border-top-color: #ffd84d; box-shadow: 0 -5px 12px #0002; }
+#bee-game #scene[data-map="meadow"] .station-sign { background: #3f5a2a; border-color: #ffd84d; color: #fff6df; }
+#bee-game #scene[data-map="meadow"] .rug { background: repeating-linear-gradient(45deg, #d7edb5 0 18px, #c9e3a0 18px 36px); border-color: #698a42; box-shadow: inset 0 0 0 3px #f7ffe8aa, 0 6px 14px #0002; }
+#bee-game #scene[data-map="meadow"] .rug::before { content: '🌼   🧺   🌼'; position: absolute; top: 10px; left: 50%; transform: translateX(-50%); font-size: clamp(14px, 2.6vw, 24px); opacity: .7; letter-spacing: .4em; }
+#bee-game #scene[data-map="meadow"] .door { border-color: #6d8f3f; background: repeating-linear-gradient(90deg, #b9853d 0 8px, #a56f2c 8px 16px); }
+#bee-game #scene[data-map="meadow"] .door-sign { background: #3f5a2a; }
+#bee-game #scene[data-map="meadow"] #kitchen .hive-label { background: #3f5a2a; }
+#bee-game #kitchen .bunting { position: absolute; left: 2%; right: 2%; top: 3%; height: 20px; border-top: 2px solid #6b4a1e; pointer-events: none; }
+#bee-game #kitchen .bunting i { position: absolute; top: 0; left: calc(var(--i) * 7.1%); width: 0; height: 0; transform: translateX(-50%); border-left: 7px solid transparent; border-right: 7px solid transparent; border-top: 12px solid #ff8a8a; }
+#bee-game #kitchen .bunting i:nth-child(4n+2) { border-top-color: #ffd84d; }
+#bee-game #kitchen .bunting i:nth-child(4n+3) { border-top-color: #8fd4f2; }
+#bee-game #kitchen .bunting i:nth-child(4n+4) { border-top-color: #9ad66b; }
+#bee-game #kitchen .sun { position: absolute; right: 5%; top: 7%; width: 34px; height: 34px; border-radius: 50%; background: radial-gradient(circle at 40% 35%, #fffbe0, #ffd84d 60%, #f0b23c); box-shadow: 0 0 26px #ffe58a99; pointer-events: none; }
+#bee-game #kitchen .cloud { position: absolute; width: 64px; height: 20px; border-radius: 20px; background: #fffdf6; opacity: .78; filter: blur(.4px); pointer-events: none; }
+#bee-game #kitchen .cloud::before, #bee-game #kitchen .cloud::after { content: ''; position: absolute; border-radius: 50%; background: inherit; }
+#bee-game #kitchen .cloud::before { width: 28px; height: 28px; left: 8px; bottom: 4px; }
+#bee-game #kitchen .cloud::after { width: 20px; height: 20px; right: 10px; bottom: 2px; }
+#bee-game #kitchen .cloud-a { left: 20%; top: 10%; }
+#bee-game #kitchen .cloud-b { left: 48%; top: 6%; transform: scale(.8); opacity: .6; }
+
+/* ---------- Hive Café: cosy indoor café ---------- */
+#bee-game #scene[data-map="hive"] { background: conic-gradient(#f8e9c9 25%, #efd6a7 0 50%, #f8e9c9 0 75%, #efd6a7 0) 0 0 / 38px 38px; }
+#bee-game #scene[data-map="hive"] #kitchen { background: linear-gradient(180deg, #f5d79a 0%, #e6b96f 70%, #c98f45 100%); border-bottom-color: #8a5a1c; }
+#bee-game #scene[data-map="hive"] #kitchen::before { background: repeating-linear-gradient(90deg, #ffffff12 0 46px, #00000008 46px 48px), repeating-linear-gradient(0deg, #00000007 0 40px, #ffffff10 40px 42px), radial-gradient(ellipse at 50% 8%, #fff0bb99, transparent 60%); }
+#bee-game #scene[data-map="hive"] .station-sign { background: #2f2a21; border-color: #c9974a; color: #fff6df; }
+#bee-game #scene[data-map="hive"] .rug { background: repeating-linear-gradient(45deg, #e6b980 0 18px, #dfae72 18px 36px); border-color: #b96a3a; }
+#bee-game #scene[data-map="hive"] .rug::before { content: '☕   🍰'; position: absolute; top: 10px; left: 50%; transform: translateX(-50%); font-size: clamp(14px, 2.6vw, 24px); opacity: .55; letter-spacing: .5em; }
+#bee-game #scene[data-map="hive"] .door { border-color: #5b380e; background: repeating-linear-gradient(90deg, #a97531 0 8px, #966325 8px 16px); }
+#bee-game #kitchen .cafe-window { position: absolute; right: 3%; top: 3%; width: 19%; height: 21%; border: 3px solid #6b4a1e; border-radius: 10px 10px 0 0; background: linear-gradient(180deg, #bfe8f7 0 62%, #cfe7a8 62% 100%); box-shadow: inset 0 0 0 2px #ffffff66, 0 4px 10px #0002; pointer-events: none; }
+#bee-game #kitchen .cafe-window::before { content: ''; position: absolute; inset: 0; background: linear-gradient(90deg, transparent 48%, #6b4a1e 48% 52%, transparent 52%), linear-gradient(0deg, transparent 48%, #6b4a1e 48% 52%, transparent 52%); }
+#bee-game #kitchen .cafe-window::after { content: ''; position: absolute; left: -8%; right: -8%; top: -4%; height: 12%; background: repeating-linear-gradient(90deg, #b96a3a 0 10px, #9c4e2c 10px 20px); border-radius: 8px 8px 2px 2px; box-shadow: 0 3px 6px #0003; }
+
+/* ---------- Royal Hive: regal hall ---------- */
+#bee-game #scene[data-map="royal"] { background: conic-gradient(#f5ecd8 25%, #ddcdb0 0 50%, #f5ecd8 0 75%, #ddcdb0 0) 0 0 / 52px 52px; }
+#bee-game #scene[data-map="royal"] #kitchen { background: linear-gradient(180deg, #3c2454 0%, #5a356f 70%, #2b1938 100%); border-bottom-color: #c9a227; }
+#bee-game #scene[data-map="royal"] #kitchen::before { background: repeating-linear-gradient(90deg, #ffd84d12 0 46px, #00000022 46px 48px), radial-gradient(ellipse at 50% 6%, #ffd84d33, transparent 62%); }
+#bee-game #scene[data-map="royal"] #kitchen::after { background: linear-gradient(180deg, #6d4d1f, #3d2810); border-top-color: #ffd84d; }
+#bee-game #scene[data-map="royal"] .station-sign { background: #3b2050; border-color: #ffd84d; color: #ffe99a; }
+#bee-game #scene[data-map="royal"] .rug { background: linear-gradient(90deg, #7d1f30, #a92a3a 50%, #7d1f30); border-color: #ffd84d; box-shadow: inset 0 0 0 4px #ffd84d55, 0 8px 18px #0004; }
+#bee-game #scene[data-map="royal"] .rug::before { content: '✦   👑   ✦'; position: absolute; top: 10px; left: 50%; transform: translateX(-50%); color: #ffd84d; font-size: clamp(14px, 2.6vw, 24px); opacity: .8; letter-spacing: .4em; }
+#bee-game #scene[data-map="royal"] .door { border-color: #ffd84d; background: repeating-linear-gradient(90deg, #5a356f 0 8px, #3c2454 8px 16px); }
+#bee-game #scene[data-map="royal"] .door-sign { background: #6b4a00; color: #ffe99a; }
+#bee-game #scene[data-map="royal"] #kitchen .hive { left: 9%; background: repeating-linear-gradient(0deg, #ffd84d 0 6px, #b8861f 6px 9px); border-color: #ffd84d; }
+#bee-game #scene[data-map="royal"] #kitchen .hive-label { background: #6b4a00; color: #ffe99a; }
+#bee-game #kitchen .curtain { position: absolute; top: 0; width: 8%; height: 52%; background: linear-gradient(90deg, #5f1b2c, #8c273d 55%, #5f1b2c); box-shadow: inset 0 0 0 2px #ffd84d33; pointer-events: none; }
+#bee-game #kitchen .curtain::after { content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 7%; background: repeating-linear-gradient(90deg, #ffd84d 0 4px, transparent 4px 8px); opacity: .7; }
+#bee-game #kitchen .curtain-l { left: 0; border-radius: 0 0 40% 0; }
+#bee-game #kitchen .curtain-r { right: 0; border-radius: 0 0 0 40%; }
+#bee-game #kitchen .chandelier { position: absolute; left: 50%; top: 0; width: 52px; height: 34px; transform: translateX(-50%); border-top: 2px solid #ffd84d; border-radius: 50%; box-shadow: 0 0 24px #ffe58a66; pointer-events: none; }
+#bee-game #kitchen .chandelier::before { content: ''; position: absolute; left: 50%; top: 0; width: 2px; height: 22px; background: #ffd84d; }
+#bee-game #kitchen .chandelier::after { content: ''; position: absolute; left: 0; right: 0; top: 20px; height: 10px; border-radius: 50%; background: radial-gradient(ellipse, #fff6c2, #f0b23c 60%, transparent 70%); box-shadow: 0 0 20px #ffdf8a88; }
+#bee-game #kitchen .royal-crest { position: absolute; right: 14%; top: 6%; font-size: 22px; filter: drop-shadow(0 3px 5px #0005); pointer-events: none; }
+
 /* ---------- dining-room furnishing ---------- */
 #bee-game .rug { position: absolute; left: 7%; right: 7%; top: 46%; bottom: 6%; z-index: 0; border: 4px solid #b96a3a; border-radius: 24px; background: repeating-linear-gradient(45deg, #e6b980 0 18px, #dfae72 18px 36px); box-shadow: inset 0 0 0 3px #f7e3bf99, 0 6px 14px #0002; opacity: .78; pointer-events: none; }
 #bee-game .plant { position: absolute; z-index: 0; font-size: clamp(20px, 3.4vw, 30px); line-height: 1; filter: drop-shadow(0 3px 3px #0003); pointer-events: none; }
-/* Kitchen stations are little food stalls, not floating icons. Each one sits
-   on the counter line at the bottom of the kitchen (kitchen is 36% tall, so a
-   bottom of 65% puts the stall feet 1% above it). */
-#bee-game .stn { position: absolute; bottom: 65%; text-align: center; }
+/* Stations and the menu sign form one anchored row. Because the sign is part
+   of the row flow, it cannot be covered by an awning on short screens or drift
+   far above the stalls on tall screens. */
+#bee-game .station-area { position: absolute; left: 0; right: 0; bottom: 65%; display: flex; flex-direction: column; align-items: center; pointer-events: none; }
+#bee-game .station-sign { position: relative; margin-bottom: 8px; padding: 3px 11px 4px; border: 2px solid #7d4b12; border-radius: 4px; background: #3a2a17; color: var(--gold); font-size: clamp(8px, 1.4vw, 12px); font-weight: 900; letter-spacing: .13em; white-space: nowrap; box-shadow: 0 4px 8px #0005; }
+#bee-game .station-sign::before, #bee-game .station-sign::after { content: ''; position: absolute; bottom: 100%; width: 1px; height: 7px; background: #5b380e; }
+#bee-game .station-sign::before { left: 22%; }
+#bee-game .station-sign::after { right: 22%; }
+#bee-game .station-row { width: 100%; display: flex; align-items: flex-end; justify-content: center; }
+#bee-game .stn { position: relative; flex: 1 1 0; min-width: 0; text-align: center; }
 #bee-game .stn:focus-visible { outline: 3px solid var(--gold); outline-offset: 3px; border-radius: 10px; }
 /* No filter here: it would create a stacking context and trap the counter
    underneath the bees. The counter needs to paint above them so the name and
@@ -81,6 +143,12 @@
 #bee-game .stn[data-station="2"] { --aw1: #b6e07a; --aw2: #4f9e3c; }
 #bee-game .stn[data-station="3"] { --aw1: #8fd4f2; --aw2: #3b8fc4; }
 #bee-game .stn[data-station="4"] { --aw1: #e3a6ef; --aw2: #9b5bc0; }
+/* The Royal Hive keeps a tighter gold/plum/burgundy awning palette. */
+#bee-game #scene[data-map="royal"] .stn[data-station="0"] { --aw1: #ffd84d; --aw2: #7a3fa0; }
+#bee-game #scene[data-map="royal"] .stn[data-station="1"] { --aw1: #e3a6ef; --aw2: #5a356f; }
+#bee-game #scene[data-map="royal"] .stn[data-station="2"] { --aw1: #ffb347; --aw2: #8c273d; }
+#bee-game #scene[data-map="royal"] .stn[data-station="3"] { --aw1: #ffd84d; --aw2: #3b5f8f; }
+#bee-game #scene[data-map="royal"] .stn[data-station="4"] { --aw1: #c9a227; --aw2: #3c2454; }
 
 #bee-game .window { position: relative; margin: 0 4%; height: clamp(38px, 6.4vw, 64px); display: flex; align-items: center; justify-content: center; background: linear-gradient(180deg, #fff8dd, #f1d494); border: 2px solid #5b380e; border-top: 0; box-shadow: inset 0 -5px 0 #00000012; }
 #bee-game .window::before { content: ''; position: absolute; inset: 3px; border: 1px dashed #c99b4a55; border-radius: 3px; pointer-events: none; }
@@ -185,21 +253,22 @@
   #bee-game .hud-actions { gap: 2px; }
   #bee-game #devbtn, #bee-game .sound-btn, #bee-game .exit-btn { width: 36px; height: 36px; min-height: 0; font-size: 16px; }
 }
-@media (max-width: 340px) {
-  /* On the narrowest phones the wall sign would touch the middle awning. */
-  #bee-game #kitchen .menu-board { display: none; }
-}
 /* Short or landscape screens: keep the stalls inside the kitchen band. */
 @media (max-height: 480px) {
-  #bee-game .stn { bottom: 64%; }
-  #bee-game .awning { height: 8px; }
-  #bee-game .window { height: 28px; }
-  #bee-game .mach { font-size: 18px; }
+  #bee-game .station-area { bottom: 64%; }
+  #bee-game .station-sign { margin-bottom: 3px; padding: 1px 8px 2px; font-size: 7px; }
+  #bee-game .awning { height: 7px; }
+  #bee-game .window { height: 24px; }
+  #bee-game .mach { font-size: 17px; }
   #bee-game .sign { display: none; }
   #bee-game .sinfo { flex-direction: row; gap: 3px; }
-  #bee-game .slv, #bee-game .swk { font-size: 6px; line-height: 1.1; padding: 0 3px; }
-  #bee-game .counter { padding: 2px 3px; }
-  #bee-game #kitchen .shelf, #bee-game #kitchen .lamp, #bee-game #kitchen .hive, #bee-game .plant { display: none; }
+  #bee-game .slv, #bee-game .swk { font-size: 6px; line-height: 1.1; padding: 0 2px; }
+  #bee-game .counter { padding: 1px 2px 2px; }
+  #bee-game #kitchen .shelf, #bee-game #kitchen .lamp, #bee-game #kitchen .hive,
+  #bee-game #kitchen .bunting, #bee-game #kitchen .sun, #bee-game #kitchen .cloud,
+  #bee-game #kitchen .cafe-window, #bee-game #kitchen .curtain,
+  #bee-game #kitchen .chandelier, #bee-game #kitchen .royal-crest,
+  #bee-game .plant { display: none; }
   #bee-game .rug { top: 48%; }
   #bee-game .door { width: 42px; }
 }

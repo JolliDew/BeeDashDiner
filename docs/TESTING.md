@@ -181,6 +181,11 @@ Use a throwaway account and a throwaway database when possible.
 - [ ] 768×1024 and 1440×900: the playfield widens, the dock is one slim row,
       and modals are centred.
 - [ ] Worst-case HUD values (`999.9M`, `999`, `10/14`) do not collide with Exit.
+- [ ] Switch to levels 1, 5 and 8: Meadow Stand, Hive Café and Royal Hive each
+      have distinct walls, floors, rugs, doors and decor.
+- [ ] The MENU sign stays 3–8px above the station awnings at 360, 568×320 and
+      1440; it is never covered and never floats far away.
+- [ ] Gold buttons on Help/Profile have dark text; Play/Log Out are readable.
 - [ ] Keyboard: station buttons have a visible focus ring; modal close buttons work.
 - [ ] `prefers-reduced-motion` disables the rise/toast animations and the login background lines.
 - [ ] No JavaScript errors in the console during a 2-minute idle run.

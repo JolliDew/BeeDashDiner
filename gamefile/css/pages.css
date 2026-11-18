@@ -49,6 +49,19 @@ body.page {
     color: #ffd84d;
 }
 
+/* Link colours must not bleed into button text: gold-on-gold is unreadable. */
+.page-card a.btn-gold {
+    color: #241d12;
+}
+
+.page-card a.btn-ghost {
+    color: #fff6df;
+}
+
+.page-card a.btn-danger {
+    color: #ffffff;
+}
+
 .page-actions {
     display: flex;
     flex-wrap: wrap;

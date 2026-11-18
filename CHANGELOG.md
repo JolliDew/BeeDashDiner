@@ -23,6 +23,10 @@ HUD and a three-button dock.
   hanging OPEN sign in the bottom-left corner.
 - **Room furnishing:** tiled kitchen wall, jar shelf, pendant lamps, a MENU
   board, a soft rug and plants around the dining room.
+- **Three restaurant maps:** Meadow Stand is an outdoor market with sky,
+  bunting, sun and a green picnic floor; Hive Café is a warm interior with
+  pendant lamps, jar shelf and an arched window; Royal Hive is a plum-and-gold
+  hall with curtains, a chandelier, crown crest, marble floor and red carpet.
 - **Procedural audio:** Web Audio sounds for UI clicks, guests arriving and
   ordering, serving, coins and tips, station unlocks, upgrades, purchases,
   missions and level-ups, plus a slow ambient loop. The speaker panel has
@@ -80,6 +84,11 @@ HUD and a three-button dock.
 - Bee offsets scale to the station width, so edge workers no longer start
   off-screen.
 - Short landscape screens use compact stalls; normal phones keep station names.
+- The MENU sign is now part of the stall row: it keeps a 3–8px gap above the
+  awnings at every tested size instead of being covered on desktop or floating
+  far above on mobile.
+- Gold buttons on Help/Profile use dark text again; the Play and Log Out menu
+  buttons were darkened to meet accessible contrast.
 
 ### Verification
 

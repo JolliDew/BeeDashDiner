@@ -1,4 +1,4 @@
-import { ASSETS, ITEMS, CUSTOMERS, BALANCE as B, art, fmt } from './config.js';
+import { ASSETS, ITEMS, CUSTOMERS, MAPS, BALANCE as B, art, fmt } from './config.js';
 import { Bee, Customer } from './entities.js';
 import { pickJob } from './WorkerAI.js';
 
@@ -43,21 +43,47 @@ export class Scene {
     this.host.innerHTML = '';
     this.bees = []; this.customers = []; this.stationEls = []; this.seatEls = [];
     this.seats = Array(this.economy.seats).fill(null);
+
+    const loc = this.state.location;
+    const mapDef = MAPS[loc] || MAPS[0];
+    const map = mapDef.id;
+    this.host.dataset.map = map;
+    this.hiveX = map === 'royal' ? 11 : 7;
+    const menuLabel = mapDef.menu;
+    const plantIcon = mapDef.plant;
+
     const kitchen = this.mk('kitchen');
     kitchen.id = 'kitchen';
     kitchen.setAttribute('aria-hidden', 'true');
-    kitchen.innerHTML = '<span class="lamp" style="left:12%"></span>'
-      + '<span class="lamp" style="left:50%"></span>'
-      + '<span class="lamp" style="left:88%"></span>'
-      + '<span class="shelf"><span class="menu-board">MENU</span></span>'
-      + '<span class="hive" aria-hidden="true"><span class="hive-label">HIVE</span></span>';
+    let decor = '<span class="hive" aria-hidden="true"><span class="hive-label">HIVE</span></span>';
+    if (map === 'meadow') {
+      decor += '<span class="bunting" aria-hidden="true">'
+        + Array.from({ length: 14 }, (_, i) => `<i style="--i:${i}"></i>`).join('')
+        + '</span>'
+        + '<span class="sun" aria-hidden="true"></span>'
+        + '<span class="cloud cloud-a" aria-hidden="true"></span>'
+        + '<span class="cloud cloud-b" aria-hidden="true"></span>';
+    } else if (map === 'hive') {
+      decor += '<span class="lamp" style="left:12%"></span>'
+        + '<span class="lamp" style="left:50%"></span>'
+        + '<span class="lamp" style="left:88%"></span>'
+        + '<span class="shelf" aria-hidden="true"></span>'
+        + '<span class="cafe-window" aria-hidden="true"></span>';
+    } else {
+      decor += '<span class="curtain curtain-l" aria-hidden="true"></span>'
+        + '<span class="curtain curtain-r" aria-hidden="true"></span>'
+        + '<span class="chandelier" aria-hidden="true"></span>'
+        + '<span class="royal-crest" aria-hidden="true">👑</span>';
+    }
+    kitchen.innerHTML = decor;
+
     // The rug goes down first so the aisle and door always paint on top of it.
     const rug = this.mk('rug');
     rug.setAttribute('aria-hidden', 'true');
-    const plantL = this.mk('plant', '🪴');
+    const plantL = this.mk('plant', plantIcon);
     plantL.style.left = '1.5%'; plantL.style.top = '37%';
     plantL.setAttribute('aria-hidden', 'true');
-    const plantR = this.mk('plant', '🪴');
+    const plantR = this.mk('plant', plantIcon);
     plantR.style.right = '1.5%'; plantR.style.top = '37%';
     plantR.setAttribute('aria-hidden', 'true');
     const aisle = this.mk('aisle');
@@ -66,17 +92,25 @@ export class Scene {
       + '<span class="door-sign">OPEN</span>'
       + '<span class="door-mat" aria-hidden="true"></span>');
     door.setAttribute('aria-hidden', 'true');
+
+    // The sign lives with the stalls, not at a fixed kitchen percentage. It can
+    // therefore never be covered by an awning on short screens or float far
+    // above them on tall ones.
+    const area = this.mk('station-area', `<span class="station-sign">${menuLabel}</span><span class="station-row"></span>`);
+    const row = area.querySelector('.station-row');
     this.state.stations.forEach((s, i) => {
       // Each station is drawn as a small food stall: striped awning, serving
       // window, wooden counter, name sign and worker/level indicators.
       // .sup = "you can upgrade this" badge, .slv = recipe level,
       // .swk = bees working / worker slots.
       const [icon, name] = ITEMS[this.state.location][i];
-      const d = this.mk('stn', '<span class="stall">'
+      const d = document.createElement('div');
+      d.className = 'stn';
+      d.innerHTML = '<span class="stall">'
         + '<span class="awning" aria-hidden="true"></span>'
         + `<span class="window"><span class="mwrap"><span class="mach">${art(ASSETS.stations[i], icon)}</span><span class="sup" hidden>⬆</span></span><span class="shutter" aria-hidden="true">🔒</span></span>`
         + `<span class="counter"><span class="sign">${name}</span><span class="sinfo"><span class="slv"></span><span class="swk"></span></span></span>`
-        + '</span>');
+        + '</span>';
       d.dataset.station = i;
       d.dataset.toggle = 'modal';
       d.dataset.target = '#stationModal';
@@ -86,8 +120,7 @@ export class Scene {
       d.setAttribute('aria-label', `Upgrade ${ITEMS[this.state.location][i][1]}`);
       d.style.cursor = 'pointer';
       d.style.pointerEvents = 'auto';
-      d.style.left = (i / this.state.stations.length * 100) + '%';
-      d.style.width = (100 / this.state.stations.length) + '%';
+      row.appendChild(d);
       this.stationEls[i] = d;
     });
     this.renderSeats();

@@ -15,6 +15,11 @@ export const ITEMS = [
   [['🍰', 'Honey Cake'], ['🥧', 'Nectar Pie'], ['🍦', 'Sundae'], ['🍹', 'Mead Fizz'], ['👑', 'Queen Feast']]
 ];
 export const LOCATIONS = ['Meadow Stand', 'Hive Café', 'Royal Hive'];
+export const MAPS = [
+  { id: 'meadow', menu: 'FARM MENU', plant: '🌻' },
+  { id: 'hive', menu: 'CAFÉ MENU', plant: '🪴' },
+  { id: 'royal', menu: 'ROYAL MENU', plant: '🏺' }
+];
 export const BEES = [
   { name: 'Forager', acc: '🧺', hue: 0 }, { name: 'Baker', acc: '🥖', hue: -30 },
   { name: 'Nurse', acc: '🩹', hue: 75 }, { name: 'Builder', acc: '🔧', hue: 165 },

@@ -44,7 +44,8 @@ passwords are intentionally simple and exist only for grading.
 | **Recipe milestones** | Recipes go to level 10. Milestones at **2/6/10** add a worker slot; milestones at **4/8** double that station's profit. |
 | **Global upgrades** | Tip jar, bigger queue, faster walking, kitchen drills, and Golden recipe. They survive restaurant moves. |
 | **Popup panels** | Tap/click a station to open its upgrade panel. Staff, global upgrades, and cosmetics each have their own modal. |
-| **Audio** | Procedural Web Audio effects for guests, serving, tips, upgrades, missions and level-ups, plus ambient music. Separate Sound effects / Music toggles are saved in the browser. |
+| **Audio** | Procedural Web Audio effects for guests, serving, tips, upgrades, missions and level-ups, plus ambient music. Separate Sound effects / Music volume sliders are saved in the browser. |
+| **Three maps** | Meadow Stand is an outdoor market; Hive Café is a warm interior; Royal Hive is a regal hall. Each has its own walls, floor, rug, lighting, door, menu sign and decor while keeping the same rules and lower-left guest door. |
 | **Missions** | Three missions per level. Missions must be finished before you advance. Already-satisfied missions auto-complete in order. |
 | **Diamonds & cosmetics** | Mission/level rewards buy four bee accessories. Cosmetics are saved and shown on every bee. |
 | **Admin panel** | Full user CRUD: search, paginate, create, edit role/email/username, reset password, reset progress, delete, and audit log. |

@@ -116,7 +116,7 @@ a.menu-help:hover {
     padding: 4px;
     border: 0;
     background: none;
-    color: #8a8a9e;
+    color: #b0b0c3;
     font: inherit;
     font-size: .8rem;
     text-decoration: underline;
@@ -170,14 +170,14 @@ a.menu-help:hover {
 
 /* Play Button */
 .play-btn {
-    background: linear-gradient(45deg, #00b09b, #96c93d);
-    color: white;
+    background: linear-gradient(45deg, #0b7a6a, #3f7f2a);
+    color: #ffffff;
 }
 
 .play-btn:hover {
-    background: linear-gradient(45deg, #029883, #84b333);
+    background: linear-gradient(45deg, #09695b, #356f24);
     transform: translateY(-2px);
-    box-shadow: 0 6px 12px rgba(0, 176, 155, 0.3);
+    box-shadow: 0 6px 12px rgba(11, 122, 106, 0.3);
 }
 
 /* Admin Button */
@@ -194,14 +194,14 @@ a.menu-help:hover {
 
 /* Quit Button */
 .quit-btn {
-    background: #e63946;
-    color: white;
+    background: #c62828;
+    color: #ffffff;
 }
 
 .quit-btn:hover {
-    background: #d62828;
+    background: #b71c1c;
     transform: translateY(-2px);
-    box-shadow: 0 6px 12px rgba(230, 57, 70, 0.3);
+    box-shadow: 0 6px 12px rgba(183, 28, 28, 0.3);
 }
 
 /* --- In-Game Shell ---

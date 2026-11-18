@@ -146,6 +146,29 @@ JolliDew/
 └── docs/                      # guides, deployment, this document
 ```
 
+## 3.5 Restaurant maps
+
+Each location has its own visual identity while keeping the same game rules and
+the lower-left guest door:
+
+- **Meadow Stand** is an outdoor market: sky wall, bunting, sun, clouds, green
+  picnic floor and a farm-style menu sign.
+- **Hive Café** is a warm indoor café: peach tiled walls, pendant lamps, jar
+  shelf, café window, woven rug and a chalkboard-style menu.
+- **Royal Hive** is a regal hall: plum-and-gold walls, velvet curtains,
+  chandelier, crown crest, marble floor, red carpet and a royal menu.
+
+The menu sign is anchored to the stall row rather than to a fixed percentage of
+the kitchen. This guarantees an 8px gap above the awnings on phone and desktop
+and a 3–4px gap in short landscape mode, so it can never be covered by a stall
+or drift far away from them.
+
+![Meadow Stand](docs/screenshots/map-meadow.png){width=100%}
+
+![Hive Café](docs/screenshots/map-hive.png){width=100%}
+
+![Royal Hive](docs/screenshots/map-royal.png){width=100%}
+
 # 4. Development log
 
 | Stage | Work completed | Evidence |
@@ -153,6 +176,7 @@ JolliDew/
 | 1. Setup | Consolidated the working copy into XAMPP `htdocs`; protected `.git`, database config and notes; fixed Apache ACLs. | Login returned 200; `.git` returned 404. |
 | 2. UI shell | Fixed the clipped gradient title, unlocked scrolling on auth pages, added a responsive main menu and a favicon. | Menu at 320, 360, 568×320 and 1440. |
 | 3. Scene | Replaced station icons with food stalls, added a café door, kitchen wall, shelf, lamps, rug and plants. | Game phone/desktop screenshots. |
+| 3b. Three maps | Meadow Stand became an outdoor market, Hive Café a warm interior and Royal Hive a regal hall. The menu sign moved into the stall row so it cannot overlap or drift. | Map measurements at 360, 568×320 and 1440: sign gap 3–8px, zero overflow. |
 | 4. HUD and desktop | Grouped honey/diamonds/chairs into one bar, made Exit an icon button, widened the playfield to 1000px, slimmed the desktop dock. | 320–1440 checks with zero overflow. |
 | 5. Saving | Dirty-checked serialized autosave, pagehide/visibility keepalive save, local-backup fallback, welcome-back toast. | Honey survived a pagehide + reload test. |
 | 6. Pacing | Removed the door burst, delayed the first customer, enforced a calm entry gap, started workers from a hive. | Spawn log: first guest at 1.4s, then a measured interval. |
@@ -198,6 +222,8 @@ JolliDew/
 | T10 | Audio | Open speaker, change sliders, reload | Volumes persist | 70/45 restored; music timer resumed | Pass |
 | T11 | Mobile layout | 320×568 and 568×320 | No clipped UI | No horizontal overflow | Pass |
 | T12 | Deployment | Open Render URL, log in, play | App reachable over HTTPS | Pending Render deploy | Pending |
+| T13 | Maps and menu sign | Switch to levels 1, 5 and 8 at 360, 568×320 and 1440 | Distinct maps; sign always 3–8px above stalls; no overflow | 3/4/5 stations, correct decor, no overlap | Pass |
+| T14 | Colour contrast | Open menu, help and profile; inspect gold buttons | Dark text on gold, readable labels | Button text corrected | Pass |
 
 ## 5.3 Bugs found and fixed
 

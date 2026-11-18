@@ -9,7 +9,7 @@ $loggedIn = Auth::userId() !== null;
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>How to Play - JolliDew</title>
+    <title>How to Play - BeeDashDiner</title>
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
     <link rel="stylesheet" href="css/site-nav.css">
     <link rel="stylesheet" href="css/pages.css">
@@ -18,7 +18,7 @@ $loggedIn = Auth::userId() !== null;
 <?php $navActive = 'help'; include 'includes/nav.php'; ?>
 <main class="page-wrap">
     <section class="page-card">
-        <h1>How to play JolliDew</h1>
+        <h1>How to play BeeDashDiner</h1>
         <p>You run a small bee café. Guests arrive, your bees cook automatically, and the honey you earn buys more seats, workers, recipes and restaurants.</p>
 
         <h2>Your goal</h2>

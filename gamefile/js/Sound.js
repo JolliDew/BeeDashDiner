@@ -1,5 +1,5 @@
 /**
- * Procedural audio for JolliDew. No sample files: every sound is synthesised
+ * Procedural audio for BeeDashDiner. No sample files: every sound is synthesised
  * with the Web Audio API, so the game stays small and works offline.
  *
  * Mixing follows a simple game-audio chain:

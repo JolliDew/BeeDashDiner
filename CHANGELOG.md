@@ -1,6 +1,6 @@
 # Changelog
 
-All notable changes to JolliDew.
+All notable changes to BeeDashDiner.
 
 ## [2.2.0] — scene-first UI
 
@@ -31,8 +31,12 @@ HUD and a three-button dock.
   ordering, serving, coins and tips, station unlocks, upgrades, purchases,
   missions and level-ups, plus a slow ambient loop. The speaker panel has
   separate Sound effects / Music volume sliders, saved in `localStorage`.
-- **Shared navigation:** one role-aware menu on every page (Game, How to play,
-  Profile, Admin for admins, Log out).
+- **Public landing page:** a responsive home page with a game preview, three-map
+  gallery, features, rules summary and Play/Create-account calls to action.
+- **Shared navigation:** one role-aware menu on every page (Home, Game, How to
+  play, Profile, Admin for admins, Log out). Logout returns to the landing page.
+- **Unified brand:** the visible product name is now **BeeDashDiner** everywhere;
+  the GitHub repository and local XAMPP folder remain `JolliDew` for continuity.
 - **Profile and media:** avatar upload with type, size and image checks; password
   change; saved level/honey summary.
 - **Google + local passwords:** Google-created accounts have a random hidden

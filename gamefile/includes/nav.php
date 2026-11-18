@@ -37,13 +37,14 @@ $navActive = $navActive ?? '';
 $navAvatar = preg_replace('#^uploads/#', '', $navAvatar);
 $navAvatar = $navAvatar !== '' && preg_match('/^[a-z0-9._-]+$/i', $navAvatar)
     && is_file(__DIR__ . '/../uploads/' . $navAvatar) ? 'uploads/' . $navAvatar : '';
-$navHome = Auth::userId() ? 'Mainmenu.php' : 'login.php';
+$navHome = 'index.php';
 ?>
 <header class="site-nav">
     <div class="site-nav-inner">
-        <a class="site-brand" href="<?= htmlspecialchars($navHome) ?>"><span aria-hidden="true">🍯</span> JolliDew</a>
+        <a class="site-brand" href="<?= htmlspecialchars($navHome) ?>"><span aria-hidden="true">🍯</span> BeeDashDiner</a>
         <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav-links" aria-label="Open navigation">☰</button>
         <nav id="site-nav-links" class="site-nav-links" aria-label="Main navigation">
+            <a href="index.php"<?= $navActive === 'home' ? ' aria-current="page"' : '' ?>>Home</a>
             <?php if (Auth::userId()): ?>
                 <a href="Mainmenu.php"<?= $navActive === 'game' ? ' aria-current="page"' : '' ?>>Game</a>
                 <a href="help.php"<?= $navActive === 'help' ? ' aria-current="page"' : '' ?>>How to play</a>

@@ -1,4 +1,4 @@
-# JolliDew gameplay design
+# BeeDashDiner gameplay design
 
 This is the reference for tuning and code review. The game is an idle bee café:
 the player buys upgrades and the bees serve customers automatically.

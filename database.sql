@@ -1,4 +1,4 @@
--- PostgreSQL / Supabase schema for JolliDew.
+-- PostgreSQL / Supabase schema for BeeDashDiner.
 -- Run in the Supabase SQL Editor, or:
 --   psql "$DATABASE_URL" -f gamefile/login_db_pg.sql
 --

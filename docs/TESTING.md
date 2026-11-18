@@ -115,10 +115,18 @@ Use a throwaway account and a throwaway database when possible.
 - [ ] Guest arrival/order, serving, tips, station unlock, purchase, mission and
       level-up each have a distinct sound; muting silences everything.
 
-### Navigation, profile and media
+### Landing and navigation
 
-- [ ] The shared navigation appears on login, register, menu, help, profile,
-      admin and denied pages.
+- [ ] `/JolliDew/` redirects to the landing page; the landing page loads at
+      phone and desktop widths with no overflow.
+- [ ] Guest landing shows **Play now** and **Create account**; a signed-in
+      visitor sees **Continue playing** and saved level/honey.
+- [ ] The landing map gallery shows Meadow Stand, Hive Café and Royal Hive.
+- [ ] The brand is **BeeDashDiner** in every title, nav and heading; only the
+      repository/folder path says JolliDew.
+- [ ] The shared navigation appears on landing, login, register, menu, help,
+      profile, admin and denied pages.
+- [ ] Logout returns to the landing page.
 - [ ] Guests see Log in / Register; players see Game, How to play, Profile and
       Log out; admins also see Admin.
 - [ ] On a phone, the ☰ button opens the navigation and every link is reachable.

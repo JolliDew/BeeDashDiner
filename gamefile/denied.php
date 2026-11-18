@@ -13,7 +13,7 @@ $message = $from === 'admin'
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Access denied - JolliDew</title>
+    <title>Access denied - BeeDashDiner</title>
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
     <link rel="stylesheet" href="css/site-nav.css">
     <link rel="stylesheet" href="css/pages.css">

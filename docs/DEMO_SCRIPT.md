@@ -1,4 +1,4 @@
-# JolliDew demo video script (10–12 minutes)
+# BeeDashDiner demo video script (10–12 minutes)
 
 Record on the deployed Render URL, not localhost. Use two browser profiles or log
 out between roles. Keep the database visible in a second tab for the database
@@ -17,7 +17,7 @@ segment.
 
 Say:
 
-> “We are Group [name]. Our system is JolliDew, a cloud-based bee café game with
+> “We are Group [name]. Our system is BeeDashDiner, a cloud-based bee café game with
 > an admin dashboard. It uses HTML, CSS, JavaScript, Bootstrap, PHP and
 > PostgreSQL on Supabase, deployed with Docker on Render. Our roles were backend,
 > database, game mechanics, design and QA.”

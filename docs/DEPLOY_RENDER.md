@@ -1,4 +1,4 @@
-# Deploying JolliDew on Render
+# Deploying BeeDashDiner on Render
 
 The application is a PHP 8.2 + Apache app. The database stays on Supabase
 (PostgreSQL). Render builds the included `Dockerfile`; no buildpack settings are
@@ -17,7 +17,7 @@ branch you want to deploy) from your own machine. Never commit
 3. Runtime: **Docker**.
 4. Branch: the branch you pushed.
 5. Plan: **Free** (or the plan your account provides).
-6. Health check path: `/login.php`.
+6. Health check path: `/` (the public landing page).
 7. Add the environment variable:
 
    | Key | Value |
@@ -37,7 +37,7 @@ it in the dashboard instead of storing it in git.
 
 ## 3. First-run checks
 
-1. Open `https://YOUR-APP.onrender.com/login.php`.
+1. Open `https://YOUR-APP.onrender.com/`; the landing page should load.
 2. Register the demo player account.
 3. Register the demo admin account.
 4. Promote the admin in the Supabase SQL editor:

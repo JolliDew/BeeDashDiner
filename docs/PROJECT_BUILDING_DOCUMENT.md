@@ -1,12 +1,12 @@
 ---
-title: "JolliDew — Project Building Document"
+title: "BeeDashDiner — Project Building Document"
 subtitle: "CC106 CLE: Cloud-Based Web Application Group Project"
 date: "November 2026"
 ---
 
 # Cover and team
 
-**Project title:** JolliDew (BeeDashDiner)  
+**Project title:** BeeDashDiner
 **System:** A cloud-based bee café game with an admin dashboard  
 **Course:** CC106 CLE — Cloud-Based Application Development  
 **Repository:** https://github.com/JohnDavidMorandante/JolliDew  
@@ -20,7 +20,7 @@ date: "November 2026"
 | Ardion Nicolas Dela Cruz Tamagos | Design, frontend, art, QA | 20% |
 | Iszen Paul Masculino Ventura | Group leader, ideas, documentation, QA | 10% |
 
-![Main menu](docs/screenshots/menu-desktop.png){width=85%}
+![BeeDashDiner public landing page](docs/screenshots/landing-desktop.png){width=100%}
 
 # 1. SWOT analysis
 
@@ -59,7 +59,7 @@ the assigned system, not only on the game.
 
 ## 2.1 Problem and users
 
-JolliDew is a small idle restaurant game. A player runs a bee café: guests
+BeeDashDiner is a small idle restaurant game. A player runs a bee café: guests
 arrive automatically, bees cook and serve, and honey buys upgrades. The site
 also has a full administrator area for account management.
 
@@ -68,6 +68,17 @@ also has a full administrator area for account management.
 | Guest | Register, log in, read the rules. Cannot enter the game or admin area. |
 | Player | Play the game, save progress, view profile, upload an avatar, change password, restart their own progress. |
 | Administrator | All player capabilities plus user CRUD, role changes, password resets, progress resets, account deletion and the audit log. |
+
+### Entry flow
+
+A visitor first sees a public landing page with the game preview, three-map
+gallery, rules summary and clear **Play now / Create account** actions. The
+shared navigation is present from that first page. After login, the player lands
+on the main menu; **Exit** returns there, and **Log out** returns to the landing
+page. Local XAMPP `/JolliDew/` redirects to the landing page, while Render serves
+it at `/`.
+
+![Main menu](docs/screenshots/menu-desktop.png){width=78%}
 
 ## 2.2 Feature list
 
@@ -183,6 +194,7 @@ or drift far away from them.
 | 7. Audio | Procedural Web Audio engine with compressor, reverb, volume sliders, soft timbres, slow ambient music, ducking and tab-hide suspension. | Context running; slider persistence; no console errors. |
 | 8. Rubric features | Shared nav, profile/avatar upload, password change, access-denied page, restart, help/win copy, menu progress. | Live XAMPP checks for each flow. |
 | 9. Deployment package | Dockerfile, Render entrypoint, env-based DB config, `render.yaml`, deployment guide, database export. | Ready for Render; URL to be added after deploy. |
+| 9b. Landing and brand | Added a public landing page, root redirect, home-first navigation, and standardised the visible product name to BeeDashDiner (repo/folder stays JolliDew). | Landing screenshots at 320 and 1440; brand check. |
 | 10. Documentation | README, game rules, testing record, security/scalability proposal, reflections, video script. | This document and `docs/`. |
 
 ![Game on a phone](docs/screenshots/game-phone.png){width=48%}
@@ -225,6 +237,7 @@ or drift far away from them.
 | T13 | Maps and menu sign | Switch to levels 1, 5 and 8 at 360, 568×320 and 1440 | Distinct maps; sign always 3–8px above stalls; no overflow | 3/4/5 stations, correct decor, no overlap | Pass |
 | T14 | Colour contrast | Open menu, help and profile; inspect gold buttons | Dark text on gold, readable labels | Button text corrected | Pass |
 | T15 | Google account password | Simulate a Google-created account; try manual login, then set a local password in Profile and log in manually | Helpful message first; local login works after setting | Both stages passed | Pass |
+| T16 | Landing and home flow | Visit `/JolliDew/`, use Play/Create account, log out | Landing loads, CTAs work, logout returns home | Root 302 to landing; landing 200; flow verified | Pass |
 
 ## 5.3 Bugs found and fixed
 

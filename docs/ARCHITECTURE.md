@@ -8,8 +8,9 @@ no build step.
 ## 1. Request flow
 
 ```text
-login.php / register.php / google-login.php
-        │  session (Auth)
+index.php (public landing) ── Play/Create account ──► login.php / register.php
+        │                                                │  session (Auth)
+        │◄──────────────── Log out ─────────────────────┘
         ▼
 Mainmenu.php ── Play Game ──► fetch in-game.php
         │                         │

@@ -149,7 +149,7 @@ $link = fn(int $p): string => 'admin.php?' . http_build_query(['q' => $q, 'page'
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin - JolliDew</title>
+    <title>Admin - BeeDashDiner</title>
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
     <link rel="stylesheet" href="vendor/bootstrap/bootstrap.min.css">
     <link rel="stylesheet" href="css/site-nav.css">
@@ -178,7 +178,7 @@ $link = fn(int $p): string => 'admin.php?' . http_build_query(['q' => $q, 'page'
 <div class="container py-4">
     <div class="d-flex justify-content-between align-items-center flex-wrap mb-3">
         <div>
-            <h1 class="h3 mb-1">🍯 JolliDew admin</h1>
+            <h1 class="h3 mb-1">🍯 BeeDashDiner admin</h1>
             <div class="muted">Signed in as <strong><?= e($me['username']) ?></strong> (<?= e($me['role']) ?>)</div>
         </div>
         <div class="mt-2 mt-sm-0">

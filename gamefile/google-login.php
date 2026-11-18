@@ -29,7 +29,7 @@ function google_login_error(string $message, int $code = 400): void
     http_response_code($code);
     echo '<!doctype html><html lang="en"><head><meta charset="utf-8">'
         . '<meta name="viewport" content="width=device-width,initial-scale=1">'
-        . '<title>Google sign-in - JolliDew</title>'
+        . '<title>Google sign-in - BeeDashDiner</title>'
         . '<style>body{font-family:system-ui,sans-serif;background:#1f160b;color:#fff6df;'
         . 'display:grid;place-items:center;min-height:100vh;margin:0;padding:24px}'
         . 'main{max-width:520px;background:#33291a;border-radius:16px;padding:24px}'

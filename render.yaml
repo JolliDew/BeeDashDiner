@@ -1,10 +1,10 @@
 services:
   - type: web
-    name: jollidew
+    name: beedashdiner
     runtime: docker
     plan: free
     dockerfilePath: ./Dockerfile
-    healthCheckPath: /login.php
+    healthCheckPath: /
     autoDeploy: true
     envVars:
       - key: DATABASE_URL

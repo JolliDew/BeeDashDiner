@@ -138,7 +138,7 @@ $signInMethod = $authProvider === 'google'
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Profile - JolliDew</title>
+    <title>Profile - BeeDashDiner</title>
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
     <link rel="stylesheet" href="css/site-nav.css">
     <link rel="stylesheet" href="css/pages.css">
@@ -194,7 +194,7 @@ $signInMethod = $authProvider === 'google'
 
         <h2><?= $needsPasswordSetup ? 'Set a local password' : 'Change password' ?></h2>
         <?php if ($needsPasswordSetup): ?>
-            <p class="muted">This account was created with Google, so JolliDew never received your Google password. Set a password here if you also want to sign in with your email or username. Google sign-in will keep working.</p>
+            <p class="muted">This account was created with Google, so BeeDashDiner never received your Google password. Set a password here if you also want to sign in with your email or username. Google sign-in will keep working.</p>
         <?php endif; ?>
         <form action="profile.php" method="POST">
             <?= Csrf::field() ?>

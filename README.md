@@ -1,9 +1,10 @@
-# 🍯 JolliDew (BeeDashDiner)
+# 🍯 BeeDashDiner
 
 A small idle restaurant game built with **vanilla JavaScript modules**, **PHP**, and **MySQL/MariaDB or PostgreSQL**. You run a bee café: hire automatic workers, improve recipes, complete missions, unlock new restaurants, and spend diamonds on cosmetics.
 
 > **Branch:** `feat/scene-first-ui`
 > **What it contains:** the scene-first UI (food-stall stations, café entrance, desktop playfield, procedural audio) on top of Emman's redesign, plus bug fixes, security hardening, full admin CRUD, save format v3, and tests.
+> **Name:** **BeeDashDiner** is the product name. The GitHub repository and local XAMPP folder remain `JolliDew` for continuity and submission paths.
 
 The backend uses **PDO** and supports both **MySQL/MariaDB** (XAMPP) and **PostgreSQL** (including Supabase). The gameplay and API code are identical on both engines.
 
@@ -50,7 +51,8 @@ passwords are intentionally simple and exist only for grading.
 | **Diamonds & cosmetics** | Mission/level rewards buy four bee accessories. Cosmetics are saved and shown on every bee. |
 | **Admin panel** | Full user CRUD: search, paginate, create, edit role/email/username, reset password, reset progress, delete, and audit log. |
 | **Profile & media** | Players can upload a JPEG/PNG/WebP profile picture (type, size and image checks), change their password, and see their saved level/honey. |
-| **Shared navigation** | One role-aware menu on every page: Game, How to play, Profile, Admin (admins only), Log out. |
+| **Shared navigation** | One role-aware menu on every page: Home, Game, How to play, Profile, Admin (admins only), Log out. |
+| **Public landing** | A responsive home page with the game preview, three-map gallery, feature summary and Play/Create-account calls to action. |
 | **Restart** | A confirmed **Restart progress** action deletes only the signed-in player's save and starts a fresh game. |
 | **Save v3** | Global staff, global upgrades, and compact station records. Old v1/v2 saves migrate automatically. |
 | **Security** | Config-driven Google OAuth with verified-email checks, CSRF-protected forms, secure session cookies, and no committed secrets. |
@@ -96,7 +98,7 @@ Start **Apache** and **MySQL** in XAMPP.
 mysql -u root -p < gamefile/login_db.sql
 ```
 
-**Existing JolliDew database:** import `gamefile/upgrade_db.sql` once instead. It adds the admin role/audit tables and keeps old saves.
+**Existing database:** import `gamefile/upgrade_db.sql` once instead. It adds the admin role/audit tables and keeps old saves.
 
 #### Option B — PostgreSQL/Supabase
 
@@ -126,7 +128,14 @@ Fill in the real values. `gamefile/db.php` is ignored by git, so credentials are
 
 ### 4. Run the game
 
-**XAMPP/Apache:** put the project in `htdocs`, for example `http://localhost/JolliDew/gamefile/login.php`.
+**XAMPP/Apache:** put the project in `htdocs`, then open the landing page:
+
+```text
+http://localhost/JolliDew/
+```
+
+It redirects to `gamefile/index.php`. The direct login page is
+`http://localhost/JolliDew/gamefile/login.php`.
 
 **PHP built-in server:**
 
@@ -134,7 +143,7 @@ Fill in the real values. `gamefile/db.php` is ignored by git, so credentials are
 php -S 127.0.0.1:8000 -t gamefile
 ```
 
-Then open <http://127.0.0.1:8000/login.php>.
+Then open <http://127.0.0.1:8000/>.
 
 ### 5. Promote the first admin
 
@@ -167,7 +176,7 @@ http://localhost/JolliDew/gamefile/google-login.php
 If the automatic URI does not match, set `redirect_uri` in `google-config.php` to the exact registered value. The login only accepts Google accounts whose email is verified.
 
 Google-created accounts are stored with a random hidden password; the Google
-password is never shared with JolliDew. Sign in with Google once, open
+password is never shared with BeeDashDiner. Sign in with Google once, open
 **Profile**, and use **Set a local password** if you also want to log in with a
 username/email and password. An administrator can also reset the password from
 the admin panel. If a manual account already uses the same email, Google
@@ -381,4 +390,4 @@ The project intentionally does **not** ship real credentials. `db.example.php`, 
 
 ## 📄 License / attribution
 
-Built by the JolliDew group. Inspiration: **NEPTUNE (TREEPLLA)** — *Cat Snack Bar*.
+Built by the BeeDashDiner group. Inspiration: **NEPTUNE (TREEPLLA)** — *Cat Snack Bar*.

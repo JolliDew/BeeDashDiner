@@ -43,6 +43,7 @@ export class MissionTracker {
       if (!paid) {
         this.state.missions.done.push(mission.id);
         this.game.grantReward(mission.reward, `Mission complete: ${mission.text}`);
+        this.game.sound?.mission();
       }
       advanced = true;
     }
@@ -51,6 +52,7 @@ export class MissionTracker {
       this.state.missions.finished = true;
       const final = LEVELS[LEVELS.length - 1]?.reward;
       if (final) this.game.grantReward(final, 'Game complete!');
+      this.game.sound?.levelUp();
       advanced = true;
     }
 

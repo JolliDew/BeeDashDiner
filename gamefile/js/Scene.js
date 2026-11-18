@@ -7,6 +7,7 @@ export class Scene {
     this.host = host; this.state = state; this.economy = economy;
     this.bees = []; this.customers = []; this.seats = []; this.stationEls = []; this.seatEls = [];
     this.spawnTimer = 0; this.burst = 0; this.quiet = false;
+    this.sound = null;
     this.kitchenY = 26;
     // Guests enter and leave through the same bottom-left door. The aisle is
     // the first/last step on the dining-room floor.
@@ -190,6 +191,7 @@ export class Scene {
     // The chair is reserved immediately so two guests can never target it.
     this.seats[seat] = c; this.customers.push(c);
     c.render(this.host.clientWidth, this.host.clientHeight);
+    if (!this.quiet) this.sound?.enter();
   }
 
   /** Called when a departing guest clears the seating area. */
@@ -211,7 +213,9 @@ export class Scene {
       this.state.stats.tips++;
       this.state.stats.tipHoney += tip;
       this.pop(bee.x + 4, bee.y - 11, '🪙 +' + fmt(tip), 'tip');
+      if (!this.quiet) this.sound?.tip();
     }
+    if (!this.quiet) this.sound?.serve();
 
     customer.served(tip);
     // The chair stays reserved until the guest reaches the aisle.
@@ -232,7 +236,13 @@ export class Scene {
     }
     this.bees.forEach(b => b.update(dt, this));
     for (const c of [...this.customers]) {
-      if (!c.update(dt, this)) { c.el.remove(); this.customers.splice(this.customers.indexOf(c), 1); }
+      const before = c.state;
+      if (!c.update(dt, this)) {
+        if (!this.quiet) this.sound?.leave();
+        c.el.remove(); this.customers.splice(this.customers.indexOf(c), 1);
+      } else if (before === 'enter' && c.state === 'wait' && !this.quiet) {
+        this.sound?.order();
+      }
     }
   }
 

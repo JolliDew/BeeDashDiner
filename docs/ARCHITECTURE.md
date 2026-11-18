@@ -39,11 +39,12 @@ Mainmenu.php ── Play Game ──► fetch in-game.php
 | `js/Economy.js` | Prices, cook times, seats, slots, costs, capacity. |
 | `js/upgrades.js` | Global upgrade definitions (including cook speed and Golden recipe). |
 | `js/WorkerAI.js` | Home-station preference and global longest-wait job picker. |
-| `js/Scene.js` | DOM scene, station indicators, queue chairs, spawning, delivery. |
+| `js/Scene.js` | DOM scene, food stalls, entrance, queue chairs, spawning, delivery. |
 | `js/entities.js` | Bee and Customer movement, claiming, cooking, tips, cosmetics. |
-| `js/UpgradePanel.js` | Mission card, station/global/cosmetics modals, keyboard access. |
+| `js/UpgradePanel.js` | Dock, mission/station/global/cosmetics modals, keyboard access. |
 | `js/MissionTracker.js` | Ordered mission completion and one-time rewards. |
-| `js/SaveService.js` | Server save/load with a `localStorage` backup. |
+| `js/SaveService.js` | Serialized server save/load with a `localStorage` backup. |
+| `js/Sound.js` | Procedural Web Audio SFX and ambient music; no sample files. |
 | `js/DevTools.js` | Optional developer panel (`$devMode` in `in-game.php`). |
 | `js/cosmetics.js` | Cosmetic definitions and equip rules. |
 | `css/bee-game.css`, `css/bee-modals.css` | Flat-scoped game and modal styles. |

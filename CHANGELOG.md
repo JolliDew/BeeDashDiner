@@ -23,6 +23,10 @@ HUD and a three-button dock.
   hanging OPEN sign in the bottom-left corner.
 - **Room furnishing:** tiled kitchen wall, jar shelf, pendant lamps, a MENU
   board, a soft rug and plants around the dining room.
+- **Procedural audio:** Web Audio sounds for UI clicks, guests arriving and
+  ordering, serving, coins and tips, station unlocks, upgrades, purchases,
+  missions and level-ups, plus a soft ambient loop. The speaker button opens
+  separate Sound effects / Music toggles, saved in `localStorage`.
 - **Seat-layout tests** for full and short chair rows.
 
 ### Changed

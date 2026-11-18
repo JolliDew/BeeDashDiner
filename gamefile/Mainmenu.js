@@ -1,6 +1,16 @@
 let currentGame = null;
 let starting = false;
 
+/** Create/resume the shared AudioContext inside the Play click gesture. */
+function unlockAudio() {
+    try {
+        const Ctx = window.AudioContext || window.webkitAudioContext;
+        if (!Ctx) return;
+        if (!window.__jolliAudioCtx) window.__jolliAudioCtx = new Ctx();
+        if (window.__jolliAudioCtx.state === 'suspended') window.__jolliAudioCtx.resume();
+    } catch (e) { /* audio is optional */ }
+}
+
 function showMenuError(message) {
     let el = document.getElementById('menu-error');
     if (!el) {
@@ -15,6 +25,7 @@ function showMenuError(message) {
 function startGame() {
     // A fast double-click must not create two game loops.
     if (starting || currentGame) return;
+    unlockAudio();
     starting = true;
 
     const old = document.getElementById('menu-error');

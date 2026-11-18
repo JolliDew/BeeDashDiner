@@ -2,8 +2,8 @@
 
 A small idle restaurant game built with **vanilla JavaScript modules**, **PHP**, and **MySQL/MariaDB or PostgreSQL**. You run a bee café: hire automatic workers, improve recipes, complete missions, unlock new restaurants, and spend diamonds on cosmetics.
 
-> **Branch:** `fix/emman-redesign-admin`
-> **What it contains:** Emman's newer redesign (popup upgrade panels, global staff, station milestones, queue chairs, station indicators) plus bug fixes, security hardening, full admin CRUD, save format v3, and tests.
+> **Branch:** `feat/scene-first-ui`
+> **What it contains:** the scene-first UI (food-stall stations, café entrance, desktop playfield, procedural audio) on top of Emman's redesign, plus bug fixes, security hardening, full admin CRUD, save format v3, and tests.
 
 The backend uses **PDO** and supports both **MySQL/MariaDB** (XAMPP) and **PostgreSQL** (including Supabase). The gameplay and API code are identical on both engines.
 
@@ -15,12 +15,13 @@ The backend uses **PDO** and supports both **MySQL/MariaDB** (XAMPP) and **Postg
 |---|---|
 | **10 levels** | Levels 1–4 are Meadow Stand, 5–7 are Hive Café, 8–10 are Royal Hive. |
 | **Automatic workers** | Bees prefer their home station, then help the longest-waiting customer anywhere. A bee helping away from home gets a gold glow. |
-| **Global staff** | One hive team serves every station. Hire bees in the **Staff & global upgrades** popup. |
+| **Global staff** | One hive team serves every station. Hire bees in the **Upgrades** panel. |
 | **Queue** | Starts with **4 waiting chairs**; each *Bigger waiting area* level adds one chair. The HUD shows `🪑 waiting/seats`. |
 | **Tips** | Customers sometimes leave a bonus (10–30% of the dish price). Tip chance starts at 8%, +2% per Tip jar level, capped at **28%**. |
 | **Recipe milestones** | Recipes go to level 10. Milestones at **2/6/10** add a worker slot; milestones at **4/8** double that station's profit. |
 | **Global upgrades** | Tip jar, bigger queue, faster walking, kitchen drills, and Golden recipe. They survive restaurant moves. |
 | **Popup panels** | Tap/click a station to open its upgrade panel. Staff, global upgrades, and cosmetics each have their own modal. |
+| **Audio** | Procedural Web Audio effects for guests, serving, tips, upgrades, missions and level-ups, plus ambient music. Separate Sound effects / Music toggles are saved in the browser. |
 | **Missions** | Three missions per level. Missions must be finished before you advance. Already-satisfied missions auto-complete in order. |
 | **Diamonds & cosmetics** | Mission/level rewards buy four bee accessories. Cosmetics are saved and shown on every bee. |
 | **Admin panel** | Full user CRUD: search, paginate, create, edit role/email/username, reset password, reset progress, delete, and audit log. |

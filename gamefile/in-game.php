@@ -23,6 +23,13 @@ header('Expires: 0');
                         <span class="hud-item" id="hud-queue">🪑 0/4</span>
                     </div>
                     <div class="hud-actions">
+                        <div class="sound-wrap">
+                            <button id="soundbtn" class="sound-btn" type="button" title="Audio settings" aria-label="Audio settings" aria-haspopup="dialog" aria-expanded="false" aria-controls="audio-menu" aria-pressed="true">🔊</button>
+                            <div id="audio-menu" class="audio-menu" role="dialog" aria-label="Audio settings" hidden>
+                                <button type="button" class="audio-row" data-audio="sfx" aria-pressed="true"><span>Sound effects</span><span class="state">On</span></button>
+                                <button type="button" class="audio-row" data-audio="music" aria-pressed="true"><span>Music</span><span class="state">On</span></button>
+                            </div>
+                        </div>
                         <button id="devbtn" type="button" title="Dev mode" aria-label="Toggle developer tools" hidden>🛠</button>
                         <button class="menu-btn exit-btn" type="button" onclick="returnToMenu()" title="Exit to main menu" aria-label="Exit to main menu">
                             <span aria-hidden="true">🚪</span>

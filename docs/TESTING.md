@@ -110,6 +110,10 @@ Use a throwaway account and a throwaway database when possible.
 - [ ] Move to Hive Café: stations and staff reset, global upgrades remain.
 - [ ] Reload the page: honey, level, staff, upgrades, cosmetics, and missions persist.
 - [ ] Exit to menu and re-enter; the server save is loaded.
+- [ ] Speaker button opens audio settings; Sound effects and Music toggle
+      independently, play immediately, and keep their state after a reload.
+- [ ] Guest arrival/order, serving, tips, station unlock, purchase, mission and
+      level-up each have a distinct sound; muting silences everything.
 
 ### Admin flow
 

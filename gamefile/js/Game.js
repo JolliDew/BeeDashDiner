@@ -5,6 +5,7 @@ import { UpgradePanel } from './UpgradePanel.js';
 import { MissionTracker } from './MissionTracker.js';
 import { DevTools } from './DevTools.js';
 import { SaveService } from './SaveService.js';
+import { SoundEngine } from './Sound.js';
 import { GLOBAL_UPGRADES, globalDef } from './upgrades.js';
 import { cosmeticDef } from './cosmetics.js';
 
@@ -19,6 +20,8 @@ export class Game {
       save: root.querySelector('#hud-save')
     };
     this.saveTimer = 0;
+    this.sound = new SoundEngine();
+    this.soundBtn = null; this.audioMenu = null;
     this.saves = new SaveService({ url: apiUrl, userId, onStatus: s => this.setSaveStatus(s) });
   }
 
@@ -38,12 +41,14 @@ export class Game {
     this.state = await this.saves.load();
     this.economy = new Economy(this.state);
     this.scene = new Scene(this.root.querySelector('#scene'), this.state, this.economy);
+    this.scene.sound = this.sound;
     this.tracker = new MissionTracker(this);
     this.panel = new UpgradePanel(this.root.querySelector('#panel'), this);
     if (this.devMode) this.dev = new DevTools(this.root, this);
 
     this.scene.build();
     this.panel.build();
+    this.setupAudio();
     this.changed();
     this.lastSave = JSON.stringify(this.state);
 
@@ -51,6 +56,78 @@ export class Game {
     this.last = performance.now(); this.acc = 0; this.running = true;
     this.raf = requestAnimationFrame(t => this.loop(t));
     return this;
+  }
+
+  /** Wire the audio panel and the global UI click. */
+  setupAudio() {
+    this.sound?.start();
+    this.sound?.attachUnlock();
+    this.soundBtn = this.root.querySelector('#soundbtn');
+    this.audioMenu = this.root.querySelector('#audio-menu');
+    this.renderAudio();
+
+    this._onSoundBtn = e => {
+      e.stopPropagation();
+      if (!this.audioMenu) return;
+      const open = this.audioMenu.hidden;
+      this.audioMenu.hidden = !open;
+      this.soundBtn.setAttribute('aria-expanded', String(open));
+      if (open) this.audioMenu.querySelector('button')?.focus();
+      this.sound?.click();
+    };
+    this.soundBtn?.addEventListener('click', this._onSoundBtn);
+
+    this._onAudioRow = e => {
+      const row = e.target.closest('[data-audio]');
+      if (!row) return;
+      if (row.dataset.audio === 'sfx') this.sound?.setSfx(!this.sound?.sfxOn);
+      else this.sound?.setMusic(!this.sound?.musicOn);
+      this.renderAudio();
+      this.sound?.click();
+    };
+    this.audioMenu?.addEventListener('click', this._onAudioRow);
+
+    this._closeAudio = () => {
+      if (!this.audioMenu) return;
+      this.audioMenu.hidden = true;
+      this.soundBtn?.setAttribute('aria-expanded', 'false');
+    };
+    this._onAudioOutside = e => {
+      if (!this.audioMenu || this.audioMenu.hidden) return;
+      if (this.audioMenu.contains(e.target) || this.soundBtn?.contains(e.target)) return;
+      this._closeAudio();
+    };
+    this._onAudioKey = e => {
+      if (e.key === 'Escape' && this.audioMenu && !this.audioMenu.hidden) {
+        this._closeAudio();
+        this.soundBtn?.focus();
+      }
+    };
+    document.addEventListener('pointerdown', this._onAudioOutside);
+    document.addEventListener('keydown', this._onAudioKey);
+
+    this._onUiClick = e => {
+      if (e.target.closest('#soundbtn, #audio-menu')) return;
+      if (e.target.closest('.dock-btn, .stn, .exit-btn, #devbtn, .modal .close, .modal-footer .btn')) {
+        this.sound?.click();
+      }
+    };
+    document.addEventListener('click', this._onUiClick);
+  }
+
+  renderAudio() {
+    if (!this.soundBtn) return;
+    const any = this.sound?.sfxOn || this.sound?.musicOn;
+    this.soundBtn.textContent = any ? '🔊' : '🔇';
+    this.soundBtn.setAttribute('aria-pressed', String(any));
+    this.soundBtn.title = any ? 'Audio settings (on)' : 'Audio settings (muted)';
+    if (!this.audioMenu) return;
+    this.audioMenu.querySelectorAll('[data-audio]').forEach(row => {
+      const on = row.dataset.audio === 'sfx' ? this.sound?.sfxOn : this.sound?.musicOn;
+      row.setAttribute('aria-pressed', String(on));
+      const state = row.querySelector('.state');
+      if (state) state.textContent = on ? 'On' : 'Off';
+    });
   }
 
   /** Autosave only when the state actually changed since the last success. */
@@ -128,6 +205,7 @@ export class Game {
     this.state.spend(cost);
     s.unlocked = true; s.recipe = 0;
     this.scene.syncBees(); this.panel.build(); this.changed();
+    this.sound?.stationUnlock();
   }
 
   hireBee() {
@@ -138,6 +216,7 @@ export class Game {
     this.state.spend(cost);
     this.state.staff++;
     this.scene.syncBees(); this.changed();
+    this.sound?.purchase();
   }
 
   upgradeRecipe(i) {
@@ -152,6 +231,7 @@ export class Game {
         : `Milestone! ${name} profit is doubled.`);
     }
     this.changed();
+    this.sound?.upgrade();
   }
 
   buyGlobal(id) {
@@ -165,6 +245,7 @@ export class Game {
     this.state.upgrades[id] = level + 1;
     if (id === 'queue') this.scene.syncSeats();
     this.changed();
+    this.sound?.purchase();
   }
 
   cosmeticAction(id) {
@@ -180,10 +261,13 @@ export class Game {
       cos.owned.push(id);
       cos.equipped[def.kind] = id;
       this.toast(`Unlocked ${def.name}!`);
+      this.sound?.purchase();
     } else if (equipped === id) {
       cos.equipped[def.kind] = '';
+      this.sound?.click();
     } else {
       cos.equipped[def.kind] = id;
+      this.sound?.click();
     }
     this.changed();
   }
@@ -211,6 +295,7 @@ export class Game {
     } else { this.scene.syncBees(); this.scene.syncSeats(); }
     this.panel.build();
     this.changed();
+    this.sound?.levelUp();
   }
 
   devSetLevel(level) {
@@ -262,6 +347,12 @@ export class Game {
     cancelAnimationFrame(this.raf);
     clearInterval(this.autosave);
     clearTimeout(this.saveTimer);
+    this.sound?.stop();
+    if (this.soundBtn && this._onSoundBtn) this.soundBtn.removeEventListener('click', this._onSoundBtn);
+    if (this.audioMenu && this._onAudioRow) this.audioMenu.removeEventListener('click', this._onAudioRow);
+    if (this._onAudioOutside) document.removeEventListener('pointerdown', this._onAudioOutside);
+    if (this._onAudioKey) document.removeEventListener('keydown', this._onAudioKey);
+    if (this._onUiClick) document.removeEventListener('click', this._onUiClick);
     this.panel?.destroy();
     if (this.state) this.saves.push(this.state, true);
   }

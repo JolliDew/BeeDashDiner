@@ -31,7 +31,7 @@ npm run test:php    -> php tests/SaveRepository.test.php
 Expected:
 
 ```text
-50 JavaScript tests passing
+52 JavaScript tests passing
 PHP SaveRepository checks passing
 PHP AdminRepository checks passing (in-memory SQLite)
 ```
@@ -115,6 +115,28 @@ Use a throwaway account and a throwaway database when possible.
 - [ ] Guest arrival/order, serving, tips, station unlock, purchase, mission and
       level-up each have a distinct sound; muting silences everything.
 
+### Navigation, profile and media
+
+- [ ] The shared navigation appears on login, register, menu, help, profile,
+      admin and denied pages.
+- [ ] Guests see Log in / Register; players see Game, How to play, Profile and
+      Log out; admins also see Admin.
+- [ ] On a phone, the ☰ button opens the navigation and every link is reachable.
+- [ ] Profile shows username, email, role, saved level/honey, avatar and forms.
+- [ ] Upload a JPEG/PNG/WebP under 2 MB; the avatar appears in the nav and profile.
+- [ ] A renamed text file or a file over 2 MB is rejected and no file is written.
+- [ ] Restart progress asks for confirmation, deletes only the signed-in player's
+      save, and the menu shows the success message.
+- [ ] Change password requires the current password and at least 8 characters.
+- [ ] Opening `admin.php` as a player shows the 403 access-denied page.
+
+### Save and resume
+
+- [ ] Change honey or buy an upgrade; hide the tab, then reload. The same state
+      returns and the welcome-back toast appears.
+- [ ] Press Exit and re-enter; the state is loaded again.
+- [ ] With the server unavailable, the local backup restores the last state.
+
 ### Admin flow
 
 - [ ] Run `php gamefile/bin/make-admin.php <username>`.
@@ -191,7 +213,7 @@ On **2026-11-17**, the branch was checked with:
 
 Results:
 
-- `npm test`: 50 JavaScript tests and both PHP suites pass;
+- `npm test`: 52 JavaScript tests and both PHP suites pass;
 - `login_db.sql` imports cleanly twice;
 - `upgrade_db.sql` applies to the live `origin/main` schema and is re-runnable;
 - register → login → CLI promotion → admin create/edit/password/reset/delete,

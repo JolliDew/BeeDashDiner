@@ -15,11 +15,14 @@ CREATE TABLE IF NOT EXISTS users (
   email VARCHAR(100) NOT NULL UNIQUE,
   password VARCHAR(255) NOT NULL,
   role VARCHAR(20) NOT NULL DEFAULT 'player',
+  avatar VARCHAR(255) NULL,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- Existing databases created before the admin panel need this column.
 ALTER TABLE users ADD COLUMN IF NOT EXISTS role VARCHAR(20) NOT NULL DEFAULT 'player';
+-- Profile picture uploaded by the player (path relative to gamefile/).
+ALTER TABLE users ADD COLUMN IF NOT EXISTS avatar VARCHAR(255) NULL;
 
 -- Admin action history. Usernames are snapshotted so the log survives a
 -- deleted account.

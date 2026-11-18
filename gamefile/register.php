@@ -6,6 +6,10 @@ Auth::start();
 $authCssV = @filemtime(__DIR__ . '/logindesign.css') ?: 1;
 header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
 header('Pragma: no-cache');
+if (Auth::userId() !== null) {
+    header('Location: Mainmenu.php');
+    exit();
+}
 
 $error = '';
 $success = '';
@@ -59,6 +63,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <title>Register - JolliDew</title>
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
     <link rel="stylesheet" href="logindesign.css?v=<?= $authCssV ?>">
+    <link rel="stylesheet" href="css/site-nav.css">
     <style>
         .password-container {
             position: relative;
@@ -90,7 +95,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
     </style>
 </head>
-<body>
+<body class="has-nav">
+<?php $navActive = 'register'; include 'includes/nav.php'; ?>
 <div class="lines">
   <div class="line"></div>
   <div class="line"></div>

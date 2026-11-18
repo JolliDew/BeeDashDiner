@@ -41,6 +41,8 @@ ALTER TABLE player_stations
   ADD COLUMN IF NOT EXISTS work_lvl TINYINT NOT NULL DEFAULT 0,
   ADD COLUMN IF NOT EXISTS profit_x2 TINYINT NOT NULL DEFAULT 0;
 
+ALTER TABLE users ADD COLUMN IF NOT EXISTS avatar VARCHAR(255) NULL;
+
 -- Existing saves were location-based. Give them the matching starting tier so
 -- they do not replay the first restaurants. New players stay at level 1.
 UPDATE player_progress

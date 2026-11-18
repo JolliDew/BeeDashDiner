@@ -25,8 +25,18 @@ HUD and a three-button dock.
   board, a soft rug and plants around the dining room.
 - **Procedural audio:** Web Audio sounds for UI clicks, guests arriving and
   ordering, serving, coins and tips, station unlocks, upgrades, purchases,
-  missions and level-ups, plus a soft ambient loop. The speaker button opens
-  separate Sound effects / Music toggles, saved in `localStorage`.
+  missions and level-ups, plus a slow ambient loop. The speaker panel has
+  separate Sound effects / Music volume sliders, saved in `localStorage`.
+- **Shared navigation:** one role-aware menu on every page (Game, How to play,
+  Profile, Admin for admins, Log out).
+- **Profile and media:** avatar upload with type, size and image checks; password
+  change; saved level/honey summary.
+- **Restart and win copy:** an explicit Level 10 win condition, a confirmation
+  restart that deletes only the current player's save, and a completed-game
+  banner.
+- **Access-denied page:** a proper 403 page for players who open admin URLs.
+- **Render deployment package:** Dockerfile, port-aware entrypoint, env-based
+  database connection, `render.yaml` and a deployment guide.
 - **Seat-layout tests** for full and short chair rows.
 
 ### Changed
@@ -44,8 +54,16 @@ HUD and a three-button dock.
 - **Bee spacing:** bees get small vertical offsets so a full hive does not form
   one overlapping line.
 - **Save feedback:** `Saving…` → `Saved`, then fades out after 2.2 seconds.
-  Autosave runs every 10s only when the state changed, and requests are
-  serialized. Errors stay on screen.
+  Autosave runs every 10s only when the state changed, requests are serialized,
+  page-hide sends a keepalive save, and a missing server save falls back to the
+  local backup. A welcome-back toast confirms the resume.
+- **Calm arrivals:** the opening customer burst was removed; the first guest is
+  delayed and a minimum door gap keeps guests from piling onto one pixel.
+- **Workers report in:** new bees start at the wall hive and fly to their home
+  station instead of appearing already distributed.
+- **Audio mixing:** compressor/limiter, shared reverb, perceptual SFX/music
+  sliders, softer sine/triangle timbres, slow Cmaj7/Am7/Fmaj7/G6 ambience,
+  music ducking and tab-hide suspension.
 - **Fresh builds:** game HTML is fetched with `no-store`, PHP sends no-cache
   headers, and CSS URLs are versioned by file modification time.
 
@@ -65,7 +83,7 @@ HUD and a three-button dock.
 
 ### Verification
 
-- 50 JavaScript tests and all PHP checks pass.
+- 52 JavaScript tests and all PHP checks pass.
 - XAMPP (Apache) at 390×844, 440×900 and 1440×900: scene 86.4%/85.7%/85.1%,
   dock fits, mission sheet on phones, centered desktop dialog, no JS errors.
 - Reduced motion disables guest bobbing; a served guest reaches `happy`, then

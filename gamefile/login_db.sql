@@ -12,6 +12,7 @@ CREATE TABLE IF NOT EXISTS users (
   email VARCHAR(100) NOT NULL UNIQUE,
   password VARCHAR(255) NOT NULL,
   role VARCHAR(20) NOT NULL DEFAULT 'player',
+  avatar VARCHAR(255) NULL,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -19,6 +20,7 @@ CREATE TABLE IF NOT EXISTS users (
 -- MariaDB supports IF NOT EXISTS. On MySQL 8, run this line once without it
 -- if the column is missing.
 ALTER TABLE users ADD COLUMN IF NOT EXISTS role VARCHAR(20) NOT NULL DEFAULT 'player';
+ALTER TABLE users ADD COLUMN IF NOT EXISTS avatar VARCHAR(255) NULL;
 
 -- Admin action history. Usernames are snapshotted so the log survives a
 -- deleted account.

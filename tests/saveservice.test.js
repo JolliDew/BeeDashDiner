@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 
 import { SaveService } from '../gamefile/js/SaveService.js';
+import { GameState } from '../gamefile/js/GameState.js';
 
 const storage = () => {
   const data = new Map();
@@ -50,4 +51,39 @@ test('a failed save returns false and reports the failure', async t => {
   const saves = new SaveService({ url: 'api.php', userId: '7', onStatus: s => statuses.push(s) });
   assert.equal(await saves.push({ honey: 1 }), false);
   assert.deepEqual(statuses, ['Saving…', 'Save failed']);
+});
+
+test('load falls back to the local copy when the server has no valid save', async t => {
+  const originalFetch = globalThis.fetch;
+  const originalStorage = globalThis.localStorage;
+  t.after(() => { globalThis.fetch = originalFetch; globalThis.localStorage = originalStorage; });
+  const store = storage();
+  globalThis.localStorage = store;
+  const state = new GameState().toJSON();
+  state.honey = 321;
+  store.setItem('beediner:7', JSON.stringify(state));
+  globalThis.fetch = async () => ({ ok: true, json: async () => ({}) });
+
+  const statuses = [];
+  const saves = new SaveService({ url: 'api.php', userId: '7', onStatus: s => statuses.push(s) });
+  const loaded = await saves.load();
+  assert.equal(loaded.honey, 321);
+  assert.equal(saves.loadedFrom, 'local');
+  assert.deepEqual(statuses, ['Offline copy']);
+});
+
+test('pushNow sends a keepalive request and writes the local backup', async t => {
+  const originalFetch = globalThis.fetch;
+  const originalStorage = globalThis.localStorage;
+  t.after(() => { globalThis.fetch = originalFetch; globalThis.localStorage = originalStorage; });
+  const store = storage();
+  globalThis.localStorage = store;
+  let captured = null;
+  globalThis.fetch = async (url, options) => { captured = { url, options }; return { ok: true }; };
+
+  const saves = new SaveService({ url: 'api.php', userId: '7' });
+  saves.pushNow({ honey: 77 });
+  assert.equal(captured.options.keepalive, true);
+  assert.equal(JSON.parse(captured.options.body).honey, 77);
+  assert.equal(JSON.parse(store.getItem('beediner:7')).honey, 77);
 });

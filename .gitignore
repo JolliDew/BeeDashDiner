@@ -9,6 +9,11 @@ gamefile/src/google-config.php
 .env
 .env.*
 
+# User uploads are runtime data, not source.
+gamefile/uploads/*
+!gamefile/uploads/.htaccess
+!gamefile/uploads/.gitkeep
+
 # Dependency folders (not used yet, but keeps future tooling out)
 node_modules/
 

@@ -1,0 +1,141 @@
+/* Shared navigation. Loaded by every page, before the page-specific styles. */
+body.has-nav {
+    padding-top: 72px;
+}
+
+.site-nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    background: rgba(27, 21, 13, .96);
+    border-bottom: 1px solid #4a3b22;
+    box-shadow: 0 4px 18px rgba(0, 0, 0, .28);
+    backdrop-filter: blur(8px);
+}
+
+.site-nav-inner {
+    max-width: 1120px;
+    height: 56px;
+    margin: 0 auto;
+    padding: 0 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.site-brand {
+    color: #ffd84d;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-size: 1.1rem;
+    font-weight: 800;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.site-brand:hover {
+    color: #fff6df;
+}
+
+.site-nav-links {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    margin: 0;
+    padding: 0;
+}
+
+.site-nav-links a {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: #cdbb8f;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-size: .9rem;
+    font-weight: 600;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.site-nav-links a:hover,
+.site-nav-links a[aria-current="page"] {
+    color: #ffd84d;
+}
+
+.site-nav-links .nav-logout {
+    color: #ff9a9a;
+}
+
+.nav-avatar {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 1px solid #7d6438;
+}
+
+.nav-avatar-fallback {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: #ffd84d;
+    color: #241d12;
+    font-size: 12px;
+    font-weight: 900;
+}
+
+.nav-toggle {
+    display: none;
+    padding: 4px 8px;
+    border: 1px solid #5a4929;
+    border-radius: 8px;
+    background: transparent;
+    color: #fff6df;
+    font-size: 20px;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.nav-toggle:focus-visible,
+.site-nav-links a:focus-visible {
+    outline: 3px solid #ffd84d;
+    outline-offset: 2px;
+    border-radius: 4px;
+}
+
+@media (max-width: 720px) {
+    .nav-toggle {
+        display: inline-block;
+    }
+
+    .site-nav-links {
+        display: none;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0;
+        padding: 6px 16px 12px;
+        background: #1b150d;
+        border-bottom: 1px solid #4a3b22;
+        box-shadow: 0 12px 24px rgba(0, 0, 0, .35);
+    }
+
+    .site-nav-links.open {
+        display: flex;
+    }
+
+    .site-nav-links a {
+        min-height: 44px;
+        padding: 8px 4px;
+        border-bottom: 1px solid #33291a;
+    }
+
+    .site-nav-links a:last-child {
+        border-bottom: 0;
+    }
+}

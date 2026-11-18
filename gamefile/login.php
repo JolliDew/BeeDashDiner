@@ -4,6 +4,11 @@ require_once 'src/Auth.php';
 require_once 'src/Csrf.php';
 Auth::start();
 $authCssV = @filemtime(__DIR__ . '/logindesign.css') ?: 1;
+$googleAvailable = is_file(__DIR__ . '/src/google-config.php');
+if (Auth::userId() !== null) {
+    header('Location: Mainmenu.php');
+    exit();
+}
 header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
 header('Pragma: no-cache');
 
@@ -48,8 +53,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
     <!-- Uses the same separate CSS file -->
     <link rel="stylesheet" href="logindesign.css?v=<?= $authCssV ?>">
+    <link rel="stylesheet" href="css/site-nav.css">
 </head>
-<body>
+<body class="has-nav">
+    <?php $navActive = 'login'; include 'includes/nav.php'; ?>
 
     <!-- Background Animated Lines -->
     <div class="lines">
@@ -93,6 +100,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             <button type="submit" class="btn-primary">Log In</button>
         </form>
 
+        <?php if ($googleAvailable): ?>
         <!-- Divider -->
         <div class="divider">
             <span>Or</span>
@@ -108,6 +116,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             </svg>
             Sign in with Google
         </a>
+        <?php endif; ?>
 
         <!-- Footer Link -->
         <p class="footer-text">

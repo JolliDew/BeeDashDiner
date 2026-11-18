@@ -7,6 +7,29 @@ A small idle restaurant game built with **vanilla JavaScript modules**, **PHP**,
 
 The backend uses **PDO** and supports both **MySQL/MariaDB** (XAMPP) and **PostgreSQL** (including Supabase). The gameplay and API code are identical on both engines.
 
+## 👥 Group members
+
+| Member | Contribution |
+|---|---|
+| Klein Rhee Pagulong Sioson | Backend, sound engineering, game logic, integration |
+| John David Pascua Morandante | Backend, database, Google Cloud, GitHub repository owner |
+| Emman Glen Mendoza Wong Yan | Game mechanics, documentation, design, QA |
+| Ardion Nicolas Dela Cruz Tamagos | Design, frontend, art, QA |
+| Iszen Paul Masculino Ventura | Group leader, ideas, documentation, QA |
+
+## 🌐 Live demo and test accounts
+
+After deploying with **[docs/DEPLOY_RENDER.md](docs/DEPLOY_RENDER.md)**:
+
+```text
+Live URL:    https://YOUR-SERVICE.onrender.com
+Player:      demo_player / JolliDemo123!
+Admin:       demo_admin  / JolliDemo123!
+```
+
+Replace `YOUR-SERVICE` with the Render URL before submitting. The demo
+passwords are intentionally simple and exist only for grading.
+
 ---
 
 ## ✨ What changed
@@ -25,6 +48,9 @@ The backend uses **PDO** and supports both **MySQL/MariaDB** (XAMPP) and **Postg
 | **Missions** | Three missions per level. Missions must be finished before you advance. Already-satisfied missions auto-complete in order. |
 | **Diamonds & cosmetics** | Mission/level rewards buy four bee accessories. Cosmetics are saved and shown on every bee. |
 | **Admin panel** | Full user CRUD: search, paginate, create, edit role/email/username, reset password, reset progress, delete, and audit log. |
+| **Profile & media** | Players can upload a JPEG/PNG/WebP profile picture (type, size and image checks), change their password, and see their saved level/honey. |
+| **Shared navigation** | One role-aware menu on every page: Game, How to play, Profile, Admin (admins only), Log out. |
+| **Restart** | A confirmed **Restart progress** action deletes only the signed-in player's save and starts a fresh game. |
 | **Save v3** | Global staff, global upgrades, and compact station records. Old v1/v2 saves migrate automatically. |
 | **Security** | Config-driven Google OAuth with verified-email checks, CSRF-protected forms, secure session cookies, and no committed secrets. |
 
@@ -149,10 +175,15 @@ If the automatic URI does not match, set `redirect_uri` in `google-config.php` t
    - unlock it,
    - raise its recipe level,
    - see its worker slots and milestone list.
-4. Open **Staff & global upgrades** to hire bees and buy restaurant-wide upgrades.
-5. Open **Cosmetics** to spend diamonds.
+4. Open **Upgrades** to hire bees and buy restaurant-wide upgrades.
+5. Open **Shop** to spend diamonds on cosmetics.
 6. Complete all three missions for your level, then press **Advance**.
 7. Finish all 10 levels.
+
+**Win condition:** reach the Royal Hive and complete Level 10. There is no lose
+state; the game is designed to be relaxing. Progress saves automatically, and
+the menu shows your saved level and honey. **Restart progress** on the menu
+deletes only your own save after a confirmation.
 
 ### Moving restaurants
 
@@ -280,6 +311,21 @@ The server is authoritative: `SaveRepository` re-clamps currencies, levels, stat
 
 ---
 
+## ☁️ Deploy on Render
+
+The repository includes a `Dockerfile` (PHP 8.2 + Apache + PDO PostgreSQL) and
+`render.yaml`. The database remains on Supabase. Step-by-step instructions,
+environment variables, first-admin promotion, test accounts and free-plan
+limitations are in **[docs/DEPLOY_RENDER.md](docs/DEPLOY_RENDER.md)**.
+
+## 📦 Submission files
+
+- **Database export:** `database.sql` (PostgreSQL/Supabase schema, reference data and demo accounts)
+- **Building document:** `docs/PROJECT_BUILDING_DOCUMENT.docx` (SWOT, ER diagram, role matrix, page flow, development log, testing, security/scalability, deployment, reflections)
+- **Demo video script:** `docs/DEMO_SCRIPT.md`
+- **Deployment guide:** `docs/DEPLOY_RENDER.md`
+- **Game rules:** [How to play](docs/GAMEPLAY.md) and the in-game **How to play** page
+
 ## 🧪 Tests
 
 ```bash
@@ -290,7 +336,7 @@ npm run test:pg   # optional live PostgreSQL round-trip
 Expected:
 
 ```text
-50 JavaScript tests passing
+52 JavaScript tests passing
 PHP SaveRepository checks passing
 PHP AdminRepository checks passing (in-memory SQLite)
 ```

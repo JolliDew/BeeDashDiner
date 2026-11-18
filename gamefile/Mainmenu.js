@@ -27,6 +27,8 @@ function startGame() {
     if (starting || currentGame) return;
     unlockAudio();
     starting = true;
+    const siteNav = document.querySelector('.site-nav');
+    if (siteNav) siteNav.style.display = 'none';
 
     const old = document.getElementById('menu-error');
     if (old) old.textContent = '';
@@ -73,6 +75,8 @@ function returnToMenu() {
         gameContainer.remove();
     }
     document.getElementById('main-menu').style.display = 'block';
+    const siteNav = document.querySelector('.site-nav');
+    if (siteNav) siteNav.style.display = '';
 }
 
 function quitGame() {

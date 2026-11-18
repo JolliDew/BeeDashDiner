@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: jollidew
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /login.php
+    autoDeploy: true
+    envVars:
+      - key: DATABASE_URL
+        sync: false

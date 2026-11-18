@@ -1,0 +1,15 @@
+.git
+.DS_Store
+node_modules
+*.log
+.env
+.env.*
+gamefile/db.php
+gamefile/src/google-config.php
+gamefile/uploads/*
+!gamefile/uploads/.htaccess
+!gamefile/uploads/.gitkeep
+tests
+docs
+PLAN.md
+PR2-REVIEW.md

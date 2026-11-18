@@ -72,6 +72,13 @@ delivers, records the sale/tip, and returns to idle at its home station.
 | `src/AdminRepository.php` | User CRUD, pagination, progress reset, deletion, audit. |
 | `google-login.php` | OAuth 2.0 code flow with state + verified email. |
 | `admin.php` | Admin UI and POST actions. |
+| `profile.php` | Account summary, avatar upload, password change. |
+| `help.php` | Rules, controls, win condition and restart guidance. |
+| `denied.php` | 403 access-denied page for blocked roles. |
+| `restart.php` | CSRF-protected deletion of only the current player's save. |
+| `includes/nav.php` | Shared role-aware navigation for every page. |
+| `css/site-nav.css`, `css/pages.css` | Shared navigation and page styles. |
+| `db.container.php` | Environment-driven PDO connection copied to `db.php` in Docker. |
 | `bin/make-admin.php` | CLI-only first-admin promotion. |
 
 ---
@@ -80,7 +87,7 @@ delivers, records the sale/tip, and returns to idle at its home station.
 
 ```text
 users
-  id, username, email, password, role, created_at
+  id, username, email, password, role, avatar, created_at
 
 player_progress
   user_id (PK/FK), honey, location_no, level, diamonds,

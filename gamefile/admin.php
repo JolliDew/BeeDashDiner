@@ -4,6 +4,8 @@ require_once 'src/Auth.php';
 require_once 'src/Csrf.php';
 require_once 'src/AdminRepository.php';
 Auth::start();
+header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+header('Pragma: no-cache');
 
 try {
     $me = Auth::refresh($pdo, true);
@@ -16,8 +18,8 @@ if (!$me) {
     exit();
 }
 if (($me['role'] ?? 'player') !== 'admin') {
-    http_response_code(403);
-    exit('Admin access required.');
+    header('Location: denied.php?from=admin');
+    exit();
 }
 
 $repo = new AdminRepository($pdo);
@@ -150,6 +152,7 @@ $link = fn(int $p): string => 'admin.php?' . http_build_query(['q' => $q, 'page'
     <title>Admin - JolliDew</title>
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
     <link rel="stylesheet" href="vendor/bootstrap/bootstrap.min.css">
+    <link rel="stylesheet" href="css/site-nav.css">
     <style>
         body { background: #16120c; color: #fff6df; }
         a { color: #ffd84d; }
@@ -170,7 +173,8 @@ $link = fn(int $p): string => 'admin.php?' . http_build_query(['q' => $q, 'page'
         .table-responsive { border-radius: 10px; }
     </style>
 </head>
-<body>
+<body class="has-nav">
+<?php $navActive = 'admin'; include 'includes/nav.php'; ?>
 <div class="container py-4">
     <div class="d-flex justify-content-between align-items-center flex-wrap mb-3">
         <div>

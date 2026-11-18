@@ -35,6 +35,11 @@ HUD and a three-button dock.
   Profile, Admin for admins, Log out).
 - **Profile and media:** avatar upload with type, size and image checks; password
   change; saved level/honey summary.
+- **Google + local passwords:** Google-created accounts have a random hidden
+  password (`auth_provider=google`, `password_set=0`). Profile now offers
+  **Set a local password** without asking for the unknown Google password, so
+  the same account can also use manual login. Admin resets mark the account as
+  password-capable.
 - **Restart and win copy:** an explicit Level 10 win condition, a confirmation
   restart that deletes only the current player's save, and a completed-game
   banner.

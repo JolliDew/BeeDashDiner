@@ -13,6 +13,8 @@ CREATE TABLE IF NOT EXISTS users (
   password VARCHAR(255) NOT NULL,
   role VARCHAR(20) NOT NULL DEFAULT 'player',
   avatar VARCHAR(255) NULL,
+  auth_provider VARCHAR(20) NOT NULL DEFAULT 'local',
+  password_set TINYINT NOT NULL DEFAULT 1,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -21,6 +23,8 @@ CREATE TABLE IF NOT EXISTS users (
 -- if the column is missing.
 ALTER TABLE users ADD COLUMN IF NOT EXISTS role VARCHAR(20) NOT NULL DEFAULT 'player';
 ALTER TABLE users ADD COLUMN IF NOT EXISTS avatar VARCHAR(255) NULL;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS auth_provider VARCHAR(20) NOT NULL DEFAULT 'local';
+ALTER TABLE users ADD COLUMN IF NOT EXISTS password_set TINYINT NOT NULL DEFAULT 1;
 
 -- Admin action history. Usernames are snapshotted so the log survives a
 -- deleted account.

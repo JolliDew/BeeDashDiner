@@ -38,6 +38,9 @@ $pdo->exec('CREATE TABLE users (
     email TEXT NOT NULL UNIQUE,
     password TEXT NOT NULL,
     role TEXT NOT NULL DEFAULT "player",
+    avatar TEXT,
+    auth_provider TEXT NOT NULL DEFAULT "local",
+    password_set INTEGER NOT NULL DEFAULT 1,
     created_at TEXT DEFAULT CURRENT_TIMESTAMP
 )');
 $pdo->exec('CREATE TABLE player_progress (
@@ -114,6 +117,8 @@ check($page['total'] === 2 && $page['users'][0]['id'] === $bob, 'the second page
 $repo->setPassword($alice, 'newpassword123');
 $hash = $pdo->query('SELECT password FROM users WHERE id = ' . (int)$alice)->fetchColumn();
 check(password_verify('newpassword123', $hash), 'setPassword stores a verifiable hash');
+$pwSet = $pdo->query('SELECT password_set FROM users WHERE id = ' . (int)$alice)->fetchColumn();
+check((int)$pwSet === 1, 'setPassword marks the account as password-capable');
 throws(fn() => $repo->setPassword($alice, 'short'), 'setPassword enforces the minimum length');
 
 $pdo->exec('INSERT INTO player_progress (user_id, honey, level) VALUES (' . (int)$alice . ', 500, 4)');

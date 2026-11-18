@@ -166,6 +166,13 @@ http://localhost/JolliDew/gamefile/google-login.php
 
 If the automatic URI does not match, set `redirect_uri` in `google-config.php` to the exact registered value. The login only accepts Google accounts whose email is verified.
 
+Google-created accounts are stored with a random hidden password; the Google
+password is never shared with JolliDew. Sign in with Google once, open
+**Profile**, and use **Set a local password** if you also want to log in with a
+username/email and password. An administrator can also reset the password from
+the admin panel. If a manual account already uses the same email, Google
+sign-in logs into that existing account.
+
 ---
 
 ## 🎮 How to play

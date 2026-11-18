@@ -87,7 +87,8 @@ delivers, records the sale/tip, and returns to idle at its home station.
 
 ```text
 users
-  id, username, email, password, role, avatar, created_at
+  id, username, email, password, role, avatar,
+  auth_provider (local|google), password_set (0/1), created_at
 
 player_progress
   user_id (PK/FK), honey, location_no, level, diamonds,

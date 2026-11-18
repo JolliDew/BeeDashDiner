@@ -224,6 +224,7 @@ or drift far away from them.
 | T12 | Deployment | Open Render URL, log in, play | App reachable over HTTPS | Pending Render deploy | Pending |
 | T13 | Maps and menu sign | Switch to levels 1, 5 and 8 at 360, 568×320 and 1440 | Distinct maps; sign always 3–8px above stalls; no overflow | 3/4/5 stations, correct decor, no overlap | Pass |
 | T14 | Colour contrast | Open menu, help and profile; inspect gold buttons | Dark text on gold, readable labels | Button text corrected | Pass |
+| T15 | Google account password | Simulate a Google-created account; try manual login, then set a local password in Profile and log in manually | Helpful message first; local login works after setting | Both stages passed | Pass |
 
 ## 5.3 Bugs found and fixed
 
@@ -247,6 +248,7 @@ or drift far away from them.
 | Measure | Location |
 |---|---|
 | `password_hash()` / `password_verify()` | `login.php`, `register.php`, `profile.php` |
+| Google accounts cannot be guessed into manual login | `google-login.php` stores a random hidden password + `auth_provider=google`, `password_set=0`; Profile has a **Set a local password** flow and admin reset marks `password_set=1`. |
 | Prepared statements for every query | repositories, API controller, admin/profile |
 | Output escaped with `htmlspecialchars()` | all page output, nav, admin, profile |
 | Server-side validation and clamping | register/login, `SaveRepository::clean`, admin actions |

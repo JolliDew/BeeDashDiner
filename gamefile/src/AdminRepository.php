@@ -116,7 +116,7 @@ class AdminRepository
     public function setPassword(int $id, string $password): void
     {
         self::assertPassword($password);
-        $this->pdo->prepare('UPDATE users SET password = ? WHERE id = ?')
+        $this->pdo->prepare('UPDATE users SET password = ?, password_set = 1 WHERE id = ?')
             ->execute([password_hash($password, PASSWORD_DEFAULT), $id]);
     }
 

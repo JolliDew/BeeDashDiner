@@ -20,15 +20,22 @@ $flash = '';
 $flashType = '';
 
 $avatar = '';
+$createdAt = '';
+$authProvider = 'local';
+$passwordSet = 1;
 try {
-    $q = $pdo->prepare('SELECT avatar, created_at FROM users WHERE id = ?');
+    $q = $pdo->prepare('SELECT avatar, created_at, auth_provider, password_set FROM users WHERE id = ?');
     $q->execute([$userId]);
     $account = $q->fetch() ?: [];
     $avatar = (string)($account['avatar'] ?? '');
     $createdAt = (string)($account['created_at'] ?? '');
+    $authProvider = (string)($account['auth_provider'] ?? 'local');
+    $passwordSet = (int)($account['password_set'] ?? 1);
 } catch (PDOException $e) {
-    $createdAt = '';
+    // Older databases without the provider columns still work as local accounts.
 }
+
+$needsPasswordSetup = $authProvider === 'google' && $passwordSet === 0;
 
 $progress = null;
 try {
@@ -87,10 +94,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $current = (string)($_POST['current_password'] ?? '');
         $new = (string)($_POST['new_password'] ?? '');
         $confirm = (string)($_POST['confirm_password'] ?? '');
-        $q = $pdo->prepare('SELECT password FROM users WHERE id = ?');
-        $q->execute([$userId]);
-        $hash = (string)($q->fetchColumn() ?: '');
-        if (!password_verify($current, $hash)) {
+        $currentOk = $needsPasswordSetup;
+        if (!$currentOk) {
+            $q = $pdo->prepare('SELECT password FROM users WHERE id = ?');
+            $q->execute([$userId]);
+            $hash = (string)($q->fetchColumn() ?: '');
+            $currentOk = password_verify($current, $hash);
+        }
+        if (!$currentOk) {
             $flash = 'Your current password is not correct.';
             $flashType = 'error';
         } elseif (strlen($new) < 8) {
@@ -100,10 +111,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $flash = 'The new passwords do not match.';
             $flashType = 'error';
         } else {
-            $pdo->prepare('UPDATE users SET password = ? WHERE id = ?')
+            $pdo->prepare('UPDATE users SET password = ?, password_set = 1 WHERE id = ?')
                 ->execute([password_hash($new, PASSWORD_DEFAULT), $userId]);
+            $passwordSet = 1;
+            $wasSetup = $needsPasswordSetup;
+            $needsPasswordSetup = false;
             session_regenerate_id(true);
-            $flash = 'Password changed.';
+            $flash = $wasSetup
+                ? 'Local password set. You can now sign in manually with your email or username.'
+                : 'Password changed.';
         }
     }
 }
@@ -113,6 +129,9 @@ $avatarOk = $avatarPath !== ''
     && preg_match('#^uploads/avatar_[a-z0-9._-]+$#i', $avatarPath)
     && is_file(__DIR__ . '/' . $avatarPath);
 $initial = strtoupper(substr((string)$me['username'], 0, 1));
+$signInMethod = $authProvider === 'google'
+    ? ($passwordSet ? 'Google + local password' : 'Google sign-in')
+    : 'password sign-in';
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -143,7 +162,8 @@ $initial = strtoupper(substr((string)$me['username'], 0, 1));
             </div>
             <div>
                 <p><strong><?= htmlspecialchars((string)$me['username']) ?></strong><br>
-                    <?= htmlspecialchars((string)$me['email']) ?> · <span class="muted"><?= htmlspecialchars((string)$me['role']) ?></span>
+                    <?= htmlspecialchars((string)$me['email']) ?> · <span class="muted"><?= htmlspecialchars((string)$me['role']) ?></span><br>
+                    <span class="muted">Sign-in: <?= htmlspecialchars($signInMethod) ?></span>
                 </p>
                 <?php if ($progress): ?>
                     <div class="progress-line">
@@ -172,23 +192,28 @@ $initial = strtoupper(substr((string)$me['username'], 0, 1));
             <button class="btn-gold" type="submit">Upload picture</button>
         </form>
 
-        <h2>Change password</h2>
+        <h2><?= $needsPasswordSetup ? 'Set a local password' : 'Change password' ?></h2>
+        <?php if ($needsPasswordSetup): ?>
+            <p class="muted">This account was created with Google, so JolliDew never received your Google password. Set a password here if you also want to sign in with your email or username. Google sign-in will keep working.</p>
+        <?php endif; ?>
         <form action="profile.php" method="POST">
             <?= Csrf::field() ?>
             <input type="hidden" name="action" value="password">
+            <?php if (!$needsPasswordSetup): ?>
+                <div class="form-row">
+                    <label for="current_password">Current password</label>
+                    <input type="password" id="current_password" name="current_password" autocomplete="current-password" required>
+                </div>
+            <?php endif; ?>
             <div class="form-row">
-                <label for="current_password">Current password</label>
-                <input type="password" id="current_password" name="current_password" autocomplete="current-password" required>
+                <label for="new_password"><?= $needsPasswordSetup ? 'Password' : 'New password' ?> (8+ characters)</label>
+                <input type="password" id="new_password" name="new_password" autocomplete="new-password" minlength="8" required>
             </div>
             <div class="form-row">
-                <label for="new_password">New password (8+ characters)</label>
-                <input type="password" id="new_password" name="new_password" autocomplete="new-password" required>
+                <label for="confirm_password">Confirm password</label>
+                <input type="password" id="confirm_password" name="confirm_password" autocomplete="new-password" minlength="8" required>
             </div>
-            <div class="form-row">
-                <label for="confirm_password">Confirm new password</label>
-                <input type="password" id="confirm_password" name="confirm_password" autocomplete="new-password" required>
-            </div>
-            <button class="btn-gold" type="submit">Change password</button>
+            <button class="btn-gold" type="submit"><?= $needsPasswordSetup ? 'Set password' : 'Change password' ?></button>
         </form>
     </section>
 </main>

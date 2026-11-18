@@ -142,7 +142,7 @@ if ($user) {
     $base = substr($base !== '' ? $base : strstr($email, '@', true), 0, 40) ?: 'player';
 
     $exists = $pdo->prepare('SELECT id FROM users WHERE username = ?');
-    $insert = $pdo->prepare('INSERT INTO users (username, email, password) VALUES (?, ?, ?)');
+    $insert = $pdo->prepare('INSERT INTO users (username, email, password, auth_provider, password_set) VALUES (?, ?, ?, \'google\', 0)');
     $username = $base;
     $created = false;
 

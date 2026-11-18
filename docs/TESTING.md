@@ -128,6 +128,12 @@ Use a throwaway account and a throwaway database when possible.
 - [ ] Restart progress asks for confirmation, deletes only the signed-in player's
       save, and the menu shows the success message.
 - [ ] Change password requires the current password and at least 8 characters.
+- [ ] A Google-created account (`auth_provider=google`, `password_set=0`) shows
+      **Set a local password** in Profile without asking for a current password.
+      After setting it, manual login with the new password works.
+- [ ] Trying a wrong password on an unconfigured Google account shows the
+      “use Sign in with Google first” message.
+- [ ] An admin password reset sets `password_set=1`.
 - [ ] Opening `admin.php` as a player shows the 403 access-denied page.
 
 ### Save and resume

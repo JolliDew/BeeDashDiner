@@ -38,7 +38,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 header("Location: Mainmenu.php");
                 exit();
             }
-            $error = "Invalid username/email or password.";
+            if ($user
+                && (($user['auth_provider'] ?? 'local') === 'google')
+                && (int)($user['password_set'] ?? 1) === 0) {
+                $error = 'This account uses Google sign-in. Use "Sign in with Google" first, then set a local password from Profile.';
+            } else {
+                $error = "Invalid username/email or password.";
+            }
         }
     }
 }
@@ -116,6 +122,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             </svg>
             Sign in with Google
         </a>
+        <p class="login-note">Google accounts can add a local password later from Profile.</p>
         <?php endif; ?>
 
         <!-- Footer Link -->

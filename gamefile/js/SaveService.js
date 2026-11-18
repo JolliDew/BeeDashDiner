@@ -13,7 +13,7 @@ export class SaveService {
 
   async load() {
     try {
-      const r = await fetch(this.url + '?action=load', { credentials: 'same-origin' });
+      const r = await fetch(this.url + '?action=load', { credentials: 'same-origin', cache: 'no-store' });
       if (r.ok) {
         const d = await r.json();
         if (GameState.isValid(d)) { this.onStatus('Loaded'); return GameState.fromJSON(d); }

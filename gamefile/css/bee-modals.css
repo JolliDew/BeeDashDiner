@@ -4,7 +4,8 @@
 .modal-dialog { max-width: 480px; }
 .modal-content { background: #33291a; color: #fff6df; border: 1px solid #6b5a37; border-radius: 16px; }
 .modal-header, .modal-footer { border-color: #4a3b22; }
-.modal-title { font-weight: 800; color: #ffd84d; }
+.modal-title { font-weight: 800; color: #ffd84d; overflow-wrap: anywhere; }
+.modal-content .modal-body { overflow-wrap: break-word; }
 .modal-content .close { color: #fff; text-shadow: none; opacity: .8; }
 .modal-content .list-group-item { background: #4a3b22; color: #fff6df; border-color: #33291a; }
 .modal-content .text-muted { color: #cdbb8f !important; }
@@ -55,7 +56,7 @@
 /* Station, chair and entity styles now live together in css/bee-game.css. */
 
 /* ---------- level indicators and price buttons (inside the modals) ---------- */
-.modal-content .lvl { display: flex; align-items: center; gap: 8px; margin: 2px 0 4px; font-size: 12px; }
+.modal-content .lvl { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 2px 0 4px; font-size: 12px; }
 .modal-content .lvl-label { color: #cdbb8f; min-width: 84px; }
 .modal-content .lvl b { color: #ffd84d; }
 .modal-content .lvl-note { font-size: 12px; color: #cdbb8f; }

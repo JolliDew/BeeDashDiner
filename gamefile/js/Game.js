@@ -80,11 +80,18 @@ export class Game {
   }
 
   refreshHud() {
-    this.hud.honey.innerHTML = art(ASSETS.honeyIcon, '🍯') + ' ' + (this.state.infinite ? '∞' : fmt(this.state.honey));
-    if (this.hud.diamonds) this.hud.diamonds.textContent = '💎 ' + fmt(this.state.diamonds);
+    const honey = this.state.infinite ? '∞' : fmt(this.state.honey);
+    const diamonds = fmt(this.state.diamonds);
+    this.hud.honey.innerHTML = art(ASSETS.honeyIcon, '🍯') + ' ' + honey;
+    this.hud.honey.setAttribute('aria-label', `Honey: ${honey}`);
+    if (this.hud.diamonds) {
+      this.hud.diamonds.textContent = '💎 ' + diamonds;
+      this.hud.diamonds.setAttribute('aria-label', `Diamonds: ${diamonds}`);
+    }
     if (this.hud.queue) {
       const waiting = this.scene.customers.filter(c => c.state === 'wait').length;
       this.hud.queue.textContent = `🪑 ${waiting}/${this.economy.seats}`;
+      this.hud.queue.setAttribute('aria-label', `Seats occupied: ${waiting} of ${this.economy.seats}`);
     }
     this.hud.location.textContent = `Level ${this.state.level}/${MAX_LEVEL} · ${LOCATIONS[this.state.location]}`;
   }

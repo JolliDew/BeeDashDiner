@@ -42,14 +42,26 @@ export class Scene {
     this.seats = Array(this.economy.seats).fill(null);
     const kitchen = this.mk('kitchen');
     kitchen.id = 'kitchen';
+    kitchen.setAttribute('aria-hidden', 'true');
     kitchen.innerHTML = '<span class="lamp" style="left:12%"></span>'
       + '<span class="lamp" style="left:50%"></span>'
       + '<span class="lamp" style="left:88%"></span>'
-      + '<span class="shelf"></span>';
-    this.mk('aisle');
-    this.mk('door', '<span class="door-glow" aria-hidden="true"></span>'
+      + '<span class="shelf"><span class="menu-board">MENU</span></span>';
+    // The rug goes down first so the aisle and door always paint on top of it.
+    const rug = this.mk('rug');
+    rug.setAttribute('aria-hidden', 'true');
+    const plantL = this.mk('plant', '🪴');
+    plantL.style.left = '1.5%'; plantL.style.top = '37%';
+    plantL.setAttribute('aria-hidden', 'true');
+    const plantR = this.mk('plant', '🪴');
+    plantR.style.right = '1.5%'; plantR.style.top = '37%';
+    plantR.setAttribute('aria-hidden', 'true');
+    const aisle = this.mk('aisle');
+    aisle.setAttribute('aria-hidden', 'true');
+    const door = this.mk('door', '<span class="door-glow" aria-hidden="true"></span>'
       + '<span class="door-sign">OPEN</span>'
       + '<span class="door-mat" aria-hidden="true"></span>');
+    door.setAttribute('aria-hidden', 'true');
     this.state.stations.forEach((s, i) => {
       // Each station is drawn as a small food stall: striped awning, serving
       // window, wooden counter, name sign and worker/level indicators.

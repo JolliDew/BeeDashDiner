@@ -44,6 +44,11 @@
 #bee-game #kitchen .lamp::after { content: ''; position: absolute; left: 50%; bottom: -7px; transform: translateX(-50%); width: 22px; height: 12px; border-radius: 50% 50% 35% 35%; background: radial-gradient(ellipse at 50% 25%, #fff6c2, #f0b23c); box-shadow: 0 0 16px #ffdf8a99; }
 #bee-game #kitchen .shelf { position: absolute; left: 3%; right: 3%; top: 26%; height: 4px; border-radius: 2px; background: #7d4b12; box-shadow: 0 2px 0 #5b380e; pointer-events: none; }
 #bee-game #kitchen .shelf::before { content: ''; position: absolute; left: 4%; right: 4%; bottom: 4px; height: 14px; border-radius: 5px 5px 0 0; background: repeating-linear-gradient(90deg, transparent 0 7%, #e8b24c 7% 11%, #c98a2b 11% 12%, transparent 12% 18%); opacity: .8; }
+#bee-game #kitchen .menu-board { position: absolute; left: 50%; top: 7px; transform: translateX(-50%); padding: 2px 9px 3px; border: 2px solid #7d4b12; border-radius: 3px; background: #3a2a17; color: var(--gold); font-size: clamp(7px, 1.4vw, 11px); font-weight: 900; letter-spacing: .14em; white-space: nowrap; box-shadow: 0 3px 6px #0004; }
+
+/* ---------- dining-room furnishing ---------- */
+#bee-game .rug { position: absolute; left: 7%; right: 7%; top: 46%; bottom: 6%; z-index: 0; border: 4px solid #b96a3a; border-radius: 24px; background: repeating-linear-gradient(45deg, #e6b980 0 18px, #dfae72 18px 36px); box-shadow: inset 0 0 0 3px #f7e3bf99, 0 6px 14px #0002; opacity: .78; pointer-events: none; }
+#bee-game .plant { position: absolute; z-index: 0; font-size: clamp(20px, 3.4vw, 30px); line-height: 1; filter: drop-shadow(0 3px 3px #0003); pointer-events: none; }
 /* Kitchen stations are little food stalls, not floating icons. Each one sits
    on the counter line at the bottom of the kitchen (kitchen is 36% tall, so a
    bottom of 65% puts the stall feet 1% above it). */
@@ -133,7 +138,7 @@
 
 /* ---------- reward toasts ---------- */
 #bee-game #toasts { position: fixed; left: 50%; bottom: calc(90px + env(safe-area-inset-bottom)); z-index: 60; display: flex; flex-direction: column; align-items: center; gap: 6px; width: min(380px, calc(100vw - 24px)); transform: translateX(-50%); pointer-events: none; }
-#bee-game .toast { flex: 0 0 auto; opacity: 1; background: #241d12; border: 1px solid #ffd84d; color: #fff6df; border-radius: 10px; padding: 8px 12px; font-size: 12px; font-weight: 700; box-shadow: 0 6px 20px #0008; animation: bee-toast .25s ease-out; max-width: 280px; }
+#bee-game .toast { flex: 0 0 auto; opacity: 1; background: #241d12; border: 1px solid #ffd84d; color: #fff6df; border-radius: 10px; padding: 8px 12px; font-size: 12px; font-weight: 700; box-shadow: 0 6px 20px #0008; animation: bee-toast .25s ease-out; max-width: 280px; overflow-wrap: anywhere; }
 
 @keyframes bee-rise { to { transform: translateY(-34px); opacity: 0; } }
 @keyframes bee-toast { from { transform: translateY(8px); opacity: 0; } to { transform: none; opacity: 1; } }
@@ -165,6 +170,25 @@
   #bee-game .hud-actions { gap: 3px; }
   #bee-game .exit-btn { padding: 5px 7px; }
 }
+@media (max-width: 340px) {
+  /* On the narrowest phones the wall sign would touch the middle awning. */
+  #bee-game #kitchen .menu-board { display: none; }
+}
+/* Short or landscape screens: keep the stalls inside the kitchen band. */
+@media (max-height: 480px) {
+  #bee-game .stn { bottom: 64%; }
+  #bee-game .awning { height: 8px; }
+  #bee-game .window { height: 28px; }
+  #bee-game .mach { font-size: 18px; }
+  #bee-game .sign { display: none; }
+  #bee-game .sinfo { flex-direction: row; gap: 3px; }
+  #bee-game .slv, #bee-game .swk { font-size: 6px; line-height: 1.1; padding: 0 3px; }
+  #bee-game .counter { padding: 2px 3px; }
+  #bee-game #kitchen .shelf, #bee-game #kitchen .lamp, #bee-game .plant { display: none; }
+  #bee-game .rug { top: 48%; }
+  #bee-game .door { width: 42px; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   #bee-game .ent.walking .gface, #bee-game .ent.happy .gface { animation: none; }
   #bee-game .pop { animation-duration: .01s; }

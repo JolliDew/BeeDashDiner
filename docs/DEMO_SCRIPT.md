@@ -17,7 +17,7 @@ segment.
 
 Say:
 
-> “We are Group [name]. Our system is BeeDashDiner, a cloud-based bee café game with
+> “We are Group AQM. Our system is BeeDashDiner, a cloud-based bee café game with
 > an admin dashboard. It uses HTML, CSS, JavaScript, Bootstrap, PHP and
 > PostgreSQL on Supabase, deployed with Docker on Render. Our roles were backend,
 > database, game mechanics, design and QA.”

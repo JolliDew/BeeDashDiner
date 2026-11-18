@@ -7,6 +7,7 @@ date: "November 2026"
 # Cover and team
 
 **Project title:** BeeDashDiner
+**Group:** AQM
 **System:** A cloud-based bee café game with an admin dashboard  
 **Course:** CC106 CLE — Cloud-Based Application Development  
 **Repository:** https://github.com/JohnDavidMorandante/JolliDew  
@@ -19,6 +20,8 @@ date: "November 2026"
 | Emman Glen Mendoza Wong Yan | Game mechanics, documentation, design, QA | 15% |
 | Ardion Nicolas Dela Cruz Tamagos | Design, frontend, art, QA | 20% |
 | Iszen Paul Masculino Ventura | Group leader, ideas, documentation, QA | 10% |
+
+**Group name:** AQM.
 
 ![BeeDashDiner public landing page](docs/screenshots/landing-desktop.png){width=100%}
 

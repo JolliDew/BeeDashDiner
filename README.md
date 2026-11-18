@@ -5,10 +5,11 @@ A small idle restaurant game built with **vanilla JavaScript modules**, **PHP**,
 > **Branch:** `feat/scene-first-ui`
 > **What it contains:** the scene-first UI (food-stall stations, café entrance, desktop playfield, procedural audio) on top of Emman's redesign, plus bug fixes, security hardening, full admin CRUD, save format v3, and tests.
 > **Name:** **BeeDashDiner** is the product name. The GitHub repository and local XAMPP folder remain `JolliDew` for continuity and submission paths.
+> **Group:** **AQM**.
 
 The backend uses **PDO** and supports both **MySQL/MariaDB** (XAMPP) and **PostgreSQL** (including Supabase). The gameplay and API code are identical on both engines.
 
-## 👥 Group members
+## 👥 AQM — group members
 
 | Member | Contribution |
 |---|---|
@@ -390,4 +391,4 @@ The project intentionally does **not** ship real credentials. `db.example.php`, 
 
 ## 📄 License / attribution
 
-Built by the BeeDashDiner group. Inspiration: **NEPTUNE (TREEPLLA)** — *Cat Snack Bar*.
+Built by AQM. Inspiration: **NEPTUNE (TREEPLLA)** — *Cat Snack Bar*.

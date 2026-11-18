@@ -35,9 +35,9 @@ $isAdmin = ($me['role'] ?? 'player') === 'admin';
         <div class="menu-buttons">
             <button class="menu-btn play-btn" onclick="startGame()">Play Game</button>
             <?php if ($isAdmin): ?>
-                <a href="admin.php" class="menu-btn admin-btn" style="text-decoration: none; display: inline-block;">Admin Panel</a>
+                <a href="admin.php" class="menu-btn admin-btn">Admin Panel</a>
             <?php endif; ?>
-            <a href="logout.php" class="menu-btn quit-btn" style="text-decoration: none; display: inline-block;">Log Out</a>
+            <a href="logout.php" class="menu-btn quit-btn">Log Out</a>
         </div>
     </div>
 

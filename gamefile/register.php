@@ -67,9 +67,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
         .toggle-password {
             position: absolute;
-            right: 12px;
+            right: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 40px;
+            min-height: 40px;
+            padding: 0;
             background: none;
             border: none;
+            border-radius: 6px;
             cursor: pointer;
             color: #888;
             font-size: 14px;

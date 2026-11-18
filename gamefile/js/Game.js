@@ -20,6 +20,7 @@ export class Game {
       save: root.querySelector('#hud-save')
     };
     this.saveTimer = 0;
+    this.saveDebounce = null;
     this.sound = new SoundEngine();
     this.soundBtn = null; this.audioMenu = null;
     this.saves = new SaveService({ url: apiUrl, userId, onStatus: s => this.setSaveStatus(s) });
@@ -52,6 +53,23 @@ export class Game {
     this.changed();
     this.lastSave = JSON.stringify(this.state);
 
+    // Saving must happen even when the player closes the tab or switches apps.
+    this._onVisibility = () => {
+      if (document.visibilityState === 'hidden') {
+        this.saveNow();
+        this.sound?.pause();
+      } else {
+        this.sound?.resumeFromPause();
+      }
+    };
+    this._onPageHide = () => this.saveNow();
+    document.addEventListener('visibilitychange', this._onVisibility);
+    window.addEventListener('pagehide', this._onPageHide);
+
+    if (this.saves.loadedFrom !== 'new') {
+      this.toast(`Welcome back — Level ${this.state.level} · ${LOCATIONS[this.state.location]}`);
+    }
+
     this.autosave = setInterval(() => this.saveIfDirty(), 10000);
     this.last = performance.now(); this.acc = 0; this.running = true;
     this.raf = requestAnimationFrame(t => this.loop(t));
@@ -77,15 +95,15 @@ export class Game {
     };
     this.soundBtn?.addEventListener('click', this._onSoundBtn);
 
-    this._onAudioRow = e => {
-      const row = e.target.closest('[data-audio]');
-      if (!row) return;
-      if (row.dataset.audio === 'sfx') this.sound?.setSfx(!this.sound?.sfxOn);
-      else this.sound?.setMusic(!this.sound?.musicOn);
+    this._onAudioInput = e => {
+      const input = e.target.closest('input[data-audio]');
+      if (!input) return;
+      const value = Number(input.value);
+      if (input.dataset.audio === 'sfx') this.sound?.setSfxVol(value);
+      else this.sound?.setMusicVol(value);
       this.renderAudio();
-      this.sound?.click();
     };
-    this.audioMenu?.addEventListener('click', this._onAudioRow);
+    this.audioMenu?.addEventListener('input', this._onAudioInput);
 
     this._closeAudio = () => {
       if (!this.audioMenu) return;
@@ -117,17 +135,34 @@ export class Game {
 
   renderAudio() {
     if (!this.soundBtn) return;
-    const any = this.sound?.sfxOn || this.sound?.musicOn;
+    const sfx = this.sound?.sfxVol ?? 0;
+    const music = this.sound?.musicVol ?? 0;
+    const any = sfx > 0 || music > 0;
     this.soundBtn.textContent = any ? '🔊' : '🔇';
     this.soundBtn.setAttribute('aria-pressed', String(any));
     this.soundBtn.title = any ? 'Audio settings (on)' : 'Audio settings (muted)';
     if (!this.audioMenu) return;
-    this.audioMenu.querySelectorAll('[data-audio]').forEach(row => {
-      const on = row.dataset.audio === 'sfx' ? this.sound?.sfxOn : this.sound?.musicOn;
-      row.setAttribute('aria-pressed', String(on));
-      const state = row.querySelector('.state');
-      if (state) state.textContent = on ? 'On' : 'Off';
+    this.audioMenu.querySelectorAll('input[data-audio]').forEach(input => {
+      const value = input.dataset.audio === 'sfx' ? sfx : music;
+      input.value = value;
+      const state = this.audioMenu.querySelector(`[data-state="${input.dataset.audio}"]`);
+      if (state) state.textContent = value + '%';
     });
+  }
+
+  /** Save shortly after an action, instead of waiting for the 10s interval. */
+  saveSoon() {
+    if (!this.running) return;
+    clearTimeout(this.saveDebounce);
+    this.saveDebounce = setTimeout(() => this.saveIfDirty(), 700);
+  }
+
+  /** Immediate keepalive save for page hide/unload and Exit. */
+  saveNow() {
+    if (!this.state) return;
+    this.saves.saveLocal(this.state);
+    this.saves.pushNow(this.state);
+    this.lastSave = JSON.stringify(this.state);
   }
 
   /** Autosave only when the state actually changed since the last success. */
@@ -340,6 +375,7 @@ export class Game {
     this.panel.refresh();
     this.refreshHud();
     this.saves.saveLocal(this.state);
+    this.saveSoon();
   }
 
   destroy() {
@@ -349,11 +385,14 @@ export class Game {
     clearTimeout(this.saveTimer);
     this.sound?.stop();
     if (this.soundBtn && this._onSoundBtn) this.soundBtn.removeEventListener('click', this._onSoundBtn);
-    if (this.audioMenu && this._onAudioRow) this.audioMenu.removeEventListener('click', this._onAudioRow);
+    if (this.audioMenu && this._onAudioInput) this.audioMenu.removeEventListener('input', this._onAudioInput);
     if (this._onAudioOutside) document.removeEventListener('pointerdown', this._onAudioOutside);
     if (this._onAudioKey) document.removeEventListener('keydown', this._onAudioKey);
     if (this._onUiClick) document.removeEventListener('click', this._onUiClick);
+    clearTimeout(this.saveDebounce);
+    if (this._onVisibility) document.removeEventListener('visibilitychange', this._onVisibility);
+    if (this._onPageHide) window.removeEventListener('pagehide', this._onPageHide);
+    this.saveNow();
     this.panel?.destroy();
-    if (this.state) this.saves.push(this.state, true);
   }
 }

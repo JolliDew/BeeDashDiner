@@ -64,7 +64,8 @@ export const BALANCE = {
   popTime: .25,
   happyTime: .9,
   demand: 1.3,
-  burstGap: .35
+  firstCustomerDelay: 1.8,
+  entryGap: 1.8
 };
 
 export const MILESTONES = [

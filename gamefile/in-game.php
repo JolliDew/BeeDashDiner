@@ -26,8 +26,16 @@ header('Expires: 0');
                         <div class="sound-wrap">
                             <button id="soundbtn" class="sound-btn" type="button" title="Audio settings" aria-label="Audio settings" aria-haspopup="dialog" aria-expanded="false" aria-controls="audio-menu" aria-pressed="true">🔊</button>
                             <div id="audio-menu" class="audio-menu" role="dialog" aria-label="Audio settings" hidden>
-                                <button type="button" class="audio-row" data-audio="sfx" aria-pressed="true"><span>Sound effects</span><span class="state">On</span></button>
-                                <button type="button" class="audio-row" data-audio="music" aria-pressed="true"><span>Music</span><span class="state">On</span></button>
+                                <label class="audio-row" for="sfx-vol">
+                                    <span>Sound effects</span>
+                                    <input id="sfx-vol" type="range" min="0" max="100" step="5" value="70" data-audio="sfx" aria-label="Sound effects volume">
+                                    <span class="state" data-state="sfx">70%</span>
+                                </label>
+                                <label class="audio-row" for="music-vol">
+                                    <span>Music</span>
+                                    <input id="music-vol" type="range" min="0" max="100" step="5" value="45" data-audio="music" aria-label="Music volume">
+                                    <span class="state" data-state="music">45%</span>
+                                </label>
                             </div>
                         </div>
                         <button id="devbtn" type="button" title="Dev mode" aria-label="Toggle developer tools" hidden>🛠</button>

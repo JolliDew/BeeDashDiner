@@ -6,8 +6,10 @@ export class Scene {
   constructor(host, state, economy) {
     this.host = host; this.state = state; this.economy = economy;
     this.bees = []; this.customers = []; this.seats = []; this.stationEls = []; this.seatEls = [];
-    this.spawnTimer = 0; this.burst = 0; this.quiet = false;
+    this.spawnTimer = 0; this.quiet = false;
     this.sound = null;
+    // Workers report in from the hive on the kitchen wall.
+    this.hiveX = 7; this.hiveY = 8;
     this.kitchenY = 26;
     // Guests enter and leave through the same bottom-left door. The aisle is
     // the first/last step on the dining-room floor.
@@ -47,7 +49,8 @@ export class Scene {
     kitchen.innerHTML = '<span class="lamp" style="left:12%"></span>'
       + '<span class="lamp" style="left:50%"></span>'
       + '<span class="lamp" style="left:88%"></span>'
-      + '<span class="shelf"><span class="menu-board">MENU</span></span>';
+      + '<span class="shelf"><span class="menu-board">MENU</span></span>'
+      + '<span class="hive" aria-hidden="true"><span class="hive-label">HIVE</span></span>';
     // The rug goes down first so the aisle and door always paint on top of it.
     const rug = this.mk('rug');
     rug.setAttribute('aria-hidden', 'true');
@@ -89,8 +92,8 @@ export class Scene {
     });
     this.renderSeats();
     this.syncBees();
-    this.burst = Math.floor(this.economy.seats * .4);
-    this.spawnTimer = 0;
+    // A quiet opening: no welcome crowd at the door.
+    this.spawnTimer = B.firstCustomerDelay;
   }
 
   syncSeats() {
@@ -112,7 +115,7 @@ export class Scene {
   syncBees() {
     const staff = this.state.staff;
     while (this.bees.length < staff) {
-      this.bees.push(new Bee(this.mk('ent'), this.stationX(0), this.kitchenY));
+      this.bees.push(new Bee(this.mk('ent'), this.hiveX, this.hiveY));
     }
     while (this.bees.length > staff) {
       const b = this.bees.pop();
@@ -184,14 +187,17 @@ export class Scene {
   spawnCustomer() {
     this.syncSeats();
     const free = this.seats.map((v, k) => v ? -1 : k).filter(k => k >= 0);
-    if (!free.length) return;
+    if (!free.length) return false;
     const seat = free[Math.random() * free.length | 0], f = Math.random() * CUSTOMERS.length | 0;
     const face = art(ASSETS.customers[f], CUSTOMERS[f]);
-    const c = new Customer(this.mk('ent', face), seat, this.pickItem(), face, this.doorX, this.doorY);
+    // A small jitter means two guests never occupy exactly the same door pixel.
+    const jx = (Math.random() - .5) * 1.4, jy = (Math.random() - .5) * .9;
+    const c = new Customer(this.mk('ent', face), seat, this.pickItem(), face, this.doorX + jx, this.doorY + jy);
     // The chair is reserved immediately so two guests can never target it.
     this.seats[seat] = c; this.customers.push(c);
     c.render(this.host.clientWidth, this.host.clientHeight);
     if (!this.quiet) this.sound?.enter();
+    return true;
   }
 
   /** Called when a departing guest clears the seating area. */
@@ -231,8 +237,13 @@ export class Scene {
   update(dt) {
     this.spawnTimer -= dt;
     if (this.spawnTimer <= 0) {
-      this.spawnCustomer();
-      this.spawnTimer = this.burst > 0 ? (this.burst--, B.burstGap) : this.economy.spawnInterval();
+      if (this.spawnCustomer()) {
+        // Never send the next guest into the doorway before this one has
+        // cleared it. Cap the interval so a busy restaurant stays calm.
+        this.spawnTimer = Math.max(B.entryGap, this.economy.spawnInterval());
+      } else {
+        this.spawnTimer = .6; // all chairs taken; retry soon
+      }
     }
     this.bees.forEach(b => b.update(dt, this));
     for (const c of [...this.customers]) {

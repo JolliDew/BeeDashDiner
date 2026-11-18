@@ -79,7 +79,7 @@ export class SoundEngine {
 
       // Headroom + gentle limiting so overlapping coins/fanfares never clip.
       this.master = this.ctx.createGain();
-      this.master.gain.value = .5;
+      this.master.gain.value = .7;
       this.compressor = this.ctx.createDynamicsCompressor();
       this.compressor.threshold.value = -18;
       this.compressor.knee.value = 24;
@@ -194,7 +194,7 @@ export class SoundEngine {
     if (!this.ctx) return;
     const t = this.ctx.currentTime;
     this.sfxBus.gain.setTargetAtTime(gainFor(this.sfxVol), t, .02);
-    this.musicBus.gain.setTargetAtTime(gainFor(this.musicVol) * .5, t, .05);
+    this.musicBus.gain.setTargetAtTime(gainFor(this.musicVol) * .9, t, .05);
   }
 
   setSfxVol(v) {
@@ -218,7 +218,7 @@ export class SoundEngine {
   duck(strength = .62, hold = 240) {
     if (!this.ctx || !this.musicOn) return;
     const t = this.ctx.currentTime;
-    const base = gainFor(this.musicVol) * .5;
+    const base = gainFor(this.musicVol) * .9;
     this.musicBus.gain.cancelScheduledValues(t);
     this.musicBus.gain.setTargetAtTime(base * strength, t, .03);
     clearTimeout(this.duckTimer);
@@ -267,81 +267,81 @@ export class SoundEngine {
   }
 
   click() {
-    this.noise(.025, .012, 700, 1.2);
-    this.playTone(300, { end: 240, dur: .06, type: 'sine', vol: .025 });
+    this.noise(.025, .02, 700, 1.2);
+    this.playTone(300, { end: 240, dur: .06, type: 'sine', vol: .04 });
   }
 
   enter() {
-    this.playTone(523.25, { dur: .10, type: 'triangle', vol: .03 });
-    this.playTone(783.99, { dur: .14, type: 'sine', vol: .024, delay: .08 });
+    this.playTone(523.25, { dur: .10, type: 'triangle', vol: .055 });
+    this.playTone(783.99, { dur: .14, type: 'sine', vol: .045, delay: .08 });
   }
 
   order() {
-    this.playTone(659.25, { dur: .08, type: 'triangle', vol: .022 });
-    this.playTone(880, { dur: .10, type: 'sine', vol: .02, delay: .07 });
+    this.playTone(659.25, { dur: .08, type: 'triangle', vol: .04 });
+    this.playTone(880, { dur: .10, type: 'sine', vol: .036, delay: .07 });
   }
 
   serve() {
     this.duck();
-    this.noise(.09, .018, 1600, 1.4);
-    this.playTone(523.25, { dur: .10, type: 'triangle', vol: .03 });
-    this.playTone(783.99, { dur: .15, type: 'sine', vol: .028, delay: .06 });
+    this.noise(.09, .03, 1600, 1.4);
+    this.playTone(523.25, { dur: .10, type: 'triangle', vol: .055 });
+    this.playTone(783.99, { dur: .15, type: 'sine', vol: .05, delay: .06 });
   }
 
   coin() {
-    this.playTone(1046.5, { dur: .07, type: 'sine', vol: .03 });
-    this.playTone(1318.5, { dur: .10, type: 'sine', vol: .026, delay: .05 });
+    this.playTone(1046.5, { dur: .07, type: 'sine', vol: .055 });
+    this.playTone(1318.5, { dur: .10, type: 'sine', vol: .045, delay: .05 });
   }
 
   tip() {
     this.duck();
     [1318.5, 1568, 2093].forEach((f, i) => {
-      this.playTone(f, { dur: .09, type: 'sine', vol: .022, delay: i * .05 });
+      this.playTone(f, { dur: .09, type: 'sine', vol: .04, delay: i * .05 });
     });
   }
 
   leave() {
-    this.noise(.10, .018, 420, .8);
-    this.playTone(196, { end: 147, dur: .18, type: 'triangle', vol: .025 });
+    this.noise(.10, .03, 420, .8);
+    this.playTone(196, { end: 147, dur: .18, type: 'triangle', vol: .045 });
   }
 
   stationUnlock() {
     this.duck(.72, 200);
     [392, 523.25, 659.25, 783.99].forEach((f, i) => {
-      this.playTone(f, { dur: .12, type: 'triangle', vol: .05, delay: i * .06 });
+      this.playTone(f, { dur: .12, type: 'triangle', vol: .075, delay: i * .06 });
     });
   }
 
   upgrade() {
     this.duck(.75, 180);
     [440, 554.37, 659.25].forEach((f, i) => {
-      this.playTone(f, { dur: .11, type: 'triangle', vol: .045, delay: i * .06 });
+      this.playTone(f, { dur: .11, type: 'triangle', vol: .07, delay: i * .06 });
     });
   }
 
   purchase() {
     this.duck(.72, 200);
-    this.playTone(523.25, { dur: .09, type: 'triangle', vol: .045 });
+    this.playTone(523.25, { dur: .09, type: 'triangle', vol: .07 });
     this.coin();
   }
 
   mission() {
     this.duck(.65, 280);
     [659.25, 880, 1046.5].forEach((f, i) => {
-      this.playTone(f, { dur: .16, type: 'sine', vol: .04, delay: i * .08 });
+      this.playTone(f, { dur: .16, type: 'sine', vol: .06, delay: i * .08 });
     });
   }
 
   levelUp() {
     this.duck(.55, 450);
     [523.25, 659.25, 783.99, 1046.5].forEach((f, i) => {
-      this.playTone(f, { dur: .22, type: 'triangle', vol: .055, delay: i * .12 });
+      this.playTone(f, { dur: .22, type: 'triangle', vol: .08, delay: i * .12 });
     });
-    this.playTone(1318.5, { dur: .3, type: 'sine', vol: .03, delay: .5 });
+    this.playTone(1318.5, { dur: .3, type: 'sine', vol: .05, delay: .5 });
   }
 
   deny() {
-    this.playTone(196, { end: 147, dur: .20, type: 'sine', vol: .03 });
+    this.playTone(196, { end: 147, dur: .20, type: 'sine', vol: .05 });
   }
 
   /* ---------------------------------------------------------------- music */
@@ -361,8 +361,8 @@ export class SoundEngine {
       if (!this.musicOn || !this.musicRunning) return;
       const chord = chords[Math.floor(this.musicStep / 2) % chords.length];
       // Long, soft pad. Slight stagger keeps it from sounding like one organ.
-      chord.forEach((f, i) => this.musicTone(f, 3.6, .045, i * .12));
-      if (this.musicStep % 2 === 0) this.musicTone(chord[0] / 2, 4.2, .05, 0, 'sine');
+      chord.forEach((f, i) => this.musicTone(f, 3.6, .055, i * .12));
+      if (this.musicStep % 2 === 0) this.musicTone(chord[0] / 2, 4.2, .065, 0, 'sine');
       if (this.musicStep % 2 === 1) {
         // Sparse bell on the off-bar, always a chord tone an octave up.
         this.musicTone(chord[this.musicStep % chord.length] * 2, 1.5, .018, .15, 'sine', true);

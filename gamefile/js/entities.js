@@ -130,6 +130,7 @@ export class Bee extends Walker {
     this.slot = 0;
     this.home = 0;
     this.offset = 0;
+    this.offsetY = 0;
     this.state = 'idle';
     this.customer = null; this.t = 0; this.total = 1; this.key = null;
   }
@@ -146,7 +147,9 @@ export class Bee extends Walker {
     const walk = scene.economy.walkTime;
     const stationX = scene.stationX(this.slot) + this.offset;
     const homeX = scene.stationX(this.home ?? this.slot) + this.offset;
-    const hy = scene.kitchenY, c = this.customer;
+    // A small per-bee vertical offset keeps a full hive from forming one
+    // overlapping line along the kitchen counter.
+    const hy = scene.kitchenY + (this.offsetY || 0), c = this.customer;
 
     switch (this.state) {
       case 'idle': {

@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 
 import { Customer } from '../gamefile/js/entities.js';
+import { Scene } from '../gamefile/js/Scene.js';
 
 function fakeEl() {
   const classes = new Set();
@@ -31,6 +32,18 @@ function fakeScene() {
     refreshStations() {},
   };
 }
+
+test('four chairs fill the first row evenly instead of leaving a gap', () => {
+  const scene = new Scene({}, {}, { seats: 4 });
+  assert.deepEqual([0, 1, 2, 3].map(k => scene.seatX(k)), [12.5, 37.5, 62.5, 87.5]);
+  assert.deepEqual([0, 1, 2, 3].map(k => scene.seatY(k)), [69, 69, 69, 69]);
+});
+
+test('a short last row is centred under the full rows', () => {
+  const scene = new Scene({}, {}, { seats: 6 });
+  assert.deepEqual([0, 1, 2, 3, 4, 5].map(k => scene.seatX(k)), [10, 30, 50, 70, 90, 50]);
+  assert.deepEqual([0, 5].map(k => scene.seatY(k)), [54.5, 83.5]);
+});
 
 test('a guest walks in, waits, celebrates, and leaves through the door', () => {
   const el = fakeEl();

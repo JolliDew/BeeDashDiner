@@ -15,8 +15,18 @@ export class Scene {
   }
 
   stationX(i) { return (i + .5) / this.state.stations.length * 100; }
-  seatX(k) { return ((k % B.cols) + .5) / B.cols * 100; }
-  seatY(k) { return 40 + (Math.floor(k / B.cols) + .5) * 58 / this.economy.rows; }
+  /** Use only as many columns as we have chairs, and centre a short last row. */
+  seatX(k) {
+    const cols = Math.min(B.cols, Math.max(1, this.economy.seats));
+    const row = Math.floor(k / cols);
+    const inRow = Math.min(cols, this.economy.seats - row * cols);
+    return ((cols - inRow) / 2 + (k % cols) + .5) / cols * 100;
+  }
+  seatY(k) {
+    const cols = Math.min(B.cols, Math.max(1, this.economy.seats));
+    const rows = Math.ceil(this.economy.seats / cols);
+    return 40 + (Math.floor(k / cols) + .5) * 58 / rows;
+  }
   itemIcon(i) { const it = ITEMS[this.state.location][i]; return art(ASSETS.items[it[1]], it[0]); }
   mk(cls, html = '') {
     const d = document.createElement('div');
@@ -31,6 +41,7 @@ export class Scene {
     this.bees = []; this.customers = []; this.stationEls = []; this.seatEls = [];
     this.seats = Array(this.economy.seats).fill(null);
     this.mk('kitchen').id = 'kitchen';
+    this.mk('aisle');
     this.mk('door', '<span class="door-sign">OPEN</span>');
     this.state.stations.forEach((s, i) => {
       // .sup = "you can upgrade this" arrow, .slv = recipe level, .swk = bees working / worker slots
@@ -91,6 +102,7 @@ export class Scene {
       b.home = homes.length ? homes[k % homes.length] : 0;
       if (b.state === 'idle') b.slot = b.home;
       b.offset = ((k % 5) - 2) * 6;
+      b.offsetY = ((Math.floor(k / 5) % 3) - 1) * 5;
     });
     this.refreshStations();
   }

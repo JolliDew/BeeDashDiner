@@ -289,7 +289,7 @@ npm run test:pg   # optional live PostgreSQL round-trip
 Expected:
 
 ```text
-45 JavaScript tests passing
+50 JavaScript tests passing
 PHP SaveRepository checks passing
 PHP AdminRepository checks passing (in-memory SQLite)
 ```

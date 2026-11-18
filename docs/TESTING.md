@@ -31,7 +31,7 @@ npm run test:php    -> php tests/SaveRepository.test.php
 Expected:
 
 ```text
-45 JavaScript tests passing
+50 JavaScript tests passing
 PHP SaveRepository checks passing
 PHP AdminRepository checks passing (in-memory SQLite)
 ```
@@ -178,7 +178,7 @@ On **2026-11-17**, the branch was checked with:
 
 Results:
 
-- `npm test`: 45 JavaScript tests and both PHP suites pass;
+- `npm test`: 50 JavaScript tests and both PHP suites pass;
 - `login_db.sql` imports cleanly twice;
 - `upgrade_db.sql` applies to the live `origin/main` schema and is re-runnable;
 - register → login → CLI promotion → admin create/edit/password/reset/delete,

@@ -16,22 +16,34 @@ HUD and a three-button dock.
   walks in and freed when a leaving guest reaches the aisle.
 - **Mission modal:** the mission card moved off the playfield into a dedicated
   sheet/dialog. The dock shows a notification dot when a mission is complete.
-- **Kitchen depth:** warm counter lighting and a front counter edge make the
-  larger scene read as a room rather than a flat board.
+- **Food stalls:** every station is a stall with a striped awning, serving
+  window, wooden counter, sign, level/worker plaque and a shuttered locked
+  state. Clicking one still opens its upgrade sheet.
+- **Café entrance:** a lit door with a handle, threshold mat, floor glow and a
+  hanging OPEN sign in the bottom-left corner.
+- **Room furnishing:** tiled kitchen wall, jar shelf, pendant lamps, a MENU
+  board, a soft rug and plants around the dining room.
 - **Seat-layout tests** for full and short chair rows.
 
 ### Changed
 
-- **Scene-first layout:** the scene fills about 86% of a phone screen (85% at
-  440×900) and the app is capped at 600px wide on desktop.
+- **Scene-first layout:** the scene fills about 86% of a phone screen and grows
+  to a 1000px playfield on tablets/desktops.
 - **Compact dock:** Mission, Upgrades and Shop replace the old inline upgrade
-  rows. Panels open as bottom sheets on phones and centered dialogs on desktop.
+  rows. The dock is icon-first on phones and a slim icon-and-label row from
+  760px up. Panels open as bottom sheets on phones and centered dialogs on
+  desktop.
+- **Grouped HUD:** honey, diamonds and seats share one segmented bar; Exit is a
+  40px icon button with a tooltip and `aria-label`.
 - **Dynamic chair rows:** four chairs fill the first row evenly; a short last
   row is centered instead of left-aligned.
 - **Bee spacing:** bees get small vertical offsets so a full hive does not form
   one overlapping line.
 - **Save feedback:** `Saving…` → `Saved`, then fades out after 2.2 seconds.
-  Errors stay on screen.
+  Autosave runs every 10s only when the state changed, and requests are
+  serialized. Errors stay on screen.
+- **Fresh builds:** game HTML is fetched with `no-store`, PHP sends no-cache
+  headers, and CSS URLs are versioned by file modification time.
 
 ### Fixed
 
@@ -39,10 +51,17 @@ HUD and a three-button dock.
   one-line toast 350px tall) and no longer fade out when the entrance animation
   ends.
 - Toasts sit above the dock instead of covering it.
+- The main-menu title no longer clips: gradient-clipped text is sized with
+  `clamp()` and allowed to wrap.
+- Menu, login and register pages scroll on short screens instead of clipping
+  the buttons and fields.
+- Bee offsets scale to the station width, so edge workers no longer start
+  off-screen.
+- Short landscape screens use compact stalls; normal phones keep station names.
 
 ### Verification
 
-- 48 JavaScript tests and all PHP checks pass.
+- 50 JavaScript tests and all PHP checks pass.
 - XAMPP (Apache) at 390×844, 440×900 and 1440×900: scene 86.4%/85.7%/85.1%,
   dock fits, mission sheet on phones, centered desktop dialog, no JS errors.
 - Reduced motion disables guest bobbing; a served guest reaches `happy`, then

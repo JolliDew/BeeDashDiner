@@ -93,12 +93,15 @@ Use a throwaway account and a throwaway database when possible.
 
 - [ ] Login with username and with email.
 - [ ] Main menu shows the player name; no Admin Panel link for a player.
-- [ ] Play Game loads the HUD, scene, mission card, and station buttons.
+- [ ] Play Game loads the HUD, scene, three-button dock and station stalls.
+- [ ] Honey, diamonds and seats appear in one grouped HUD bar; Exit is a small
+      icon button with a tooltip.
 - [ ] Queue HUD starts at `🪑 x/4`; buying *Bigger waiting area* adds a chair.
 - [ ] Station popup opens by mouse and by keyboard (`Tab` to a station, `Enter`).
 - [ ] Station popup shows recipe pips, worker slots, price, cook time, milestone list, and next milestone.
-- [ ] Station badges show `Lv`, `🐝 busy/slots`, and the green upgrade arrow when affordable.
-- [ ] Hire bees from **Staff & global upgrades**; staff is shared by all stations.
+- [ ] Station stalls show a sign, `Lv`, `🐝 busy/slots`, and the green upgrade arrow when affordable. Locked stalls show a shutter and padlock.
+- [ ] Guests enter and leave only through the bottom-left door, never popping in or out at a chair.
+- [ ] Hire bees from the **Upgrades** modal; staff is shared by all stations.
 - [ ] A bee at a non-home station gets the gold `.helping` glow.
 - [ ] Tip jar level 10 shows **28%**, matching the simulation.
 - [ ] Each recipe milestone at 2/6/10 adds a slot; 4/8 doubles profit.
@@ -145,9 +148,15 @@ Use a throwaway account and a throwaway database when possible.
 
 ### Responsive/accessibility
 
-- [ ] 440×900 browser: HUD wraps, panel scrolls, modals fit.
+- [ ] 320×568 and 360×800: menu title is not clipped, HUD values stay inside
+      their bar, station names are readable, and the dock fits.
+- [ ] 568×320 landscape: login/register scroll to the last button; game stalls
+      use the compact layout and do not clip.
+- [ ] 768×1024 and 1440×900: the playfield widens, the dock is one slim row,
+      and modals are centred.
+- [ ] Worst-case HUD values (`999.9M`, `999`, `10/14`) do not collide with Exit.
 - [ ] Keyboard: station buttons have a visible focus ring; modal close buttons work.
-- [ ] `prefers-reduced-motion` disables the rise/toast animations.
+- [ ] `prefers-reduced-motion` disables the rise/toast animations and the login background lines.
 - [ ] No JavaScript errors in the console during a 2-minute idle run.
 
 ---

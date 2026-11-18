@@ -37,16 +37,21 @@ export class SaveService {
     this.saveLocal(state);
     const job = this.queue.then(async () => {
       this.onStatus('Saving…');
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), 12000);
       try {
         const r = await fetch(this.url + '?action=save', {
           method: 'POST', credentials: 'same-origin', keepalive,
-          headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(state)
+          headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(state),
+          signal: controller.signal
         });
         this.onStatus(r.ok ? 'Saved' : r.status === 401 ? 'Log in again' : 'Save failed');
         return r.ok;
       } catch (e) {
-        this.onStatus('Offline');
+        this.onStatus(controller.signal.aborted ? 'Save timed out' : 'Offline');
         return false;
+      } finally {
+        clearTimeout(timer);
       }
     });
     // Keep the chain alive even if one job throws, without changing the

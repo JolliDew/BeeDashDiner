@@ -3,6 +3,9 @@ require_once 'db.php';
 require_once 'src/Auth.php';
 require_once 'src/Csrf.php';
 Auth::start();
+$authCssV = @filemtime(__DIR__ . '/logindesign.css') ?: 1;
+header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+header('Pragma: no-cache');
 
 $error = '';
 $success = '';
@@ -54,7 +57,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Register - JolliDew</title>
-    <link rel="stylesheet" href="logindesign.css">
+    <link rel="stylesheet" href="logindesign.css?v=<?= $authCssV ?>">
     <style>
         .password-container {
             position: relative;

@@ -204,15 +204,16 @@ export class Scene {
     this.state.stats.served++;
     this.pop(bee.x, bee.y - 6, '+' + fmt(gain));
 
+    let tip = 0;
     if (Math.random() < this.economy.tipChance) {
-      const tip = this.economy.tipAmount(gain);
+      tip = this.economy.tipAmount(gain);
       this.state.addHoney(tip);
       this.state.stats.tips++;
       this.state.stats.tipHoney += tip;
       this.pop(bee.x + 4, bee.y - 11, '🪙 +' + fmt(tip), 'tip');
     }
 
-    customer.served(customer.tip);
+    customer.served(tip);
     // The chair stays reserved until the guest reaches the aisle.
   }
 

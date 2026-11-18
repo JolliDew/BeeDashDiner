@@ -148,6 +148,7 @@ $link = fn(int $p): string => 'admin.php?' . http_build_query(['q' => $q, 'page'
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin - JolliDew</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
     <link rel="stylesheet" href="vendor/bootstrap/bootstrap.min.css">
     <style>
         body { background: #16120c; color: #fff6df; }

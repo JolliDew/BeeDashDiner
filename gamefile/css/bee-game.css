@@ -57,7 +57,7 @@
 /* No filter here: it would create a stacking context and trap the counter
    underneath the bees. The counter needs to paint above them so the name and
    level stay readable while a bee works at the window. */
-#bee-game .stall { width: 92%; margin: 0 auto; display: flex; flex-direction: column; }
+#bee-game .stall { width: 92%; max-width: 230px; margin: 0 auto; display: flex; flex-direction: column; }
 
 #bee-game .awning { position: relative; height: clamp(13px, 2.5vw, 22px); border: 2px solid #5b380e; border-bottom: 0; border-radius: 8px 8px 2px 2px; background: repeating-linear-gradient(90deg, var(--aw1, #ffd84d) 0 10px, var(--aw2, #e2563b) 10px 20px); box-shadow: inset 0 3px 0 #ffffff2e; }
 #bee-game .awning::after { content: ''; position: absolute; left: 0; right: 0; bottom: -2px; height: 4px; background: var(--aw2, #e2563b); }

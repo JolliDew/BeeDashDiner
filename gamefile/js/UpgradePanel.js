@@ -96,9 +96,21 @@ export class UpgradePanel {
         `<p class="small mb-2" id="cm-dia"></p><div class="list-group" id="cosmetics"></div>`);
     document.body.appendChild(this.modals);
     this.modals.addEventListener('click', e => this.onClick(e));
+    // Only one sheet/dialog may be visible at a time. UI clicks are already
+    // blocked by the backdrop, but keyboard/programmatic opens should not
+    // stack two modals on top of each other. Bootstrap bubbles this event
+    // to document, so listen there and remove it again in destroy().
+    this._onModalShow = e => {
+      this.modals.querySelectorAll('.modal.show').forEach(m => {
+        if (m !== e.target && window.jQuery) window.jQuery(m).modal('hide');
+      });
+    };
+    // Bootstrap fires this through jQuery, so bind through jQuery as well.
+    if (window.jQuery) window.jQuery(document).on('show.bs.modal', this._onModalShow);
   }
 
   destroy() {
+    if (this._onModalShow && window.jQuery) window.jQuery(document).off('show.bs.modal', this._onModalShow);
     this.modals?.remove();
     document.querySelectorAll('.modal-backdrop').forEach(x => x.remove());
     document.body.classList.remove('modal-open');

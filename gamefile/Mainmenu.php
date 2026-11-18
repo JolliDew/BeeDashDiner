@@ -23,6 +23,7 @@ header('Expires: 0');
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>JolliDew - Game</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
     <!-- Bootstrap first so Mainmenu.css wins any clash. The game modals need Bootstrap 4 + jQuery. -->
     <link rel="stylesheet" href="vendor/bootstrap/bootstrap.min.css">
     <link rel="stylesheet" href="Mainmenu.css?v=<?= $menuCssV ?>">

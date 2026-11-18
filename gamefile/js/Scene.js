@@ -40,13 +40,27 @@ export class Scene {
     this.host.innerHTML = '';
     this.bees = []; this.customers = []; this.stationEls = []; this.seatEls = [];
     this.seats = Array(this.economy.seats).fill(null);
-    this.mk('kitchen').id = 'kitchen';
+    const kitchen = this.mk('kitchen');
+    kitchen.id = 'kitchen';
+    kitchen.innerHTML = '<span class="lamp" style="left:12%"></span>'
+      + '<span class="lamp" style="left:50%"></span>'
+      + '<span class="lamp" style="left:88%"></span>'
+      + '<span class="shelf"></span>';
     this.mk('aisle');
-    this.mk('door', '<span class="door-sign">OPEN</span>');
+    this.mk('door', '<span class="door-glow" aria-hidden="true"></span>'
+      + '<span class="door-sign">OPEN</span>'
+      + '<span class="door-mat" aria-hidden="true"></span>');
     this.state.stations.forEach((s, i) => {
-      // .sup = "you can upgrade this" arrow, .slv = recipe level, .swk = bees working / worker slots
-      const d = this.mk('stn', `<span class="mwrap"><span class="mach">${art(ASSETS.stations[i], ITEMS[this.state.location][i][0])}</span><span class="sup" hidden>⬆</span></span>`
-        + `<span class="sinfo"><span class="slv"></span><span class="swk"></span></span>`);
+      // Each station is drawn as a small food stall: striped awning, serving
+      // window, wooden counter, name sign and worker/level indicators.
+      // .sup = "you can upgrade this" badge, .slv = recipe level,
+      // .swk = bees working / worker slots.
+      const [icon, name] = ITEMS[this.state.location][i];
+      const d = this.mk('stn', '<span class="stall">'
+        + '<span class="awning" aria-hidden="true"></span>'
+        + `<span class="window"><span class="mwrap"><span class="mach">${art(ASSETS.stations[i], icon)}</span><span class="sup" hidden>⬆</span></span><span class="shutter" aria-hidden="true">🔒</span></span>`
+        + `<span class="counter"><span class="sign">${name}</span><span class="sinfo"><span class="slv"></span><span class="swk"></span></span></span>`
+        + '</span>');
       d.dataset.station = i;
       d.dataset.toggle = 'modal';
       d.dataset.target = '#stationModal';
@@ -101,8 +115,11 @@ export class Scene {
     this.bees.forEach((b, k) => {
       b.home = homes.length ? homes[k % homes.length] : 0;
       if (b.state === 'idle') b.slot = b.home;
-      b.offset = ((k % 5) - 2) * 6;
-      b.offsetY = ((Math.floor(k / 5) % 3) - 1) * 5;
+      // Offsets are percentage points of the scene, so scale them to the
+      // station width. The old fixed 6% step pushed edge bees off-screen.
+      const spread = (100 / this.state.stations.length) / 8;
+      b.offset = ((k % 5) - 2) * spread;
+      b.offsetY = ((Math.floor(k / 5) % 3) - 1) * 3;
     });
     this.refreshStations();
   }

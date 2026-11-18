@@ -74,9 +74,12 @@ test('a guest walks in, waits, celebrates, and leaves through the door', () => {
 
   while (scene.freed !== c && steps++ < 300) c.update(.05, scene);
   assert.equal(scene.freed, c, 'the chair is freed when the guest reaches the aisle');
+  assert.equal(Math.round(c.x), scene.aisleX, 'the guest leaves the chair through the aisle');
+  assert.equal(Math.round(c.y), scene.aisleY);
 
-  let alive = true;
-  while (alive && steps++ < 500) alive = c.update(.05, scene);
+  while (c.state !== 'exit' && steps++ < 500) c.update(.05, scene);
   assert.equal(c.state, 'exit');
+  assert.ok(Math.abs(c.x - scene.doorX) < .01 && Math.abs(c.y - scene.doorY) < .01,
+    'the guest exits through the bottom-left door');
   assert.ok(steps < 500, 'the guest eventually leaves the scene');
 });

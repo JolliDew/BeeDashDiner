@@ -34,13 +34,51 @@
 /* ---------- the scene is the star ---------- */
 #bee-game #scene { position: relative; flex: 1 1 auto; min-height: 0; overflow: hidden; background: var(--floor-bg); }
 #bee-game #kitchen { position: absolute; left: 0; right: 0; top: 0; height: 36%; background: var(--kitchen-bg); border-bottom: 7px solid #8a5a1c; box-shadow: inset 0 -18px 30px #00000012; }
-#bee-game #kitchen::before { content: ''; position: absolute; inset: 0; background: repeating-linear-gradient(90deg, #ffffff0d 0 46px, #0000000a 46px 48px), radial-gradient(ellipse at 50% 8%, #ffde8a80, transparent 62%); pointer-events: none; }
+#bee-game #kitchen::before { content: ''; position: absolute; inset: 0; background: repeating-linear-gradient(90deg, #ffffff0d 0 46px, #0000000a 46px 48px), repeating-linear-gradient(0deg, #0000000a 0 40px, #ffffff10 40px 42px), radial-gradient(ellipse at 50% 8%, #ffde8a80, transparent 62%); pointer-events: none; }
 #bee-game #kitchen::after { content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 15%; background: linear-gradient(180deg, #a96c1f, #7d4b12); border-top: 3px solid #e3b45c; box-shadow: 0 -6px 14px #0002; pointer-events: none; }
-#bee-game .stn { position: absolute; top: 6%; text-align: center; }
-#bee-game .stn:focus-visible { outline: 3px solid var(--gold); outline-offset: 3px; border-radius: 8px; }
-#bee-game .stn.off { opacity: .3; }
-#bee-game .mach { display: inline-block; font-size: clamp(30px, 5vw, 40px); line-height: 1; background: #b8821f; border-radius: 10px; padding: 3px 9px; }
-#bee-game .ent { position: absolute; left: 0; top: 0; font-size: clamp(24px, 4.6vw, 30px); line-height: 1; will-change: transform; }
+#bee-game #kitchen .lamp { position: absolute; top: 0; width: 2px; height: 18%; background: #6b4a1e; pointer-events: none; }
+#bee-game #kitchen .lamp::after { content: ''; position: absolute; left: 50%; bottom: -7px; transform: translateX(-50%); width: 22px; height: 12px; border-radius: 50% 50% 35% 35%; background: radial-gradient(ellipse at 50% 25%, #fff6c2, #f0b23c); box-shadow: 0 0 16px #ffdf8a99; }
+#bee-game #kitchen .shelf { position: absolute; left: 3%; right: 3%; top: 26%; height: 4px; border-radius: 2px; background: #7d4b12; box-shadow: 0 2px 0 #5b380e; pointer-events: none; }
+#bee-game #kitchen .shelf::before { content: ''; position: absolute; left: 4%; right: 4%; bottom: 4px; height: 14px; border-radius: 5px 5px 0 0; background: repeating-linear-gradient(90deg, transparent 0 7%, #e8b24c 7% 11%, #c98a2b 11% 12%, transparent 12% 18%); opacity: .8; }
+/* Kitchen stations are little food stalls, not floating icons. Each one sits
+   on the counter line at the bottom of the kitchen (kitchen is 36% tall, so a
+   bottom of 65% puts the stall feet 1% above it). */
+#bee-game .stn { position: absolute; bottom: 65%; text-align: center; }
+#bee-game .stn:focus-visible { outline: 3px solid var(--gold); outline-offset: 3px; border-radius: 10px; }
+/* No filter here: it would create a stacking context and trap the counter
+   underneath the bees. The counter needs to paint above them so the name and
+   level stay readable while a bee works at the window. */
+#bee-game .stall { width: 92%; margin: 0 auto; display: flex; flex-direction: column; }
+
+#bee-game .awning { position: relative; height: clamp(13px, 2.5vw, 20px); border: 2px solid #5b380e; border-bottom: 0; border-radius: 8px 8px 2px 2px; background: repeating-linear-gradient(90deg, var(--aw1, #ffd84d) 0 10px, var(--aw2, #e2563b) 10px 20px); box-shadow: inset 0 3px 0 #ffffff2e; }
+#bee-game .awning::after { content: ''; position: absolute; left: 0; right: 0; bottom: -2px; height: 4px; background: var(--aw2, #e2563b); }
+/* A different awning per station makes them readable at a glance. */
+#bee-game .stn[data-station="0"] { --aw1: #ffd84d; --aw2: #e2563b; }
+#bee-game .stn[data-station="1"] { --aw1: #ffb347; --aw2: #c96f1e; }
+#bee-game .stn[data-station="2"] { --aw1: #b6e07a; --aw2: #4f9e3c; }
+#bee-game .stn[data-station="3"] { --aw1: #8fd4f2; --aw2: #3b8fc4; }
+#bee-game .stn[data-station="4"] { --aw1: #e3a6ef; --aw2: #9b5bc0; }
+
+#bee-game .window { position: relative; margin: 0 4%; height: clamp(38px, 6.4vw, 58px); display: flex; align-items: center; justify-content: center; background: linear-gradient(180deg, #fff8dd, #f1d494); border: 2px solid #5b380e; border-top: 0; box-shadow: inset 0 -5px 0 #00000012; }
+#bee-game .window::before { content: ''; position: absolute; inset: 3px; border: 1px dashed #c99b4a55; border-radius: 3px; pointer-events: none; }
+#bee-game .window::after { content: ''; position: absolute; left: 9%; right: 9%; bottom: 5px; height: 3px; border-radius: 2px; background: #c9974a; box-shadow: 0 1px 0 #ffffff66; }
+#bee-game .mwrap { position: relative; display: inline-block; z-index: 1; }
+#bee-game .mach { display: inline-block; font-size: clamp(24px, 4.6vw, 38px); line-height: 1; padding: 0; background: none; filter: drop-shadow(0 2px 1px #0003); }
+#bee-game .shutter { display: none; position: absolute; inset: 0; align-items: center; justify-content: center; font-size: clamp(16px, 3vw, 24px); background: repeating-linear-gradient(135deg, #7a5222 0 7px, #8d6229 7px 14px); opacity: .96; }
+#bee-game .stn.off .shutter { display: flex; }
+#bee-game .stn.off .mach { visibility: hidden; }
+#bee-game .stn.off .sign { opacity: .65; }
+
+#bee-game .counter { position: relative; z-index: 3; display: flex; flex-direction: column; align-items: center; gap: 1px; padding: 3px 4px 4px; background: linear-gradient(180deg, #c78b32, #9a5f1c 65%, #7d4b12); border: 2px solid #5b380e; border-top: 3px solid #e3b45c; border-radius: 0 0 8px 8px; box-shadow: inset 0 2px 0 #ffffff22, 0 4px 5px #0003; }
+#bee-game .sign { max-width: 100%; overflow-wrap: anywhere; white-space: normal; text-wrap: balance; font-size: clamp(8px, 1.8vw, 10px); font-weight: 800; line-height: 1.15; letter-spacing: .01em; color: var(--text); text-shadow: 0 1px 0 #0007; }
+#bee-game .sinfo { display: flex; flex-direction: column; align-items: center; gap: 1px; }
+#bee-game .slv, #bee-game .swk { font-size: clamp(8px, 1.7vw, 9px); font-weight: 800; line-height: 1.25; padding: 0 4px; border-radius: 7px; background: #241d12cc; color: var(--text); white-space: nowrap; }
+#bee-game .swk:empty { display: none; }
+#bee-game .swk.full { background: var(--go); color: #1d3308; }
+
+/* The upgrade badge floats above the serving window. */
+#bee-game .sup { position: absolute; top: -9px; right: -10px; z-index: 2; width: 18px; height: 18px; border-radius: 50%; background: var(--go); color: #1d3308; font-size: 12px; font-weight: 900; line-height: 18px; text-align: center; box-shadow: 0 0 0 2px #241d12; animation: bee-pulse 1.2s ease-in-out infinite; }
+#bee-game .ent { position: absolute; left: 0; top: 0; z-index: 1; font-size: clamp(24px, 4.6vw, 30px); line-height: 1; will-change: transform; }
 #bee-game .ent.helping { filter: drop-shadow(0 0 3px var(--gold)); }
 #bee-game .acc { position: absolute; right: -7px; bottom: -4px; font-size: 12px; }
 #bee-game .accessory { position: absolute; left: 50%; top: -11px; transform: translateX(-50%); font-size: 12px; line-height: 1; }
@@ -50,14 +88,27 @@
 #bee-game .bub.heart { background: #ffe3ec; color: #d6336c; }
 #bee-game .bar { position: absolute; left: 50%; bottom: 104%; width: 30px; height: 5px; margin-left: -15px; background: #0005; border-radius: 3px; overflow: hidden; }
 #bee-game .bar i { display: block; height: 100%; background: #e2563b; }
-#bee-game .pop { position: absolute; color: #7a4a00; font-weight: 800; font-size: 15px; pointer-events: none; animation: bee-rise .9s forwards; }
+#bee-game .pop { position: absolute; z-index: 2; color: #7a4a00; font-weight: 800; font-size: 15px; pointer-events: none; animation: bee-rise .9s forwards; }
 #bee-game .pop.tip { color: #b87900; }
 
+/* A chair under every queue spot, so players can see how many guests fit. */
+#bee-game .seat { position: absolute; transform: translate(-50%, -50%); font-size: clamp(22px, 5vw, 28px); line-height: 1; opacity: .5; z-index: 0; pointer-events: none; transition: opacity .15s; }
+#bee-game .seat.taken { opacity: .95; }
+@keyframes bee-pulse { 50% { transform: scale(1.18); } }
+
 /* ---------- door, aisle and guest movement ---------- */
-#bee-game .door { position: absolute; left: 2%; bottom: 2%; z-index: 0; width: 46px; height: 64px; border: 3px solid #5b380e; border-radius: 9px 9px 3px 3px; background: repeating-linear-gradient(90deg, #a97531 0 6px, #966325 6px 12px); box-shadow: 0 6px 16px #0005, inset 0 0 0 2px #e2a93b33; pointer-events: none; }
-#bee-game .door::after { content: ''; position: absolute; right: 6px; top: 52%; width: 5px; height: 5px; border-radius: 50%; background: var(--gold); box-shadow: 0 0 4px var(--gold); }
-#bee-game .door-sign { position: absolute; left: 50%; top: -13px; transform: translateX(-50%); padding: 1px 4px; border-radius: 4px; background: #2f6b2f; color: #f1ffe9; font-size: 7px; font-weight: 900; letter-spacing: .08em; white-space: nowrap; }
-#bee-game .aisle { position: absolute; left: 4%; bottom: 1.5%; z-index: 0; width: 22%; height: 18px; border-radius: 9px; background: repeating-linear-gradient(90deg, #00000014 0 8px, #00000008 8px 16px); transform: rotate(-8deg); pointer-events: none; }
+#bee-game .door { position: absolute; left: 2%; bottom: 2%; z-index: 0; width: clamp(44px, 8vw, 64px); aspect-ratio: 3 / 4; border: 3px solid #5b380e; border-bottom-width: 4px; border-radius: 10px 10px 4px 4px; background: repeating-linear-gradient(90deg, #a97531 0 8px, #966325 8px 16px); box-shadow: 0 8px 18px #0005, inset 0 0 0 2px #e2a93b33; pointer-events: none; }
+/* Lit window in the top half of the door. */
+#bee-game .door::before { content: ''; position: absolute; left: 16%; right: 16%; top: 9%; height: 34%; border: 2px solid #5b380e; border-radius: 6px 6px 3px 3px; background: linear-gradient(160deg, #fff4c7, #e8b24c); box-shadow: inset 0 0 8px #fff6c266; }
+#bee-game .door::after { content: ''; position: absolute; right: 12%; top: 56%; width: 6px; height: 6px; border-radius: 50%; background: var(--gold); box-shadow: 0 0 4px var(--gold); }
+#bee-game .door-glow { position: absolute; left: 50%; bottom: -10%; width: 220%; height: 38%; transform: translateX(-50%); border-radius: 50%; background: radial-gradient(ellipse at 50% 0%, #ffe9a766, transparent 70%); pointer-events: none; }
+#bee-game .door-mat { position: absolute; left: 10%; right: 10%; bottom: 2px; height: 5px; border-radius: 2px; background: #5b380e; box-shadow: 0 1px 0 #e3b45c55; }
+/* The sign hangs above the frame so guests never stand on top of it. */
+#bee-game .door-sign { position: absolute; left: 50%; top: -20px; transform: translateX(-50%); padding: 2px 6px; border-radius: 4px; background: #2f6b2f; color: #f1ffe9; font-size: clamp(8px, 1.8vw, 10px); font-weight: 900; letter-spacing: .08em; white-space: nowrap; box-shadow: 0 2px 6px #0005; }
+#bee-game .door-sign::before, #bee-game .door-sign::after { content: ''; position: absolute; top: 100%; width: 1px; height: 4px; background: #3a2e1b; }
+#bee-game .door-sign::before { left: 22%; }
+#bee-game .door-sign::after { right: 22%; }
+#bee-game .aisle { position: absolute; left: 4%; bottom: 1.5%; z-index: 0; width: 24%; height: 18px; border-radius: 9px; background: repeating-linear-gradient(90deg, #00000014 0 8px, #00000008 8px 16px); transform: rotate(-8deg); pointer-events: none; }
 #bee-game .ent .gface { display: inline-block; transform: scaleX(var(--dir, 1)); }
 #bee-game .ent.left { --dir: -1; }
 #bee-game .ent.walking .gface { animation: bee-guest-bob .32s ease-in-out infinite alternate; }
@@ -95,9 +146,18 @@
   #bee-game .dock-ico { font-size: 18px; }
   #bee-game .dock-label { font-size: 11px; }
 }
+@media (max-width: 360px) {
+  #bee-game .hud-top { gap: 6px; }
+  #bee-game .hud-stats { gap: 4px; }
+  #bee-game .hud-item { padding: 3px 5px; font-size: .76rem; }
+  #bee-game .hud-actions { gap: 3px; }
+  #bee-game .exit-btn { padding: 5px 7px; }
+}
 @media (prefers-reduced-motion: reduce) {
   #bee-game .ent.walking .gface, #bee-game .ent.happy .gface { animation: none; }
   #bee-game .pop { animation-duration: .01s; }
   #bee-game .toast { animation: none; }
   #bee-game .dock-btn { transition: none; }
+  #bee-game .sup { animation: none; }
+  #bee-game .seat { transition: none; }
 }

@@ -45,11 +45,20 @@ export class Game {
     this.scene.build();
     this.panel.build();
     this.changed();
+    this.lastSave = JSON.stringify(this.state);
 
-    this.autosave = setInterval(() => this.saves.push(this.state), 5000);
+    this.autosave = setInterval(() => this.saveIfDirty(), 10000);
     this.last = performance.now(); this.acc = 0; this.running = true;
     this.raf = requestAnimationFrame(t => this.loop(t));
     return this;
+  }
+
+  /** Autosave only when the state actually changed since the last success. */
+  async saveIfDirty() {
+    if (!this.state) return;
+    const snapshot = JSON.stringify(this.state);
+    if (snapshot === this.lastSave) return;
+    if (await this.saves.push(this.state)) this.lastSave = snapshot;
   }
 
   loop(t) {

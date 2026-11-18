@@ -10,6 +10,12 @@ if (!$me) {
     exit();
 }
 $isAdmin = ($me['role'] ?? 'player') === 'admin';
+$menuCssV = @filemtime(__DIR__ . '/Mainmenu.css') ?: 1;
+
+// The menu shell must never be served from an old cache while developing.
+header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+header('Pragma: no-cache');
+header('Expires: 0');
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -19,7 +25,7 @@ $isAdmin = ($me['role'] ?? 'player') === 'admin';
     <title>JolliDew - Game</title>
     <!-- Bootstrap first so Mainmenu.css wins any clash. The game modals need Bootstrap 4 + jQuery. -->
     <link rel="stylesheet" href="vendor/bootstrap/bootstrap.min.css">
-    <link rel="stylesheet" href="Mainmenu.css">
+    <link rel="stylesheet" href="Mainmenu.css?v=<?= $menuCssV ?>">
 </head>
 <body>
 

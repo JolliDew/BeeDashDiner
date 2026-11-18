@@ -6,6 +6,9 @@ export class SaveService {
     this.url = url;
     this.key = 'beediner:' + userId;
     this.onStatus = onStatus;
+    // Saves run one at a time. Overlapping requests used to race each other,
+    // so a late "Saved" could overwrite a newer "Saving…" in the HUD.
+    this.queue = Promise.resolve();
   }
 
   async load() {
@@ -30,15 +33,25 @@ export class SaveService {
     try { localStorage.setItem(this.key, JSON.stringify(state)); } catch (e) { /* ignore */ }
   }
 
-  async push(state, keepalive = false) {
+  push(state, keepalive = false) {
     this.saveLocal(state);
-    this.onStatus('Saving…');
-    try {
-      const r = await fetch(this.url + '?action=save', {
-        method: 'POST', credentials: 'same-origin', keepalive,
-        headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(state)
-      });
-      this.onStatus(r.ok ? 'Saved' : r.status === 401 ? 'Log in again' : 'Save failed');
-    } catch (e) { this.onStatus('Offline'); }
+    const job = this.queue.then(async () => {
+      this.onStatus('Saving…');
+      try {
+        const r = await fetch(this.url + '?action=save', {
+          method: 'POST', credentials: 'same-origin', keepalive,
+          headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(state)
+        });
+        this.onStatus(r.ok ? 'Saved' : r.status === 401 ? 'Log in again' : 'Save failed');
+        return r.ok;
+      } catch (e) {
+        this.onStatus('Offline');
+        return false;
+      }
+    });
+    // Keep the chain alive even if one job throws, without changing the
+    // result the caller receives.
+    this.queue = job.catch(() => false);
+    return job;
   }
 }

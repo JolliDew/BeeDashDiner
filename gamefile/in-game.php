@@ -3,9 +3,15 @@
 require_once __DIR__ . '/src/Auth.php';
 $userId = Auth::requireLogin(true);
 $devMode = true; // set to false for release: hides the 🛠 dev tools
+$cssV = fn(string $file): int => max(1, @filemtime(__DIR__ . '/' . $file) ?: 1);
+
+// The injected game markup and its styles must never come from an old cache.
+header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+header('Pragma: no-cache');
+header('Expires: 0');
 ?>
-<link rel="stylesheet" href="css/bee-game.css">
-<link rel="stylesheet" href="css/bee-modals.css">
+<link rel="stylesheet" href="css/bee-game.css?v=<?= $cssV('css/bee-game.css') ?>">
+<link rel="stylesheet" href="css/bee-modals.css?v=<?= $cssV('css/bee-modals.css') ?>">
 <div class="game-screen" id="bee-game" data-dev="<?= $devMode ? '1' : '0' ?>" data-user="<?= (int)$userId ?>">
     <div class="game-canvas-area">
         <div class="bee-app">
@@ -17,8 +23,10 @@ $devMode = true; // set to false for release: hides the 🛠 dev tools
                         <span class="hud-item" id="hud-queue">🪑 0/4</span>
                     </div>
                     <div class="hud-actions">
-                        <button id="devbtn" title="Dev mode" hidden>🛠</button>
-                        <button class="menu-btn exit-btn" onclick="returnToMenu()">Exit</button>
+                        <button id="devbtn" type="button" title="Dev mode" aria-label="Toggle developer tools" hidden>🛠</button>
+                        <button class="menu-btn exit-btn" type="button" onclick="returnToMenu()" title="Exit to main menu" aria-label="Exit to main menu">
+                            <span aria-hidden="true">🚪</span>
+                        </button>
                     </div>
                 </div>
                 <div class="hud-sub">

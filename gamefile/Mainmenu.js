@@ -16,7 +16,7 @@ function startGame() {
     if (old) old.textContent = '';
 
     // Fetch the in-game.php markup, inject it, then boot the OOP game (js/main.js)
-    fetch('in-game.php', { credentials: 'same-origin' })
+    fetch('in-game.php', { credentials: 'same-origin', cache: 'no-store' })
         .then(response => {
             if (response.status === 401) {
                 window.location.href = 'login.php';

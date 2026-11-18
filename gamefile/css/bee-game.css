@@ -16,15 +16,19 @@
 /* ---------- compact HUD ---------- */
 #bee-game .game-hud { flex: 0 0 auto; display: flex; flex-direction: column; align-items: stretch; justify-content: flex-start; gap: 4px; padding: 8px 12px 6px; background: #1b150d; border-bottom: 1px solid #3a2e1b; font-size: .95rem; }
 #bee-game .hud-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
-#bee-game .hud-stats { display: flex; align-items: center; gap: 6px; min-width: 0; }
-#bee-game .hud-item { padding: 4px 9px; border-radius: 9px; border: 1px solid #4a3b22; background: #2a2113; font-weight: 800; white-space: nowrap; font-variant-numeric: tabular-nums; }
+#bee-game .hud-stats { display: flex; align-items: center; min-width: 0; padding: 0; border: 1px solid #4a3b22; border-radius: 10px; background: #2a2113; overflow: hidden; }
+#bee-game .hud-item { flex: 0 1 auto; min-width: 0; padding: 4px 10px; border: 0; border-radius: 0; background: transparent; font-weight: 800; white-space: nowrap; font-variant-numeric: tabular-nums; }
+#bee-game .hud-item + .hud-item { border-left: 1px solid #4a3b22; }
 #bee-game .hud-sub { display: flex; justify-content: space-between; gap: 8px; min-height: 13px; font-size: 11px; line-height: 1.2; color: var(--mute); }
 #bee-game #hud-location { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 #bee-game #hud-save { flex: none; transition: opacity .4s ease; }
 #bee-game #hud-save.is-idle { opacity: 0; }
 #bee-game .hud-actions { display: flex; align-items: center; gap: 6px; flex: none; }
-#bee-game #devbtn { border: 0; background: transparent; font-size: 18px; line-height: 1; cursor: pointer; color: #fff; padding: 2px 4px; }
-#bee-game .exit-btn { width: auto; padding: 5px 10px; font-size: 12px; line-height: 1.1; border-radius: 8px; background: #e63946; color: #fff; }
+#bee-game #devbtn { width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border: 0; border-radius: 10px; background: transparent; font-size: 18px; line-height: 1; cursor: pointer; color: #fff; padding: 0; }
+#bee-game #devbtn:hover { background: #ffffff14; }
+#bee-game .exit-btn { width: 40px; height: 40px; min-height: 0; padding: 0; display: flex; align-items: center; justify-content: center; font-size: 18px; line-height: 1; border-radius: 10px; background: #e63946; color: #fff; box-shadow: 0 2px 0 #9c1f28; }
+#bee-game .exit-btn:hover { background: #d62828; }
+#bee-game .exit-btn:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
 
 /* ---------- dev bar ---------- */
 #bee-game #dev { flex: 0 0 auto; display: flex; flex-wrap: wrap; align-items: center; gap: 4px; padding: 6px 10px; background: #17110a; font-size: 12px; }
@@ -50,7 +54,7 @@
    level stay readable while a bee works at the window. */
 #bee-game .stall { width: 92%; margin: 0 auto; display: flex; flex-direction: column; }
 
-#bee-game .awning { position: relative; height: clamp(13px, 2.5vw, 20px); border: 2px solid #5b380e; border-bottom: 0; border-radius: 8px 8px 2px 2px; background: repeating-linear-gradient(90deg, var(--aw1, #ffd84d) 0 10px, var(--aw2, #e2563b) 10px 20px); box-shadow: inset 0 3px 0 #ffffff2e; }
+#bee-game .awning { position: relative; height: clamp(13px, 2.5vw, 22px); border: 2px solid #5b380e; border-bottom: 0; border-radius: 8px 8px 2px 2px; background: repeating-linear-gradient(90deg, var(--aw1, #ffd84d) 0 10px, var(--aw2, #e2563b) 10px 20px); box-shadow: inset 0 3px 0 #ffffff2e; }
 #bee-game .awning::after { content: ''; position: absolute; left: 0; right: 0; bottom: -2px; height: 4px; background: var(--aw2, #e2563b); }
 /* A different awning per station makes them readable at a glance. */
 #bee-game .stn[data-station="0"] { --aw1: #ffd84d; --aw2: #e2563b; }
@@ -59,26 +63,26 @@
 #bee-game .stn[data-station="3"] { --aw1: #8fd4f2; --aw2: #3b8fc4; }
 #bee-game .stn[data-station="4"] { --aw1: #e3a6ef; --aw2: #9b5bc0; }
 
-#bee-game .window { position: relative; margin: 0 4%; height: clamp(38px, 6.4vw, 58px); display: flex; align-items: center; justify-content: center; background: linear-gradient(180deg, #fff8dd, #f1d494); border: 2px solid #5b380e; border-top: 0; box-shadow: inset 0 -5px 0 #00000012; }
+#bee-game .window { position: relative; margin: 0 4%; height: clamp(38px, 6.4vw, 64px); display: flex; align-items: center; justify-content: center; background: linear-gradient(180deg, #fff8dd, #f1d494); border: 2px solid #5b380e; border-top: 0; box-shadow: inset 0 -5px 0 #00000012; }
 #bee-game .window::before { content: ''; position: absolute; inset: 3px; border: 1px dashed #c99b4a55; border-radius: 3px; pointer-events: none; }
 #bee-game .window::after { content: ''; position: absolute; left: 9%; right: 9%; bottom: 5px; height: 3px; border-radius: 2px; background: #c9974a; box-shadow: 0 1px 0 #ffffff66; }
 #bee-game .mwrap { position: relative; display: inline-block; z-index: 1; }
-#bee-game .mach { display: inline-block; font-size: clamp(24px, 4.6vw, 38px); line-height: 1; padding: 0; background: none; filter: drop-shadow(0 2px 1px #0003); }
+#bee-game .mach { display: inline-block; font-size: clamp(24px, 4.6vw, 42px); line-height: 1; padding: 0; background: none; filter: drop-shadow(0 2px 1px #0003); }
 #bee-game .shutter { display: none; position: absolute; inset: 0; align-items: center; justify-content: center; font-size: clamp(16px, 3vw, 24px); background: repeating-linear-gradient(135deg, #7a5222 0 7px, #8d6229 7px 14px); opacity: .96; }
 #bee-game .stn.off .shutter { display: flex; }
 #bee-game .stn.off .mach { visibility: hidden; }
 #bee-game .stn.off .sign { opacity: .65; }
 
 #bee-game .counter { position: relative; z-index: 3; display: flex; flex-direction: column; align-items: center; gap: 1px; padding: 3px 4px 4px; background: linear-gradient(180deg, #c78b32, #9a5f1c 65%, #7d4b12); border: 2px solid #5b380e; border-top: 3px solid #e3b45c; border-radius: 0 0 8px 8px; box-shadow: inset 0 2px 0 #ffffff22, 0 4px 5px #0003; }
-#bee-game .sign { max-width: 100%; overflow-wrap: anywhere; white-space: normal; text-wrap: balance; font-size: clamp(8px, 1.8vw, 10px); font-weight: 800; line-height: 1.15; letter-spacing: .01em; color: var(--text); text-shadow: 0 1px 0 #0007; }
+#bee-game .sign { max-width: 100%; overflow-wrap: anywhere; white-space: normal; text-wrap: balance; font-size: clamp(8px, 1.8vw, 11px); font-weight: 800; line-height: 1.15; letter-spacing: .01em; color: var(--text); text-shadow: 0 1px 0 #0007; }
 #bee-game .sinfo { display: flex; flex-direction: column; align-items: center; gap: 1px; }
-#bee-game .slv, #bee-game .swk { font-size: clamp(8px, 1.7vw, 9px); font-weight: 800; line-height: 1.25; padding: 0 4px; border-radius: 7px; background: #241d12cc; color: var(--text); white-space: nowrap; }
+#bee-game .slv, #bee-game .swk { font-size: clamp(8px, 1.7vw, 10px); font-weight: 800; line-height: 1.25; padding: 0 4px; border-radius: 7px; background: #241d12cc; color: var(--text); white-space: nowrap; }
 #bee-game .swk:empty { display: none; }
 #bee-game .swk.full { background: var(--go); color: #1d3308; }
 
 /* The upgrade badge floats above the serving window. */
 #bee-game .sup { position: absolute; top: -9px; right: -10px; z-index: 2; width: 18px; height: 18px; border-radius: 50%; background: var(--go); color: #1d3308; font-size: 12px; font-weight: 900; line-height: 18px; text-align: center; box-shadow: 0 0 0 2px #241d12; animation: bee-pulse 1.2s ease-in-out infinite; }
-#bee-game .ent { position: absolute; left: 0; top: 0; z-index: 1; font-size: clamp(24px, 4.6vw, 30px); line-height: 1; will-change: transform; }
+#bee-game .ent { position: absolute; left: 0; top: 0; z-index: 1; font-size: clamp(24px, 4.6vw, 34px); line-height: 1; will-change: transform; }
 #bee-game .ent.helping { filter: drop-shadow(0 0 3px var(--gold)); }
 #bee-game .acc { position: absolute; right: -7px; bottom: -4px; font-size: 12px; }
 #bee-game .accessory { position: absolute; left: 50%; top: -11px; transform: translateX(-50%); font-size: 12px; line-height: 1; }
@@ -92,7 +96,7 @@
 #bee-game .pop.tip { color: #b87900; }
 
 /* A chair under every queue spot, so players can see how many guests fit. */
-#bee-game .seat { position: absolute; transform: translate(-50%, -50%); font-size: clamp(22px, 5vw, 28px); line-height: 1; opacity: .5; z-index: 0; pointer-events: none; transition: opacity .15s; }
+#bee-game .seat { position: absolute; transform: translate(-50%, -50%); font-size: clamp(22px, 5vw, 34px); line-height: 1; opacity: .5; z-index: 0; pointer-events: none; transition: opacity .15s; }
 #bee-game .seat.taken { opacity: .95; }
 @keyframes bee-pulse { 50% { transform: scale(1.18); } }
 
@@ -136,7 +140,15 @@
 
 @media (min-width: 760px) {
   #bee-game .game-canvas-area { padding: 16px; }
-  #bee-game .bee-app { border-radius: 18px; overflow: hidden; box-shadow: 0 22px 70px #000b; }
+  /* Use the width of a desktop monitor instead of a 600px phone column. */
+  #bee-game .bee-app { max-width: 1000px; border-radius: 18px; overflow: hidden; box-shadow: 0 22px 70px #000b; }
+  /* Desktop dock: one slim row, icon and label side by side. */
+  #bee-game #panel { padding: 5px 12px calc(5px + env(safe-area-inset-bottom)); }
+  #bee-game .dock { max-width: 520px; margin: 0 auto; gap: 6px; }
+  #bee-game .dock-btn { flex-direction: row; gap: 8px; padding: 7px 12px; border-radius: 10px; }
+  #bee-game .dock-ico { font-size: 17px; }
+  #bee-game .dock-label { font-size: 12px; }
+  #bee-game .dock-dot { top: 3px; right: 6px; }
 }
 @media (max-width: 420px) {
   #bee-game .game-hud { padding: 6px 8px 4px; }

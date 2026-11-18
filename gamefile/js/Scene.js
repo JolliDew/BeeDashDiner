@@ -8,6 +8,10 @@ export class Scene {
     this.bees = []; this.customers = []; this.seats = []; this.stationEls = []; this.seatEls = [];
     this.spawnTimer = 0; this.burst = 0; this.quiet = false;
     this.kitchenY = 26;
+    // Guests enter and leave through the same bottom-left door. The aisle is
+    // the first/last step on the dining-room floor.
+    this.doorX = 7; this.doorY = 93;
+    this.aisleX = 17; this.aisleY = 86;
   }
 
   stationX(i) { return (i + .5) / this.state.stations.length * 100; }
@@ -27,6 +31,7 @@ export class Scene {
     this.bees = []; this.customers = []; this.stationEls = []; this.seatEls = [];
     this.seats = Array(this.economy.seats).fill(null);
     this.mk('kitchen').id = 'kitchen';
+    this.mk('door', '<span class="door-sign">OPEN</span>');
     this.state.stations.forEach((s, i) => {
       // .sup = "you can upgrade this" arrow, .slv = recipe level, .swk = bees working / worker slots
       const d = this.mk('stn', `<span class="mwrap"><span class="mach">${art(ASSETS.stations[i], ITEMS[this.state.location][i][0])}</span><span class="sup" hidden>⬆</span></span>`
@@ -127,7 +132,7 @@ export class Scene {
     let best = 0, bestScore = Infinity;
     this.state.stations.forEach((s, i) => {
       if (!s.unlocked) return;
-      const n = this.customers.filter(c => c.item === i && c.state !== 'leave').length;
+      const n = this.customers.filter(c => c.item === i && c.state !== 'leave' && c.state !== 'exit').length;
       const score = (n + Math.random() * .9) / this.economy.capacity(i);
       if (score < bestScore) { bestScore = score; best = i; }
     });
@@ -140,9 +145,16 @@ export class Scene {
     if (!free.length) return;
     const seat = free[Math.random() * free.length | 0], f = Math.random() * CUSTOMERS.length | 0;
     const face = art(ASSETS.customers[f], CUSTOMERS[f]);
-    const c = new Customer(this.mk('ent', face), seat, this.pickItem(), face, this.seatX(seat), this.seatY(seat));
+    const c = new Customer(this.mk('ent', face), seat, this.pickItem(), face, this.doorX, this.doorY);
+    // The chair is reserved immediately so two guests can never target it.
     this.seats[seat] = c; this.customers.push(c);
     c.render(this.host.clientWidth, this.host.clientHeight);
+  }
+
+  /** Called when a departing guest clears the seating area. */
+  freeSeat(customer) {
+    if (customer && this.seats[customer.seat] === customer) this.seats[customer.seat] = null;
+    this.refreshStations();
   }
 
   deliver(bee, customer) {
@@ -156,12 +168,11 @@ export class Scene {
       this.state.addHoney(tip);
       this.state.stats.tips++;
       this.state.stats.tipHoney += tip;
-      customer.tip = tip;
       this.pop(bee.x + 4, bee.y - 11, '🪙 +' + fmt(tip), 'tip');
     }
 
-    customer.leave();
-    this.seats[customer.seat] = null;
+    customer.served(customer.tip);
+    // The chair stays reserved until the guest reaches the aisle.
   }
 
   pop(x, y, text, cls = '') {

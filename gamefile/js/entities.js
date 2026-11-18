@@ -8,6 +8,7 @@ class Walker {
     let g = this.leg;
     if (!g || g.tx !== tx || g.ty !== ty) {
       if (Math.abs(this.x - tx) + Math.abs(this.y - ty) < .05) { this.leg = null; return true; }
+      this.el.classList.toggle('left', tx < this.x);
       g = this.leg = { sx: this.x, sy: this.y, tx, ty, t: 0, d: dur };
     }
     g.t += dt;
@@ -25,42 +26,101 @@ export class Customer extends Walker {
   constructor(el, seat, item, face, x, y) {
     super(el, x, y);
     this.seat = seat; this.item = item; this.face = face;
-    this.state = 'wait';
+    this.state = 'enter';
+    this.stage = 'aisle';
     this.taken = false;
     this.claimedBy = null;
     this.waitTime = 0;
     this.tip = 0;
     this.key = '';
     this.t = 0;
-    el.animate(
-      [{ scale: '0', opacity: 0 }, { scale: '1.2', opacity: 1, offset: .7 }, { scale: '1', opacity: 1 }],
-      { duration: B.popTime * 1000, easing: 'ease-out' }
-    );
+    this.el.innerHTML = `<span class="gface">${face}</span>`;
+    this.el.classList.add('walking');
+    if (el.animate) el.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 220, easing: 'ease-out' });
   }
 
-  leave() {
-    this.state = 'leave';
-    this.t = 0;
-    this.el.animate(
-      [{ scale: '1', opacity: 1 }, { scale: '0', opacity: 0 }],
-      { duration: B.popTime * 1000, fill: 'forwards' }
-    );
+  /** The bee has delivered: celebrate for a moment before walking out. */
+  served(tip = 0) {
+    this.tip = tip;
+    this.state = 'happy';
+    this.t = B.happyTime;
+    this.el.classList.remove('walking');
+    this.el.classList.add('happy');
   }
 
   update(dt, scene) {
-    if (this.state === 'leave') {
-      this.t += dt;
-      return this.t < B.popTime;
+    switch (this.state) {
+      case 'enter': {
+        const atAisle = this.stage === 'aisle';
+        const tx = atAisle ? scene.aisleX : scene.seatX(this.seat);
+        const ty = atAisle ? scene.aisleY : scene.seatY(this.seat);
+        if (this.walkTo(tx, ty, dt, scene.economy.walkTime)) {
+          if (atAisle) {
+            this.stage = 'seat';
+          } else {
+            this.state = 'wait';
+            this.x = scene.seatX(this.seat);
+            this.y = scene.seatY(this.seat);
+            this.el.classList.remove('walking');
+          }
+        }
+        break;
+      }
+      case 'wait':
+        this.x = scene.seatX(this.seat);
+        this.y = scene.seatY(this.seat);
+        this.waitTime += dt;
+        break;
+      case 'happy':
+        this.t -= dt;
+        if (this.t <= 0) {
+          this.state = 'leave';
+          this.stage = 'aisle';
+          this.el.classList.remove('happy');
+          this.el.classList.add('walking');
+        }
+        break;
+      case 'leave': {
+        const atAisle = this.stage === 'aisle';
+        const tx = atAisle ? scene.aisleX : scene.doorX;
+        const ty = atAisle ? scene.aisleY : scene.doorY;
+        if (this.walkTo(tx, ty, dt, scene.economy.walkTime)) {
+          if (atAisle) {
+            // Free the chair only once the guest is out of the seating area,
+            // so a new customer never walks through someone still standing up.
+            scene.freeSeat(this);
+            this.stage = 'door';
+          } else {
+            this.state = 'exit';
+            this.t = B.popTime;
+            this.el.classList.remove('walking');
+            if (this.el.animate) {
+              this.el.animate(
+                [{ opacity: 1 }, { opacity: 0 }],
+                { duration: B.popTime * 1000, fill: 'forwards' }
+              );
+            }
+          }
+        }
+        break;
+      }
+      case 'exit':
+        this.t -= dt;
+        return this.t > 0;
     }
-    this.x = scene.seatX(this.seat);
-    this.y = scene.seatY(this.seat);
-    this.waitTime += dt;
-    const k = 'w' + (this.taken ? 1 : 0);
+    this.paint(scene);
+    return true;
+  }
+
+  paint(scene) {
+    const bubble = this.state === 'wait'
+      ? `<span class="bub${this.taken ? ' ok' : ''}">${scene.itemIcon(this.item)}</span>`
+      : this.state === 'happy' ? '<span class="bub heart">💛</span>' : '';
+    const k = this.state + (this.taken ? '|taken' : '') + bubble;
     if (k !== this.key) {
       this.key = k;
-      this.el.innerHTML = this.face + `<span class="bub${this.taken ? ' ok' : ''}">${scene.itemIcon(this.item)}</span>`;
+      this.el.innerHTML = `<span class="gface">${this.face}</span>` + bubble;
     }
-    return true;
   }
 }
 

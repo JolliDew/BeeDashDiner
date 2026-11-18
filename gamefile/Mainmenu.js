@@ -1,4 +1,5 @@
 let currentGame = null;
+let starting = false;
 
 function showMenuError(message) {
     let el = document.getElementById('menu-error');
@@ -12,6 +13,10 @@ function showMenuError(message) {
 }
 
 function startGame() {
+    // A fast double-click must not create two game loops.
+    if (starting || currentGame) return;
+    starting = true;
+
     const old = document.getElementById('menu-error');
     if (old) old.textContent = '';
 
@@ -43,7 +48,8 @@ function startGame() {
             if (error && error.message !== 'Login required') {
                 showMenuError('Could not start the game: ' + error.message + ' (see the browser console, F12, for details)');
             }
-        });
+        })
+        .finally(() => { starting = false; });
 }
 
 function returnToMenu() {

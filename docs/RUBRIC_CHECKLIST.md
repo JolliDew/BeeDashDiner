@@ -24,7 +24,7 @@ the current branch.
 | Restart option | ✅ | `restart.php` + confirmation on the main menu |
 | Source code / repository | ✅ | Local git repo; push before submission |
 | Database export | ✅ | `database.sql` with schema, seed data and demo accounts |
-| Live application URL | ⏳ | Fill `YOUR-SERVICE.onrender.com` after Render deploy |
+| Live application URL | ✅ | https://beedashdiner.onrender.com |
 | Test credentials | ✅ | `demo_player` / `demo_admin`; passwords in README |
 | Demonstration video | ⏳ | Record with `docs/DEMO_SCRIPT.md` |
 | README with setup/platform/members | ✅ | `README.md` |
@@ -39,7 +39,7 @@ the current branch.
 
 ## Before Canvas submission
 
-1. Deploy on Render and replace `YOUR-SERVICE` in README and the building document.
+1. The Render deployment is live; update the URL only if the service name changes.
 2. Confirm the live URL, HTTPS, demo accounts, avatar upload and admin page.
 3. Record the video using the script.
 4. Regenerate the DOCX/PDF if the live URL changes.

@@ -10,7 +10,7 @@ segment.
 
 ## Before recording
 
-- Deploy and open `https://YOUR-SERVICE.onrender.com/login.php`.
+- Deploy and open `https://beedashdiner.onrender.com/login.php`.
 - Log in as `demo_admin` once to confirm the admin link appears.
 - `demo_player` and `demo_admin` are created by `database.sql`; log in with them
   to confirm they work.

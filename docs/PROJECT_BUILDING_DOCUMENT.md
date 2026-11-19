@@ -22,7 +22,7 @@ date: "November 2026"
 **Institution:** University of St. La Salle, La Salle Avenue, Bacolod City 6100, Negros Occidental, Philippines\
 **Telephone:** +63 34 434 6100\
 **Repository:** https://github.com/JolliDew/BeeDashDiner\
-**Planned public URL:** https://YOUR-SERVICE.onrender.com (replace with the real Render URL after deployment)
+**Planned public URL:** https://beedashdiner.onrender.com (replace with the real Render URL after deployment)
 
 | Member | Main role | Approx. contribution |
 |---|---|---|
@@ -368,7 +368,7 @@ audio panel above.
 | T9 | Restart | Confirm restart from menu | Own save replaced by a fresh game | Level 1, 50 honey, one open station; a save still on its way cannot undo it | Pass |
 | T10 | Audio | Open speaker, change sliders, reload | Volumes persist | 70/45 restored; music timer resumed | Pass |
 | T11 | Mobile layout | 320×568 and 568×320 | No clipped UI | No horizontal overflow | Pass |
-| T12 | Deployment | Open Render URL, log in, play | App reachable over HTTPS | Pending Render deploy | Pending |
+| T12 | Deployment | Open the Render URL, log in, play | App reachable over HTTPS | Live at https://beedashdiner.onrender.com; both demo roles verified | Pass |
 | T13 | Maps and menu sign | Switch to levels 1, 5 and 8 at 360, 568×320 and 1440 | Distinct maps; sign always 3–8px above stalls; no overflow | 3/4/5 stations, correct decor, no overlap | Pass |
 | T14 | Colour contrast | Open menu, help and profile; inspect gold buttons | Dark text on gold, readable labels | Button text corrected | Pass |
 | T15 | Google account password | Simulate a Google-created account; try manual login, then set a local password in Profile and log in manually | Helpful message first; local login works after setting | Both stages passed | Pass |
@@ -479,19 +479,24 @@ them before fixing them:
 **Platform:** Render (Docker web service)\
 **Database:** Supabase PostgreSQL (managed)\
 **Runtime:** PHP 8.2 + Apache, PDO PostgreSQL, HTTPS terminated by Render\
-**Status:** prepared and container-tested; the Render service is created by the
-repository owner, so the public URL is still a placeholder in this document.
+**Status:** **live** at <https://beedashdiner.onrender.com>.
 
 The Docker image was built locally and run on a Render-style non-root port
-against the live Supabase database. Login, the game, all four modals, autosave,
-Exit, avatar upload, admin access and the 403 page all passed inside the
-container, with no console errors.
+against the live Supabase database before the deploy. Login, the game, all four
+modals, autosave, Exit, avatar upload, admin access and the 403 page all passed
+inside the container, with no console errors. The live service was then checked
+over HTTPS with both demo roles: player login and menu, admin login and
+dashboard, the player-only 403 block, no developer tools for the player, and
+CSRF rejection on the save API.
 
 Deployment steps:
 
 1. Push the repository branch to GitHub.
 2. Create a Render Web Service from the repository and select Docker.
-3. Add the `DATABASE_URL` environment variable from Supabase (session pooler URI).
+3. Add `DATABASE_URL`, `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` and
+   `GOOGLE_REDIRECT_URI` in Render. The database value is the Supabase session
+   pooler URI; the Google callback is
+   `https://beedashdiner.onrender.com/google-login.php`.
 4. Render builds the `Dockerfile`; the entrypoint makes Apache listen on Render’s
    `PORT`; deploy.
 5. Run the repository-root `database.sql` in the Supabase SQL editor. It creates
@@ -600,7 +605,7 @@ decision column records what the group agreed to at that point.
 ## 10.3 Test credentials
 
 ```text
-Public URL: https://YOUR-SERVICE.onrender.com   (replace after deployment)
+Public URL: https://beedashdiner.onrender.com
 Player:    demo_player / JolliDemo123!
 Admin:     demo_admin  / JolliDemo123!
 ```

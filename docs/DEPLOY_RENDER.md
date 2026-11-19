@@ -21,8 +21,8 @@ required.
 3. Paste the Supabase **Session pooler** URI as `DATABASE_URL`.
 4. Deploy, open the `https://…onrender.com` URL, and log in with
    `demo_player` / `demo_admin`.
-5. Replace `YOUR-SERVICE` in `README.md`, this guide and the building document,
-   then rebuild the PDF/DOCX and the submission zip.
+5. The live URL is `https://beedashdiner.onrender.com`. Update the documents,
+   PDF/DOCX and submission zip only if the Render service name changes.
 
 The detailed steps and the database checks follow.
 
@@ -112,7 +112,7 @@ Use it when you want an empty database and do not want the grading accounts.
 
 ## 4. First-run checks
 
-1. Open `https://YOUR-SERVICE.onrender.com/`; the landing page should load.
+1. Open `https://beedashdiner.onrender.com/`; the landing page should load.
 2. Log in with `demo_player` / `JolliDemo123!`.
 3. Log out, then log in with `demo_admin` / `JolliDemo123!`. The **Admin**
    link should appear.

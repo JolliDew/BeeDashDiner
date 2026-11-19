@@ -27,13 +27,13 @@ The backend uses **PDO** and supports both **MySQL/MariaDB** (XAMPP) and **Postg
 After deploying with **[docs/DEPLOY_RENDER.md](docs/DEPLOY_RENDER.md)**:
 
 ```text
-Live URL:    https://YOUR-SERVICE.onrender.com
+Live URL:    https://beedashdiner.onrender.com
 Player:      demo_player / JolliDemo123!
 Admin:       demo_admin  / JolliDemo123!
 ```
 
-Replace `YOUR-SERVICE` with the Render URL before submitting. The demo
-passwords are intentionally simple and exist only for grading.
+The live URL is `https://beedashdiner.onrender.com`. The demo passwords are
+intentionally simple and exist only for grading.
 
 ---
 

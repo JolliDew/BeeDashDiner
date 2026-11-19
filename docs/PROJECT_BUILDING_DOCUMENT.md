@@ -110,23 +110,15 @@ three missions on a level, the player advances; after Level 10 the game is won.
 
 ## 4.1 Entity–relationship diagram
 
-![ER diagram](docs/screenshots/er-diagram.png){width=100%}
+![ER diagram](docs/screenshots/er-diagram.png){width=78%}
 
 The schema has six related tables. `player_progress` and `player_stations` have
 a foreign key to `users` with `ON DELETE CASCADE`; `menu_items` references
 `locations`. `admin_audit` deliberately has no foreign key: it stores the
 actor and target ids together with a snapshot of the usernames, so the
-append-only log survives the deletion of the account it describes. The admin
-dashboard uses a join:
+append-only log survives the deletion of the account it describes. The admin dashboard uses this join: `SELECT u.id, u.username, u.role, p.level, p.honey FROM users u LEFT JOIN player_progress p ON p.user_id = u.id ORDER BY u.id;`
 
-```sql
-SELECT u.id, u.username, u.role, p.level, p.honey
-FROM users u
-LEFT JOIN player_progress p ON p.user_id = u.id
-ORDER BY u.id;
-```
-
-## 4.2 Role access matrix {.page-break-before}
+## 4.2 Role access matrix
 
 | Page or feature | Guest | Player | Admin |
 |---|---|---|---|
@@ -190,7 +182,7 @@ or drift far away from them.
 
 ![The three restaurant maps: Meadow Stand, Hive Café and Royal Hive](docs/screenshots/maps-composite.png){width=100%}
 
-# 5. Development log"
+# 5. Development log
 
 The table follows the five weekly delivery periods. Week 1 began on
 26 October 2026; the individual commits remain available with

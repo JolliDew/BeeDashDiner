@@ -201,8 +201,8 @@ figcaption {
 }
 
 table {
-    page-break-inside: avoid;
-    break-inside: avoid;
+    page-break-inside: auto;
+    break-inside: auto;
     width: 100%;
     margin: 8px 0 14px;
     border-collapse: collapse;
@@ -217,7 +217,11 @@ tr {
 }
 
 ul,
-ol,
+ol {
+    page-break-inside: auto;
+    break-inside: auto;
+}
+
 blockquote {
     page-break-inside: avoid;
     break-inside: avoid;

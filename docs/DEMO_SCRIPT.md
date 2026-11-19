@@ -10,14 +10,63 @@ segment.
 
 ## Before recording
 
-- Deploy and open `https://beedashdiner.onrender.com/login.php`.
-- Log in as `demo_admin` once to confirm the admin link appears.
-- `demo_player` and `demo_admin` are created by `database.sql`; log in with them
-  to confirm they work.
-- Create one spare test account for the admin CRUD segment.
-- Have Supabase → Table editor and Render dashboard open in other tabs.
-- Hard reload once; the game now sends no-cache headers.
-- Set the game audio to a comfortable level with the speaker panel.
+1. Open `https://beedashdiner.onrender.com/login.php` **10 minutes early** so
+   Render's free instance is awake.
+2. Log in as `demo_admin` once to confirm the **Admin** link appears, then log
+   out. Log in as `demo_player` once to confirm the saved game loads, then log
+   out.
+3. Test **Sign in with Google** once with the Google account you will use. If
+   Google says "Access blocked", ask JD to add that Gmail as a Test user in the
+   OAuth consent screen.
+4. Create one spare account called `demo_crud` (or similar) for the admin CRUD
+   segment. You will delete it on camera.
+5. Have these tabs ready, in this order:
+   - `https://beedashdiner.onrender.com/login.php`
+   - the game main menu
+   - Supabase → **Table editor** → `users` / `player_progress`
+   - Render dashboard → the **beedashdiner** service
+   - Google Cloud Console → **Credentials**, only if showing OAuth setup
+6. Use a 1440×900 browser window, hide the bookmarks bar, and hard-reload once.
+7. Set the game audio to a comfortable level with the speaker panel.
+
+## Who speaks (all five must appear)
+
+| Member | Suggested segments |
+|---|---|
+| Iszen Paul Masculino Ventura | Introduction and closing |
+| John David Pascua Morandante | Database and cloud deployment |
+| Klein Rhee Pagulong Sioson | Admin walkthrough and security |
+| Emman Glen Mendoza Wong Yan | Player walkthrough and game mechanics |
+| Ardion Nicolas Dela Cruz Tamagos | Game round and visual design |
+
+If someone cannot record, they can speak over a screen recording. Every member
+must be seen or heard at least once.
+
+## Exact click path (for the person driving)
+
+- **Login/admin:** log in as `demo_admin` → **Admin** → search `demo_player` →
+  create `demo_crud` → edit its email → reset its password → reset its progress
+  → delete it → show the new audit row.
+- **Player:** log out → log in as `demo_player` → **Play Game** → open a stall →
+  **Mission** → **Upgrades** → **Shop** → serve a guest → exit → play again.
+- **403:** in a second tab while still a player, open `/admin.php`.
+- **Database:** Supabase → Table editor → `users`, `player_progress`,
+  `player_stations`, `admin_audit`; run the join below.
+- **Security:** show a bcrypt hash in `users.password`; show the 403 page; show
+  the HTTPS padlock.
+- **Cloud:** Render dashboard → service **Live** → open the public URL.
+- **Game:** **How to play** → mission → serve → progress HUD. Do **not** press
+  **Restart progress** on `demo_player`; use a spare account if you want to show
+  restart.
+
+## Optional Google segment (30 seconds)
+
+1. Log out to the login page.
+2. Click **Sign in with Google**.
+3. Choose the test Google account.
+4. Show that it returns to the game, then open **Profile** and point out the
+   **Set a local password** option.
+5. Log out. Do not change the demo accounts' passwords before grading.
 
 ## 0:00–1:00 — Introduction
 
@@ -120,3 +169,13 @@ Say:
 
 Every member should appear or speak in at least one segment. Keep the browser
 console closed unless you are demonstrating a bug-free load.
+
+## After recording
+
+1. Save the video as `AQM_BeeDashDiner_Demo.mp4` (or upload it to Google Drive
+   and copy the link).
+2. Put the video or its link in the professor's Google Drive submission folder.
+3. Add the video link to `SUBMISSION_INFO.txt` if you upload a link instead of a
+   file.
+4. Watch the first and last 15 seconds to confirm the audio and screen capture
+   are clean.

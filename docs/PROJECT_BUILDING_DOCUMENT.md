@@ -126,7 +126,7 @@ LEFT JOIN player_progress p ON p.user_id = u.id
 ORDER BY u.id;
 ```
 
-## 4.2 Role access matrix
+## 4.2 Role access matrix {.page-break-before}
 
 | Page or feature | Guest | Player | Admin |
 |---|---|---|---|

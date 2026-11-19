@@ -121,9 +121,14 @@ header#title-block-header p.date {
     text-decoration: none;
 }
 
+.page-break-before {
+    page-break-before: always;
+}
+
 h1 {
     page-break-before: auto;
     page-break-after: avoid;
+    page-break-inside: avoid;
     margin: 28px 0 10px;
     padding-bottom: 4px;
     border-bottom: 2px solid #c9a35c;
@@ -142,6 +147,8 @@ thead {
 }
 
 h2 {
+    page-break-inside: avoid;
+    page-break-after: avoid;
     margin: 16px 0 6px;
     color: #5a3d10;
     font-family: 'Segoe UI', Arial, sans-serif;
@@ -150,6 +157,8 @@ h2 {
 }
 
 h3 {
+    page-break-inside: avoid;
+    page-break-after: avoid;
     margin: 12px 0 4px;
     color: #5a3d10;
     font-family: 'Segoe UI', Arial, sans-serif;
@@ -182,6 +191,7 @@ figure img {
 figure {
     margin: 12px 0;
     page-break-inside: avoid;
+    break-inside: avoid;
 }
 
 figcaption {
@@ -191,6 +201,8 @@ figcaption {
 }
 
 table {
+    page-break-inside: avoid;
+    break-inside: avoid;
     width: 100%;
     margin: 8px 0 14px;
     border-collapse: collapse;
@@ -201,6 +213,19 @@ table {
 
 tr {
     page-break-inside: avoid;
+    break-inside: avoid;
+}
+
+ul,
+ol,
+blockquote {
+    page-break-inside: avoid;
+    break-inside: avoid;
+}
+
+li {
+    page-break-inside: avoid;
+    break-inside: avoid;
 }
 
 th,
@@ -226,6 +251,8 @@ code {
 
 pre {
     padding: 8px 10px;
+    page-break-inside: avoid;
+    break-inside: avoid;
     border: 1px solid #d8c39b;
     border-radius: 4px;
     background: #faf6ec;

@@ -68,21 +68,63 @@ header#title-block-header p.date {
 
 #TOC {
     page-break-after: always;
+    padding-top: 4mm;
 }
 
-#TOC ul {
+#TOC::before {
+    content: "Contents";
+    display: block;
+    margin: 0 0 12px;
+    padding-bottom: 4px;
+    border-bottom: 2px solid #c9a35c;
+    color: #8a5a1c;
+    font-family: 'Segoe UI', Arial, sans-serif;
+    font-size: 20pt;
+}
+
+/* A compact two-column contents page instead of one long vertical list. */
+#TOC > ul {
+    column-count: 2;
+    column-gap: 11mm;
+    column-rule: 1px solid #e2d1b0;
     list-style: none;
     padding-left: 0;
+    margin: 0;
+}
+
+#TOC ul ul {
+    margin: 2px 0 8px;
+    padding-left: 12px;
+    list-style: none;
 }
 
 #TOC li {
-    margin: 3px 0;
-    font-size: 9.6pt;
+    break-inside: avoid;
+    page-break-inside: avoid;
+    margin: 2px 0;
+    font-size: 10.8pt;
+    line-height: 1.5;
+}
+
+#TOC > ul > li {
+    margin: 0 0 12px;
+}
+
+#TOC > ul > li > a {
+    color: #8a5a1c;
+    font-weight: 700;
+    font-size: 11.8pt;
+}
+
+#TOC a {
+    color: #3a2a17;
+    text-decoration: none;
 }
 
 h1 {
-    page-break-before: always;
-    margin: 0 0 10px;
+    page-break-before: auto;
+    page-break-after: avoid;
+    margin: 28px 0 10px;
     padding-bottom: 4px;
     border-bottom: 2px solid #c9a35c;
     color: #8a5a1c;
@@ -92,6 +134,11 @@ h1 {
 
 h1:first-of-type {
     page-break-before: avoid;
+    margin-top: 0;
+}
+
+thead {
+    display: table-header-group;
 }
 
 h2 {

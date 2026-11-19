@@ -22,7 +22,7 @@ date: "November 2026"
 **Institution:** University of St. La Salle, La Salle Avenue, Bacolod City 6100, Negros Occidental, Philippines\
 **Telephone:** +63 34 434 6100\
 **Repository:** https://github.com/JolliDew/BeeDashDiner\
-**Planned public URL:** https://beedashdiner.onrender.com (replace with the real Render URL after deployment)
+**Public URL:** https://beedashdiner.onrender.com
 
 | Member | Main role | Approx. contribution |
 |---|---|---|
@@ -32,13 +32,8 @@ date: "November 2026"
 | Ardion Nicolas Dela Cruz Tamagos | Design, frontend, art, QA | 20% |
 | Iszen Paul Masculino Ventura | Group leader, ideas, documentation, QA | 20% |
 
-**Group name:** AQM.
 
-The course code and title follow the USLS BS Computer Science curriculum
-(CC106, Cloud-based Application Development, 3rd Year 1st Semester). CLE is
-the course's Culminating Learning Evidence, not part of the course name.
-
-![BeeDashDiner public landing page](docs/screenshots/landing-desktop.png){width=100%}
+![BeeDashDiner public landing page](docs/screenshots/landing-desktop.png){width=82%}
 
 # 2. SWOT analysis
 
@@ -154,7 +149,7 @@ ORDER BY u.id;
 
 ## 4.3 Page flow
 
-![Page flow](docs/screenshots/page-flow.png){width=100%}
+![Page flow](docs/screenshots/page-flow.png){width=92%}
 
 ## 4.4 Folder structure
 
@@ -201,11 +196,7 @@ the kitchen. This guarantees an 8px gap above the awnings on phone and desktop
 and a 3–4px gap in short landscape mode, so it can never be covered by a stall
 or drift far away from them.
 
-![Meadow Stand](docs/screenshots/map-meadow.png){width=100%}
-
-![Hive Café](docs/screenshots/map-hive.png){width=100%}
-
-![Royal Hive](docs/screenshots/map-royal.png){width=100%}
+![The three restaurant maps: Meadow Stand, Hive Café and Royal Hive](docs/screenshots/maps-composite.png){width=100%}
 
 # 5. Development log
 
@@ -313,8 +304,8 @@ loop(t) {
 }
 ```
 
-![Game on a phone](docs/screenshots/game-phone.png){width=48%}
-![Audio panel](docs/screenshots/audio-panel.png){width=48%}
+![Game on a phone](docs/screenshots/game-phone.png){width=30%}
+![Audio panel](docs/screenshots/audio-panel.png){width=30%}
 
 ## 5.2 Screenshots of key pages
 
@@ -324,10 +315,10 @@ change and the rules. The landing page is in Section 1, the main menu in
 Section 3, the three restaurant maps in Section 4, and the in-game HUD and
 audio panel above.
 
-![Admin dashboard with the account list, create form and audit log](docs/screenshots/admin-desktop.png){width=100%}
+![Admin dashboard with the account list, create form and audit log](docs/screenshots/admin-desktop.png){width=80%}
 
-![Profile: avatar upload, password change and saved progress](docs/screenshots/profile-desktop.png){width=48%}
-![How to play: rules, controls and the win condition](docs/screenshots/help-desktop.png){width=48%}
+![Profile: avatar upload, password change and saved progress](docs/screenshots/profile-desktop.png){width=44%}
+![How to play: rules, controls and the win condition](docs/screenshots/help-desktop.png){width=44%}
 
 # 6. Testing record
 
@@ -616,35 +607,3 @@ Admin:     demo_admin  / JolliDemo123!
 The database export `database.sql` creates these demo accounts with hashed
 passwords and gives `demo_admin` the admin role. Change the passwords before
 opening the site to the public.
-
-## 10.4 Reproducing the project locally
-
-```bash
-# Database (PostgreSQL/Supabase)
-psql "$DATABASE_URL" -f database.sql
-
-# Local config
-cp gamefile/db.example.php gamefile/db.php   # then edit the values
-cp gamefile/src/google-config.example.php gamefile/src/google-config.php  # optional
-
-# Run XAMPP Apache, then open:
-# http://localhost/JolliDew/gamefile/login.php
-
-# Tests
-npm test
-```
-
-## 10.5 Demo video plan
-
-A 10–12 minute recording should follow the guide’s segments:
-
-1. Introduction (1 min): group, purpose, tech stack.
-2. Admin walkthrough (2–3 min): login, create/read/update/delete, media/avatar,
-   audit log.
-3. Player walkthrough (2–3 min): register/login, play, save/resume, profile,
-   mobile view, blocked admin URL.
-4. Database (1 min): show tables and a row changing after an action.
-5. Security (1 min): hashed password and blocked URL.
-6. Cloud deployment (1 min): public Render URL and HTTPS.
-7. Game (1 min): rules, score, win condition, restart.
-8. Closing (1 min): challenges, lessons, next improvements.

@@ -34,6 +34,10 @@ date: "November 2026"
 
 **Group name:** AQM.
 
+The course code and title follow the USLS BS Computer Science curriculum
+(CC106, Cloud-based Application Development, 3rd Year 1st Semester). CLE is
+the course's Culminating Learning Evidence, not part of the course name.
+
 ![BeeDashDiner public landing page](docs/screenshots/landing-desktop.png){width=100%}
 
 # 2. SWOT analysis

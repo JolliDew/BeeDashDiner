@@ -35,6 +35,16 @@ function e(mixed $value): string
     return htmlspecialchars((string)$value, ENT_QUOTES, 'UTF-8');
 }
 
+/** PostgreSQL returns microseconds; a person only needs the minute. */
+function fmt_date(?string $value): string
+{
+    if (!$value) {
+        return '—';
+    }
+    $ts = strtotime($value);
+    return $ts === false ? e($value) : date('j M Y, H:i', $ts);
+}
+
 /** A logging failure must never undo or hide a successful admin action. */
 function record_action(
     AdminRepository $repo,
@@ -306,7 +316,7 @@ $link = fn(int $p): string => 'admin.php?' . http_build_query(['q' => $q, 'page'
         <div class="card-header d-flex justify-content-between align-items-center flex-wrap">
             <span class="font-weight-bold">Accounts</span>
             <form method="get" class="form-inline mt-2 mt-sm-0">
-                <input class="form-control form-control-sm mr-2" name="q" value="<?= e($q) ?>" placeholder="Search username or email">
+                <input class="form-control form-control-sm mr-2" style="min-width:240px" name="q" value="<?= e($q) ?>" placeholder="Search username or email">
                 <button class="btn btn-sm btn-outline-warning" type="submit">Search</button>
                 <?php if ($q !== ''): ?><a class="btn btn-sm btn-link" href="admin.php">Clear</a><?php endif; ?>
             </form>
@@ -337,8 +347,8 @@ $link = fn(int $p): string => 'admin.php?' . http_build_query(['q' => $q, 'page'
                                 <span class="muted">No save yet</span>
                             <?php endif; ?>
                         </td>
-                        <td class="small muted"><?= e($u['created_at'] ?? '') ?></td>
-                        <td class="small muted"><?= e($u['updated_at'] ?? '—') ?></td>
+                        <td class="small muted"><?= fmt_date($u['created_at'] ?? null) ?></td>
+                        <td class="small muted"><?= fmt_date($u['updated_at'] ?? null) ?></td>
                         <td class="text-right">
                             <a class="btn btn-sm btn-outline-warning" href="admin.php?<?= e(http_build_query(['q' => $q, 'page' => $page, 'edit' => (int)$u['id']])) ?>">Edit</a>
                         </td>
@@ -367,8 +377,8 @@ $link = fn(int $p): string => 'admin.php?' . http_build_query(['q' => $q, 'page'
                 <?php endif; ?>
                 <?php foreach ($audits as $a): ?>
                     <tr>
-                        <td class="small muted"><?= e($a['created_at'] ?? '') ?></td>
-                        <td><?= e($a['actor_username'] ?? ('#' . $a['actor_id'])) ?></td>
+                        <td class="small muted"><?= fmt_date($a['created_at'] ?? null) ?></td>
+                        <td><?= $a['actor_username'] !== null ? e($a['actor_username']) : 'CLI' ?></td>
                         <td><code><?= e($a['action']) ?></code></td>
                         <td><?= e($a['target_username'] ?? ($a['target_user_id'] ? '#' . $a['target_user_id'] : '—')) ?></td>
                         <td class="small muted"><?= e($a['details'] ?? '') ?></td>

@@ -20,14 +20,16 @@ if (Auth::userId()) {
     ];
     if (isset($pdo) && $pdo instanceof PDO) {
         try {
-            $q = $pdo->prepare('SELECT username, role, avatar FROM users WHERE id = ?');
-            $q->execute([Auth::userId()]);
-            if ($row = $q->fetch()) {
-                $navUser = $row;
-                $navAvatar = (string)($row['avatar'] ?? '');
+            // Prefix the locals: this file is included inside other pages'
+            // scope, so a plain $q or $row would overwrite their variables.
+            $navStmt = $pdo->prepare('SELECT username, role, avatar FROM users WHERE id = ?');
+            $navStmt->execute([Auth::userId()]);
+            if ($navRow = $navStmt->fetch()) {
+                $navUser = $navRow;
+                $navAvatar = (string)($navRow['avatar'] ?? '');
             }
             $navIsAdmin = (($navUser['role'] ?? 'player') === 'admin');
-        } catch (PDOException $e) {
+        } catch (PDOException $navError) {
             // A database that has not received the avatar migration still
             // gets the session's username/role.
         }

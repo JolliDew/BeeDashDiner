@@ -78,7 +78,9 @@ HUD and a three-button dock.
   sliders, softer sine/triangle timbres, slow Cmaj7/Am7/Fmaj7/G6 ambience,
   music ducking and tab-hide suspension.
 - **Fresh builds:** game HTML is fetched with `no-store`, PHP sends no-cache
-  headers, and CSS URLs are versioned by file modification time.
+  headers, and the stylesheet URLs of the menu (`Mainmenu.css`), the game
+  (`bee-game.css`, `bee-modals.css`) and the sign-in pages (`logindesign.css`)
+  carry a file-modification-time version.
 
 ### Fixed
 
@@ -101,13 +103,18 @@ HUD and a three-button dock.
 
 ### Verification
 
-- 52 JavaScript tests and all PHP checks pass.
+- 60 JavaScript tests, both PHP suites and the optional live PostgreSQL suite
+  pass.
 - XAMPP (Apache) at 390×844, 440×900 and 1440×900: scene 86.4%/85.7%/85.1%,
   dock fits, mission sheet on phones, centered desktop dialog, no JS errors.
+- Headless Chrome through XAMPP: the mission reward is paid once and reaches
+  the server, a reload does not pay it again, “Restart progress” sticks even
+  while a save is still on its way, and Exit during the load leaves no game
+  running (14/14 checks).
 - Reduced motion disables guest bobbing; a served guest reaches `happy`, then
   leaves and frees its chair.
-- Temporary visual-test account and save rows were removed; the live database
-  is back to 6 users, 1 admin and 5 saves.
+- Every temporary test account was deleted. The live database holds 8 users,
+  6 progress rows, 22 station rows and 1 audit row.
 
 ## [2.1.0] — Emman redesign fixes + admin CRUD
 
@@ -130,7 +137,7 @@ brief.
   - self-delete and last-admin guards.
 - **First-admin CLI:** `php gamefile/bin/make-admin.php <username>`.
 - **Roles and audit schema:** `users.role`, `admin_audit`, indexes; both MySQL
-  and PostgreSQL files updated. `upgrade_db.sql` performs the MySQL migration.
+  and PostgreSQL files updated. `gamefile/upgrade_db.sql` performs the MySQL migration.
 - **CSRF protection** for login, registration, and every admin POST.
 - **Secure session cookies:** `HttpOnly`, `SameSite=Lax`, `Secure` on HTTPS.
 - **`Auth::refresh()`**: deleted users and changed roles take effect immediately.
@@ -157,7 +164,9 @@ brief.
 - **CSS is flattened** (no native nesting) for wider browser support and reliable
   XAMPP demos.
 - **Save validation:** stations must open in order; staff is clamped to open
-  slots; missions `done` is rebuilt from the index to prevent duplicate rewards.
+  slots; the client rebuilds the completed-mission list from the index
+  (`GameState.fromJSON()`), and the server clamps the index to the level's own
+  three missions, so a crafted save cannot replay a reward.
 - **Google OAuth:** requires a verified email, uses the configured/exact redirect
   URI when supplied, generates unique usernames safely, and stores the role in
   the session.

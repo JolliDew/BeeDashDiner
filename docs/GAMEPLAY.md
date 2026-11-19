@@ -108,7 +108,9 @@ capacity(station) = slots / (3 × walkTime + cookTime)
 spawnInterval     = random(0.75 ... 1.25) / (1.3 × totalCapacity)
 ```
 
-The first burst is about 40% of the queue capacity.
+The first guest arrives 1.8 s after the game starts. Every later guest waits
+`max(1.8 s, spawnInterval)`, so the doorway is never crowded and a busy
+restaurant stays calm. When every chair is taken, the game retries after 0.6 s.
 
 ---
 
@@ -132,11 +134,11 @@ Recipe upgrades also add +30% price and −10% cooking time per level. The stati
 |---|---|---|---|---|
 | `tipChance` | Tip jar | 2 | 10 | +2% tip chance per level, cap 28% |
 | `queue` | Bigger waiting area | 3 | 10 | +1 queue chair per level |
-| `walkSpeed` | Wing workout | 4 | 5 | −5% walking time per level |
-| `cookSpeed` | Kitchen drills | 8 | 5 | −4% cooking time per level |
+| `walkSpeed` | Wing workout | 4 | 5 | −5% walking time per level (33% faster walking at level 5) |
+| `cookSpeed` | Kitchen drills | 8 | 5 | −4% cooking time per level (25% faster cooking at level 5) |
 | `profitX2` | Golden recipe | 9 | 1 | every dish worth double |
 
-Costs use `baseCost × growth^level × 6^location`. The tip-jar UI text and `Economy.tipChance` read the same constants, so they cannot drift.
+Costs use `baseCost × growth^level × 6^location`. The shop text and the simulation both call the helpers in `gamefile/js/config.js` (`tipChanceAt`, `walkSpeedBonus`, `cookSpeedBonus`), so the number the player reads is the number the game applies.
 
 ---
 
@@ -234,4 +236,4 @@ When changing balance:
 2. Keep `gamefile/src/SaveRepository.php` clamps in sync (recipe max, slot milestones, global max levels).
 3. Update the docs tables above.
 4. Run `npm test`.
-5. If you change the schema, update both `login_db.sql` and `login_db_pg.sql`, plus `upgrade_db.sql`.
+5. If you change the schema, update `gamefile/login_db.sql`, `gamefile/login_db_pg.sql`, the repository root `database.sql` and `gamefile/upgrade_db.sql`.

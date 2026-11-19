@@ -54,7 +54,7 @@ passwords are intentionally simple and exist only for grading.
 | **Profile & media** | Players can upload a JPEG/PNG/WebP profile picture (type, size and image checks), change their password, and see their saved level/honey. |
 | **Shared navigation** | One role-aware menu on every page: Home, Game, How to play, Profile, Admin (admins only), Log out. |
 | **Public landing** | A responsive home page with the game preview, three-map gallery, feature summary and Play/Create-account calls to action. |
-| **Restart** | A confirmed **Restart progress** action deletes only the signed-in player's save and starts a fresh game. |
+| **Restart** | A confirmed **Restart progress** action replaces only the signed-in player's save with a fresh game. A save that is still on its way cannot undo it. |
 | **Save v3** | Global staff, global upgrades, and compact station records. Old v1/v2 saves migrate automatically. |
 | **Security** | Config-driven Google OAuth with verified-email checks, CSRF-protected forms, secure session cookies, and no committed secrets. |
 
@@ -66,7 +66,7 @@ See **[docs/GAMEPLAY.md](docs/GAMEPLAY.md)** for formulas and the mission table,
 
 - **Frontend:** HTML5, CSS3, flat vanilla JavaScript ES modules. No build step, no npm runtime dependencies.
 - **Backend:** PHP 8+ with PDO and session authentication.
-- **Database:** MySQL 5.7+/MariaDB 10.2+, or PostgreSQL 13+ (Supabase works). XAMPP ships MariaDB.
+- **Database:** MariaDB 10.2+ (what XAMPP ships) or PostgreSQL 13+ (Supabase works). MySQL 8 works too, but its `ALTER TABLE` has no `IF NOT EXISTS`, so run those lines once without it.
 - **Bundled front-end libraries:** Bootstrap 4.6.2 and jQuery 3.7.1 are in `gamefile/vendor/`, so the game works offline under XAMPP.
 - **Tests:** Node.js 20+ built-in test runner, plus dependency-free PHP scripts.
 
@@ -79,8 +79,12 @@ See **[docs/GAMEPLAY.md](docs/GAMEPLAY.md)** for formulas and the mission table,
 ```bash
 git clone https://github.com/JohnDavidMorandante/JolliDew.git
 cd JolliDew
-git switch fix/emman-redesign-admin
+git switch feat/scene-first-ui
 ```
+
+> The release branch is `feat/scene-first-ui`. The older `fix/emman-redesign-admin`
+> branch is the 2.1.0 code without the landing page, the profile flow and the
+> procedural audio.
 
 ### 2. Create the database
 
@@ -101,15 +105,24 @@ mysql -u root -p < gamefile/login_db.sql
 
 **Existing database:** import `gamefile/upgrade_db.sql` once instead. It adds the admin role/audit tables and keeps old saves.
 
+> The MySQL/MariaDB files do not create the demo accounts. Use the PostgreSQL
+> `database.sql` if you want them, or create the accounts in the browser.
+
 #### Option B — PostgreSQL/Supabase
 
-Open **SQL Editor** in Supabase, paste `gamefile/login_db_pg.sql`, and run it. With a direct connection string:
+Open **SQL Editor** in Supabase, paste the schema and run it. With a direct connection string:
 
 ```bash
-psql "$DATABASE_URL" -f gamefile/login_db_pg.sql
+psql "$DATABASE_URL" -f database.sql
 ```
 
-`login_db_pg.sql` handles fresh and existing databases. It is safe to re-run.
+The repository-root `database.sql` is the complete schema: it creates the
+tables, the reference data **and** the two demo accounts (`demo_player` and
+`demo_admin`). `gamefile/login_db_pg.sql` is the same schema **without** the
+demo accounts — use it for a clean database.
+
+Both files are safe to re-run: tables use `IF NOT EXISTS`, missing columns are
+added with `ALTER TABLE ... IF NOT EXISTS`, and seed rows use `ON CONFLICT`.
 
 ### 3. Create your local database config
 
@@ -201,7 +214,7 @@ sign-in logs into that existing account.
 **Win condition:** reach the Royal Hive and complete Level 10. There is no lose
 state; the game is designed to be relaxing. Progress saves automatically, and
 the menu shows your saved level and honey. **Restart progress** on the menu
-deletes only your own save after a confirmation.
+replaces only your own save with a fresh game after a confirmation.
 
 ### Moving restaurants
 
@@ -249,8 +262,8 @@ Every recipe level also gives **+30% price** and **−10% cooking time**. Maximu
 |---|---|---|---|
 | 🪙 Tip jar | Level 2 | 10 | +2% tip chance per level (cap 28%) |
 | 🪑 Bigger waiting area | Level 3 | 10 | +1 queue chair per level |
-| 💨 Wing workout | Level 4 | 5 | −5% walking time per level |
-| ⏱️ Kitchen drills | Level 8 | 5 | −4% cooking time per level |
+| 💨 Wing workout | Level 4 | 5 | −5% walking time per level (33% faster walking at level 5) |
+| ⏱️ Kitchen drills | Level 8 | 5 | −4% cooking time per level (25% faster cooking at level 5) |
 | ✨ Golden recipe | Level 9 | 1 | Every dish is worth double |
 
 Global upgrade prices scale with the restaurant (`6×` per location).
@@ -295,7 +308,9 @@ Full details: **[docs/ADMIN.md](docs/ADMIN.md)**.
 
 ## 💾 Save data
 
-Saves are stored per account and mirrored to `localStorage` as an offline backup. Format **v3**:
+Saves are stored per account. A copy is kept in `localStorage` and is used only
+when the server cannot be reached; if the server answers, the server wins.
+Format **v3**:
 
 ```json
 {
@@ -325,7 +340,7 @@ Old saves:
 - **v2** per-station staff is summed into the global team; per-station `workLvl`/`profitX2` become the global `cookSpeed`/`profitX2` upgrades.
 - Staff is clamped to the number of open worker slots, so an old over-hired save cannot break the UI.
 
-The server is authoritative: `SaveRepository` re-clamps currencies, levels, station order, recipes, staff, missions, stats, and cosmetics on every save.
+The server is authoritative: `SaveRepository` re-clamps currencies, levels, station order, recipes, staff, missions, stats, and cosmetics on every save. Every save also carries a write number that only grows, so a slow request that arrives late is rejected with `409` instead of undoing newer progress.
 
 ---
 
@@ -354,7 +369,7 @@ npm run test:pg   # optional live PostgreSQL round-trip
 Expected:
 
 ```text
-52 JavaScript tests passing
+60 JavaScript tests passing
 PHP SaveRepository checks passing
 PHP AdminRepository checks passing (in-memory SQLite)
 ```
@@ -381,7 +396,7 @@ The project intentionally does **not** ship real credentials. `db.example.php`, 
 | Symptom | Fix |
 |---|---|
 | “Database connection failed” | Check `gamefile/db.php`, start MySQL, and import the schema. |
-| Admin panel says the schema is missing | Run `login_db.sql`/`login_db_pg.sql` or `upgrade_db.sql`. |
+| Admin panel says the schema is missing | Run `gamefile/login_db.sql`/`gamefile/login_db_pg.sql` or `gamefile/upgrade_db.sql`. |
 | Google says `redirect_uri_mismatch` | Register the exact URI, or set `redirect_uri` in `google-config.php`. |
 | Google says the email is not verified | Use a Google account with a verified email address. |
 | Upgrades modal does not open | Confirm `vendor/bootstrap` and `vendor/jquery` exist; the game loads them from `Mainmenu.php`. |

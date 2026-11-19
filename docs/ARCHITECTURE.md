@@ -44,7 +44,7 @@ Mainmenu.php ── Play Game ──► fetch in-game.php
 | `js/entities.js` | Bee and Customer movement, claiming, cooking, tips, cosmetics. |
 | `js/UpgradePanel.js` | Dock, mission/station/global/cosmetics modals, keyboard access. |
 | `js/MissionTracker.js` | Ordered mission completion and one-time rewards. |
-| `js/SaveService.js` | Serialized server save/load with a `localStorage` backup. |
+| `js/SaveService.js` | Serialized server save/load; the server wins, `localStorage` is the fallback when the server cannot be reached. |
 | `js/Sound.js` | Procedural Web Audio SFX and ambient music; no sample files. |
 | `js/DevTools.js` | Optional developer panel (`$devMode` in `in-game.php`). |
 | `js/cosmetics.js` | Cosmetic definitions and equip rules. |
@@ -76,7 +76,7 @@ delivers, records the sale/tip, and returns to idle at its home station.
 | `profile.php` | Account summary, avatar upload, password change. |
 | `help.php` | Rules, controls, win condition and restart guidance. |
 | `denied.php` | 403 access-denied page for blocked roles. |
-| `restart.php` | CSRF-protected deletion of only the current player's save. |
+| `restart.php` | CSRF-protected reset: replaces only the current player's save with a fresh game. |
 | `includes/nav.php` | Shared role-aware navigation for every page. |
 | `css/site-nav.css`, `css/pages.css` | Shared navigation and page styles. |
 | `db.container.php` | Environment-driven PDO connection copied to `db.php` in Docker. |
@@ -106,7 +106,8 @@ admin_audit
 ```
 
 `upgrades` is JSON text, so no new columns are needed for new global upgrades.
-It also carries `staff`, the global hive team size.
+It also carries `staff`, the global hive team size, and `seq`, the write number
+that keeps saves in order (see section 5).
 
 ---
 
@@ -124,6 +125,15 @@ It also carries `staff`, the global hive team size.
 
 This protects against crafted localStorage, a stale client, and old saves.
 
+### Save ordering
+
+Every save carries a write number (`seq`) that only ever grows. The number
+travels inside the existing `upgrades` JSON, so no schema change was needed.
+The server locks the row, compares the incoming number with the stored one and
+answers `409` when the incoming save is older — it never overwrites newer
+progress with a late request. The client adopts the number the server reports,
+both on load and after a `409`.
+
 ---
 
 ## 6. Authentication and roles
@@ -131,8 +141,11 @@ This protects against crafted localStorage, a stale client, and old saves.
 - Passwords use `password_hash()`/`password_verify()`; login rehashes when PHP's
   default algorithm changes.
 - Sessions use `HttpOnly`, `SameSite=Lax`, and `Secure` when HTTPS is detected.
-- `Auth::refresh($pdo)` re-reads the account on every game/API/admin request.
-  This makes deletion and role changes effective immediately.
+- `Auth::refresh($pdo)` re-reads the account on the landing page, the menu, the
+  profile, the API and the admin panel. This makes deletion and role changes
+  effective immediately. The injected game shell (`in-game.php`) only calls
+  `Auth::requireLogin()`, because the API call that follows it refreshes the
+  account anyway.
 - `role` is `player` or `admin`; only `admin.php` checks for `admin`.
 - Google login requires a verified email (`email_verified`/`verified_email`) and
   uses an OAuth `state` value checked with `hash_equals`.
@@ -160,7 +173,8 @@ To add a menu item or location:
 1. Add it to `gamefile/js/config.js` (`ITEMS`, `LEVELS`, `BALANCE`).
 2. Update the per-location station count in `SaveRepository::STATIONS_PER_LOCATION`.
 3. Update `LEVELS_PER_LOCATION` if the level-to-restaurant mapping changes.
-4. Update `locations`/`menu_items` seed data in both SQL files.
+4. Update `locations`/`menu_items` seed data in `gamefile/login_db.sql`,
+   `gamefile/login_db_pg.sql` and the repository root `database.sql`.
 5. Add tests. The server rejects a station count that does not match.
 
 To add a global upgrade:

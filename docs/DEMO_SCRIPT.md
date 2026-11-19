@@ -8,7 +8,9 @@ segment.
 
 - Deploy and open `https://YOUR-SERVICE.onrender.com/login.php`.
 - Log in as `demo_admin` once to confirm the admin link appears.
-- Create/confirm `demo_player` and one spare test account for admin CRUD.
+- `demo_player` and `demo_admin` are created by `database.sql`; log in with them
+  to confirm they work.
+- Create one spare test account for the admin CRUD segment.
 - Have Supabase → Table editor and Render dashboard open in other tabs.
 - Hard reload once; the game now sends no-cache headers.
 - Set the game audio to a comfortable level with the speaker panel.
@@ -98,8 +100,9 @@ checks. The audit log records the actor, target and action.”
 1. Show the rules from **How to play**: goal, controls, win at Level 10.
 2. Start a game and serve a few guests.
 3. Show the progress HUD, mission dots, score/honey and the door entry.
-4. Show the **Restart progress** confirmation (do not delete the demo progress
-   unless you have a backup; if you do, show the fresh Level 1 menu afterwards).
+4. Show the **Restart progress** confirmation (this replaces the demo progress
+   with a fresh game, so do not press it unless you have a backup; if you do,
+   show the fresh Level 1 menu afterwards).
 
 ## 10:00–11:00 — Closing
 

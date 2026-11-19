@@ -31,7 +31,7 @@ npm run test:php    -> php tests/SaveRepository.test.php
 Expected:
 
 ```text
-52 JavaScript tests passing
+60 JavaScript tests passing
 PHP SaveRepository checks passing
 PHP AdminRepository checks passing (in-memory SQLite)
 ```
@@ -67,6 +67,8 @@ Do not point it at a database you cannot write to.
 | `missions.test.js` | 30 ordered missions, unique ids, safe progress reads |
 | `missiontracker.test.js` | one-time rewards, level gating, out-of-order completion, final reward |
 | `cosmetics.test.js` | ids/prices, equip rules, diamond spending |
+| `customer.test.js` | guest lifecycle, seat reservation, leaving through the aisle to the door |
+| `saveservice.test.js` | server-first load order, local fallback, write numbers, 409 handling, serialized queue, failed keepalive |
 
 ## 3. PHP coverage
 
@@ -83,7 +85,7 @@ Use a throwaway account and a throwaway database when possible.
 
 ### Setup
 
-- [ ] Import `login_db.sql` (MySQL) or `login_db_pg.sql` (PostgreSQL).
+- [ ] Import `gamefile/login_db.sql` (MySQL/MariaDB) or `gamefile/login_db_pg.sql` (PostgreSQL).
 - [ ] Import it a **second** time to prove it is safe to re-run.
 - [ ] Copy `db.php` from an example; confirm it is ignored by `git status`.
 - [ ] Start Apache/XAMPP or `php -S 127.0.0.1:8000 -t gamefile`.
@@ -133,14 +135,17 @@ Use a throwaway account and a throwaway database when possible.
 - [ ] Profile shows username, email, role, saved level/honey, avatar and forms.
 - [ ] Upload a JPEG/PNG/WebP under 2 MB; the avatar appears in the nav and profile.
 - [ ] A renamed text file or a file over 2 MB is rejected and no file is written.
-- [ ] Restart progress asks for confirmation, deletes only the signed-in player's
-      save, and the menu shows the success message.
+- [ ] Restart progress asks for confirmation, replaces only the signed-in player's
+      save with a fresh game (level 1, 50 honey), and the menu shows the success
+      message. A save that is still on its way must not bring the old progress
+      back.
 - [ ] Change password requires the current password and at least 8 characters.
 - [ ] A Google-created account (`auth_provider=google`, `password_set=0`) shows
       **Set a local password** in Profile without asking for a current password.
       After setting it, manual login with the new password works.
-- [ ] Trying a wrong password on an unconfigured Google account shows the
-      “use Sign in with Google first” message.
+- [ ] Trying a wrong password on a Google account that has no local password yet
+      (`auth_provider=google`, `password_set=0`) shows the “use Sign in with
+      Google first” message.
 - [ ] An admin password reset sets `password_set=1`.
 - [ ] Opening `admin.php` as a player shows the 403 access-denied page.
 
@@ -166,7 +171,8 @@ Use a throwaway account and a throwaway database when possible.
 - [ ] Try to demote/delete the last admin: blocked with a message.
 - [ ] Check the audit log records create/update/password/reset/delete.
 - [ ] Open `admin.php` as a player: 403.
-- [ ] Log in as a deleted user in an old tab: next API call returns 401 and the menu redirects.
+- [ ] Log in as a deleted user in an old tab: the next API call returns 401 and
+      the HUD shows “Log in again”. Reloading the menu sends you to the login page.
 
 ### Google login (optional)
 
@@ -232,9 +238,9 @@ On **2026-11-17**, the branch was checked with:
 
 Results:
 
-- `npm test`: 52 JavaScript tests and both PHP suites pass;
-- `login_db.sql` imports cleanly twice;
-- `upgrade_db.sql` applies to the live `origin/main` schema and is re-runnable;
+- `npm test`: 60 JavaScript tests and both PHP suites pass;
+- `gamefile/login_db.sql` imports cleanly twice;
+- `gamefile/upgrade_db.sql` applies to the live `origin/main` schema and is re-runnable;
 - register → login → CLI promotion → admin create/edit/password/reset/delete,
   CSRF rejection, player 403, last-admin guards, audit rows, API save round-trip;
 - main menu → game → station modal (mouse and keyboard) → global/cosmetics

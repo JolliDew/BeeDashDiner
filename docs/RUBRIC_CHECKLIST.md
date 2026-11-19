@@ -7,7 +7,7 @@ Status as of the current branch.
 | Two roles (admin + regular user) | ✅ | `users.role`, `admin.php`, player 403 test |
 | Authentication and session management | ✅ | `login.php`, `Auth.php`, session regeneration/logout |
 | Role-based access control | ✅ | Admin role checks; `denied.php` 403 page |
-| Complete CRUD for main data | ✅ | Admin user create/read/update/delete + audit; player restart deletes own save |
+| Complete CRUD for main data | ✅ | Admin user create/read/update/delete + audit; the player's own restart replaces only their save |
 | Reusable common navigation | ✅ | `includes/nav.php`, `css/site-nav.css` on every page |
 | Proper HTML/CSS, Bootstrap, IDs/classes | ✅ | Bootstrap modals/buttons; shared page/game CSS |
 | Session variables control content | ✅ | Role-aware nav and admin link |

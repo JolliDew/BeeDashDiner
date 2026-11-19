@@ -7,12 +7,14 @@ date: "November 2026"
 
 # Cover and team
 
-**Project title:** BeeDashDiner
-**Group:** AQM
+**Project title:** BeeDashDiner  
+**Group:** AQM  
+**Institution:** University of St. La Salle, La Salle Avenue, Bacolod City 6100, Negros Occidental, Philippines  
+**Telephone:** +63 34 434 6100  
 **System:** A cloud-based bee café game with an admin dashboard  
 **Course:** CC106 CLE — Cloud-Based Application Development  
 **Repository:** https://github.com/JohnDavidMorandante/JolliDew  
-**Live application:** https://YOUR-SERVICE.onrender.com (replace after Render deployment)
+**Planned public URL:** https://YOUR-SERVICE.onrender.com (replace with the real Render URL after deployment)
 
 | Member | Main role | Approx. contribution |
 |---|---|---|
@@ -111,9 +113,12 @@ three missions on a level, the player advances; after Level 10 the game is won.
 
 ![ER diagram](docs/screenshots/er-diagram.png){width=100%}
 
-The schema has six related tables. `player_progress`, `player_stations` and
-`admin_audit` reference `users`; `menu_items` references `locations`. All user
-child rows use `ON DELETE CASCADE`. The admin dashboard uses a join:
+The schema has six related tables. `player_progress` and `player_stations` have
+a foreign key to `users` with `ON DELETE CASCADE`; `menu_items` references
+`locations`. `admin_audit` deliberately has no foreign key: it stores the
+actor and target ids together with a snapshot of the usernames, so the
+append-only log survives the deletion of the account it describes. The admin
+dashboard uses a join:
 
 ```sql
 SELECT u.id, u.username, u.role, p.level, p.honey
@@ -155,7 +160,7 @@ JolliDew/
 │   ├── profile.php            # profile, avatar, password
 │   ├── help.php               # rules, controls, win condition
 │   ├── denied.php             # 403 page
-│   ├── restart.php            # delete own save
+│   ├── restart.php            # start over (fresh save, old save invalidated)
 │   └── login/register/menu/game pages
 ├── tests/                     # JS + PHP test suites
 └── docs/                      # guides, deployment, this document
@@ -194,7 +199,7 @@ or drift far away from them.
 | 3b. Three maps | Meadow Stand became an outdoor market, Hive Café a warm interior and Royal Hive a regal hall. The menu sign moved into the stall row so it cannot overlap or drift. | Map measurements at 360, 568×320 and 1440: sign gap 3–8px, zero overflow. |
 | 4. HUD and desktop | Grouped honey/diamonds/chairs into one bar, made Exit an icon button, widened the playfield to 1000px, slimmed the desktop dock. | 320–1440 checks with zero overflow. |
 | 5. Saving | Dirty-checked serialized autosave, pagehide/visibility keepalive save, local-backup fallback, welcome-back toast. | Honey survived a pagehide + reload test. |
-| 6. Pacing | Removed the door burst, delayed the first customer, enforced a calm entry gap, started workers from a hive. | Spawn log: first guest at 1.4s, then a measured interval. |
+| 6. Pacing | Removed the door burst, delayed the first customer, enforced a calm entry gap, started workers from a hive. | Spawn log: first guest at 1.8s, then a measured interval. |
 | 7. Audio | Procedural Web Audio engine with compressor, reverb, volume sliders, soft timbres, slow ambient music, ducking and tab-hide suspension. | Context running; slider persistence; no console errors. |
 | 8. Rubric features | Shared nav, profile/avatar upload, password change, access-denied page, restart, help/win copy, menu progress. | Live XAMPP checks for each flow. |
 | 9. Deployment package | Dockerfile, Render entrypoint, env-based DB config, `render.yaml`, deployment guide, database export. | Ready for Render; URL to be added after deploy. |
@@ -210,17 +215,23 @@ or drift far away from them.
 
 `npm test` runs the JavaScript and PHP suites with no database required.
 
-- **52 JavaScript tests** cover game state migration, economy, missions, worker
+- **60 JavaScript tests** cover game state migration, economy, missions, worker
   selection, customer lifecycle, seat layout, cosmetics, save queueing and
   invalid saves.
 - **PHP SaveRepository checks** cover v1/v2 migration, station chains, staff
-  clamping, mission repair and round-trips.
+  clamping, mission repair, write-number ordering and round-trips.
 - **PHP AdminRepository checks** cover create/edit/search/pagination/password,
   progress reset, last-admin and self-delete guards, and audit snapshots.
+- **A live PostgreSQL suite** (`npm run test:pg`) runs the same save checks
+  against Supabase, including the rejection of an older save.
 - **PHP lint** passes on every PHP file.
 - **Headless Chrome/CDP** checks cover 320×568, 360×800, 568×320, 768×1024 and
   1440×900: no unintended horizontal overflow, modals one at a time, 1000px
   desktop playfield, audio context and sliders, save/resume, and console errors.
+- **A headless end-to-end run through XAMPP** registers an account, crafts a
+  save, plays, reloads, restarts and exits during the load; all 14 checks
+  pass, including "the mission reward is paid exactly once" and "a save that
+  is still on its way cannot undo the restart".
 
 ## 5.2 Manual test cases
 
@@ -234,7 +245,7 @@ or drift far away from them.
 | T6 | Worker intro | Enter game | Worker leaves the hive | Bee started at hive and flew to station | Pass |
 | T7 | Avatar upload | Upload PNG under 2 MB | Image appears in profile/nav | Uploaded and displayed | Pass |
 | T8 | Invalid upload | Rename a text file as `.png` | Rejected, no file written | Server rejected it | Pass |
-| T9 | Restart | Confirm restart from menu | Own save deleted | Progress and stations rows removed | Pass |
+| T9 | Restart | Confirm restart from menu | Own save replaced by a fresh game | Level 1, 50 honey, one open station; a save still on its way cannot undo it | Pass |
 | T10 | Audio | Open speaker, change sliders, reload | Volumes persist | 70/45 restored; music timer resumed | Pass |
 | T11 | Mobile layout | 320×568 and 568×320 | No clipped UI | No horizontal overflow | Pass |
 | T12 | Deployment | Open Render URL, log in, play | App reachable over HTTPS | Pending Render deploy | Pending |
@@ -242,6 +253,10 @@ or drift far away from them.
 | T14 | Colour contrast | Open menu, help and profile; inspect gold buttons | Dark text on gold, readable labels | Button text corrected | Pass |
 | T15 | Google account password | Simulate a Google-created account; try manual login, then set a local password in Profile and log in manually | Helpful message first; local login works after setting | Both stages passed | Pass |
 | T16 | Landing and home flow | Visit `/JolliDew/`, use Play/Create account, log out | Landing loads, CTAs work, logout returns home | Root 302 to landing; landing 200; flow verified | Pass |
+| T17 | Mission reward | Craft a save with one mission finished, press Play, then reload | The reward is paid once and reaches the server | Server showed index 1 and 200 honey; a reload kept 200 honey | Pass |
+| T18 | Save ordering | Send two saves, the older one arriving late | The newer state is kept | The server answered 409 and kept the newer progress | Pass |
+| T19 | Restart race | Exit the game, restart, then let the keepalive save arrive | The restart stays | Level 1 and 50 honey after the late save | Pass |
+| T20 | Exit during load | Press Exit while the save is still loading | No game keeps running | The game markup was removed and the menu came back | Pass |
 
 ## 5.3 Bugs found and fixed
 
@@ -257,6 +272,24 @@ or drift far away from them.
 - Customers arrived in a burst at one door pixel; arrivals are now staggered.
 - Two modals could stack if opened programmatically; Bootstrap’s jQuery
   `show.bs.modal` now closes any other dialog.
+
+The final audit round found four more defects, all confirmed by reproducing
+them in a real browser before fixing them:
+
+- **A mission reward could be paid again on every reload.** The game took its
+  "already saved" baseline *after* the opening change, so the reward paid while
+  loading was never pushed and was paid again next time. The baseline is now
+  taken before the first change.
+- **A late save could undo a newer one.** Every save now carries a write
+  number that only grows; the server keeps the newest number and answers
+  `409` instead of overwriting it.
+- **"Restart progress" could be undone by the keepalive from Exit.** The restart
+  now replaces the save with a fresh game whose write number is far ahead, so
+  a save that is still on its way is too old to be stored.
+- **The upgrade shop promised less than the game delivered.** The walking and
+  cooking upgrades shorten the time rather than adding a percentage of speed.
+  Both the shop text and the simulation now use the same helper functions, so
+  they cannot drift apart.
 
 # 6. Security and scalability proposal
 
@@ -300,7 +333,9 @@ or drift far away from them.
 - Use the managed Supabase PostgreSQL tier and read replicas for reporting.
 - Put the PHP app behind a load balancer and run multiple stateless containers.
 - Serve static CSS, JS and uploaded media through a CDN/object storage.
-- Cache reference data (`locations`, `menu_items`) in memory or a fast KV store.
+- Cache the reference data (`locations`, `menu_items`) in memory or a fast KV
+  store if the app ever starts reading it; today the gameplay values live in
+  `gamefile/js/config.js` and the database copy is documentation only.
 - Keep writes small: `player_progress` is one row per player and saves are
   serialized/debounced; add a queue if write volume grows.
 - Add structured logs and metrics for API latency, save failures and login failures.
@@ -309,7 +344,9 @@ or drift far away from them.
 
 **Platform:** Render (Docker web service)  
 **Database:** Supabase PostgreSQL (managed)  
-**Runtime:** PHP 8.2 + Apache, PDO PostgreSQL, HTTPS terminated by Render
+**Runtime:** PHP 8.2 + Apache, PDO PostgreSQL, HTTPS terminated by Render  
+**Status:** prepared and container-tested; the Render service is created by the
+repository owner, so the public URL is still a placeholder in this document.
 
 The Docker image was built locally and run on a Render-style non-root port
 against the live Supabase database. Login, the game, all four modals, autosave,
@@ -323,7 +360,9 @@ Deployment steps:
 3. Add the `DATABASE_URL` environment variable from Supabase (session pooler URI).
 4. Render builds the `Dockerfile`; the entrypoint makes Apache listen on Render’s
    `PORT`; deploy.
-5. Register `demo_player` and `demo_admin`; promote the admin in Supabase SQL.
+5. Run the repository-root `database.sql` in the Supabase SQL editor. It creates
+   the schema and the two demo accounts; `demo_admin` is already an admin in
+   the seed data, so no promotion step is needed.
 6. Verify the public URL, HTTPS, login, game, profile upload, and access-denied page.
 
 Problems met and solutions:
@@ -335,8 +374,9 @@ Problems met and solutions:
 - **HTTPS cookies:** Render terminates TLS at its proxy. `Auth::start()` now
   checks `X-Forwarded-Proto`.
 - **Google OAuth:** the redirect URI mismatch could not be fixed without Google
-  Console access. The Google button is hidden when no config file exists; the
-  password path remains available.
+  Console access. The Google button is hidden on both the sign-in and the
+  registration page when no config file exists; the password path remains
+  available.
 - **Ephemeral uploads:** documented as a free-plan limitation; Supabase Storage
   is the recommended next step.
 
@@ -413,13 +453,14 @@ backups for every critical task and hold a short stand-up each work session.
 ## 9.2 Test credentials
 
 ```text
-Live URL: https://YOUR-SERVICE.onrender.com
-Player:  demo_player / JolliDemo123!
-Admin:   demo_admin  / JolliDemo123!
+Public URL: https://YOUR-SERVICE.onrender.com   (replace after deployment)
+Player:    demo_player / JolliDemo123!
+Admin:     demo_admin  / JolliDemo123!
 ```
 
 The database export `database.sql` creates these demo accounts with hashed
-passwords. Change the passwords before opening the site to the public.
+passwords and gives `demo_admin` the admin role. Change the passwords before
+opening the site to the public.
 
 ## 9.3 Reproducing the project locally
 

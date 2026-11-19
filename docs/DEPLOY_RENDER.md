@@ -35,44 +35,79 @@ branch you want to deploy) from your own machine. Never commit
 Blueprint. The `DATABASE_URL` value is marked `sync: false`, so Render asks for
 it in the dashboard instead of storing it in git.
 
-## 3. First-run checks
+## 3. Create the database
 
-1. Open `https://YOUR-APP.onrender.com/`; the landing page should load.
-2. Register the demo player account.
-3. Register the demo admin account.
-4. Promote the admin in the Supabase SQL editor:
+The app cannot create its own tables, so initialize Supabase **before** the
+first request.
+
+1. In Supabase open **SQL Editor → New query**.
+2. Open the repository-root `database.sql`, paste the whole file and run it.
+   It creates the schema, the reference data and the two demo accounts, and it
+   is safe to run again.
+3. Check that it worked:
 
    ```sql
-   UPDATE users SET role = 'admin' WHERE username = 'demo_admin';
+   SELECT username, role FROM users ORDER BY id;
    ```
 
-5. Log out and back in. The **Admin** link should appear.
-6. Start a game, exit, reload, and confirm the welcome-back toast and saved
+   You should see `demo_player` with the role `player` and `demo_admin` with
+   the role `admin`. The demo admin is promoted by the seed data itself, so
+   there is nothing else to run.
+4. Optional: give the demo player a starting save, so the demo video opens on
+   a restaurant that is already running:
+
+   ```sql
+   INSERT INTO player_progress
+          (user_id, honey, location_no, level, diamonds, upgrades,
+           mission_index, missions_done, missions_finished, stats, cosmetics)
+   VALUES ((SELECT id FROM users WHERE username = 'demo_player'),
+           4587.9, 2, 2, 5, '{"staff":1,"seq":0}', 6,
+           '["l1_serve5","l1_recipe2","l1_hire2","l2_unlock2","l2_serve20","l2_tips3"]',
+           0, '{"served":30,"earned":0,"tips":3,"tipHoney":40}',
+           '{"owned":[],"equipped":{"bee":"","theme":""}}')
+   ON CONFLICT (user_id) DO UPDATE
+      SET honey = EXCLUDED.honey, level = EXCLUDED.level,
+          diamonds = EXCLUDED.diamonds, mission_index = EXCLUDED.mission_index,
+          missions_done = EXCLUDED.missions_done, stats = EXCLUDED.stats;
+   ```
+
+   The server repairs anything this leaves out, so a simpler row also works.
+
+`gamefile/login_db_pg.sql` is the same schema **without** the demo accounts.
+Use it when you want an empty database and do not want the grading accounts.
+
+## 4. First-run checks
+
+1. Open `https://YOUR-SERVICE.onrender.com/`; the landing page should load.
+2. Log in with `demo_player` / `JolliDemo123!`.
+3. Log out, then log in with `demo_admin` / `JolliDemo123!`. The **Admin**
+   link should appear.
+4. Start a game, exit, reload, and confirm the welcome-back toast and saved
    honey/level.
-7. Upload a profile picture from **Profile**.
-8. Open `admin.php` while logged in as the player and confirm the access-denied
+5. Upload a profile picture from **Profile**.
+6. Open `admin.php` while logged in as the player and confirm the access-denied
    page appears.
 
-## 4. Test credentials for the README
+## 5. Test credentials for the README
 
-Use non-personal demo accounts and put the credentials in the README, for
-example:
+Use non-personal demo accounts and put the credentials in the README:
 
 ```text
-Player: demo_player / <password>
-Admin:  demo_admin  / <password>
+Player: demo_player / JolliDemo123!
+Admin:  demo_admin  / JolliDemo123!
 ```
 
-The password itself may be shown to the instructor. Do not reuse a personal
-password.
+Those accounts already exist after step 3 — do not register them again, or you
+will create a second account with a different password. The password itself may
+be shown to the instructor. Do not reuse a personal password.
 
-## 5. HTTPS and cookies
+## 6. HTTPS and cookies
 
 Render terminates TLS at its proxy and sends `X-Forwarded-Proto: https`.
 `Auth::start()` treats that as HTTPS, so the session cookie is `Secure`,
 `HttpOnly`, and `SameSite=Lax`.
 
-## 6. Important limits of the free plan
+## 7. Important limits of the free plan
 
 - The container filesystem is ephemeral. Uploaded avatars work during a running
   instance but can disappear after a redeploy or restart. For a permanent media
@@ -83,18 +118,19 @@ Render terminates TLS at its proxy and sends `X-Forwarded-Proto: https`.
 - Use one instance while sessions are stored on the local filesystem. Multiple
   instances would need shared session storage.
 
-## 7. Troubleshooting
+## 8. Troubleshooting
 
 | Problem | Check |
 |---|---|
 | `Database connection failed` | `DATABASE_URL` exists, uses the session pooler, password is URL-encoded, and SSL is enabled |
+| “The admin schema is missing.” | Run the repository-root `database.sql` (or `gamefile/upgrade_db.sql`) in the Supabase SQL editor |
 | 502 / port error | Render sets `PORT`; the entrypoint makes Apache listen on it |
 | CSS missing | `AllowOverride All` is applied in the Dockerfile and `.htaccess` is present |
 | Avatar upload fails | `uploads/` is writable by `www-data`; check the Render logs |
 | Admin link missing | The `users.role` value is `admin`; log out and back in |
-| Google button missing | Expected: it only appears when `gamefile/src/google-config.php` exists |
+| Google button missing | Expected: the sign-in and registration pages show it only when `gamefile/src/google-config.php` exists |
 
-## 8. Redeploy
+## 9. Redeploy
 
 Push a new commit to the connected branch, or press **Manual Deploy** in
 Render. The database is untouched by redeploys.

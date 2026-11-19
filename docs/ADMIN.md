@@ -24,8 +24,14 @@ mysql -u root -p jollidew_db < gamefile/upgrade_db.sql
 The migration adds:
 
 - `users.role` (`player` or `admin`, default `player`);
-- the `admin_audit` table;
-- the index used by the account list.
+- `users.avatar`, `users.auth_provider` and `users.password_set`;
+- the `admin_audit` table, with an index on `target_user_id` and one on
+  `created_at`;
+- the save-v3 columns on `player_progress` and `player_stations`.
+
+It does not create an index on `users`; the account list is small enough to
+scan, and the unique indexes on `username` and `email` are enough for the
+duplicate checks.
 
 ### PostgreSQL/Supabase
 
@@ -61,7 +67,7 @@ Open `admin.php` directly or use the main-menu button.
 | Create account | **Create account** form | Username, email, password, role. |
 | Edit account | **Edit** on a row | Username, email, and role. |
 | Reset password | Edit panel | New password is hashed with `PASSWORD_DEFAULT`. |
-| Reset progress | Edit panel | Deletes save rows but keeps the account. |
+| Reset progress | Edit panel | Replaces the save with a fresh game (level 1) and keeps the account. |
 | Delete account | Edit panel | Deletes the account and every progress row. |
 | Review log | **Recent admin actions** | Newest first, up to 40 rows. |
 
@@ -76,6 +82,10 @@ Open `admin.php` directly or use the main-menu button.
   demoted admin loses access immediately, even with an old session file.
 - Progress deletion is explicit (`player_stations`, then `player_progress`, then
   `users`), so it works on old databases without cascade foreign keys.
+- A progress reset uses the same code as the player's own **Restart progress**
+  action: it writes a fresh save and moves the write number far ahead, so a
+  save that the player's browser still has on its way cannot bring the old
+  progress back.
 
 ---
 
@@ -128,8 +138,8 @@ are not deleted by account deletion.
 
 | Problem | Cause / fix |
 |---|---|
-| “Admin access required.” | The logged-in account has `role = player`. Promote it with the CLI script. |
-| “The admin schema is missing.” | Run `upgrade_db.sql` or `login_db_pg.sql`; `users.role` or `admin_audit` is absent. |
+| “The admin panel is only available to administrator accounts.” | The logged-in account has `role = player`. Promote it with the CLI script. |
+| “The admin schema is missing.” | Run `gamefile/upgrade_db.sql` or `gamefile/login_db_pg.sql`; `users.role` or `admin_audit` is absent. |
 | `make-admin.php` says no account | Register the account in the browser first; usernames are case-sensitive. |
 | Admin button is missing | Log out and back in after promotion, or reload `Mainmenu.php`; `Auth::refresh()` updates the session from the database. |
 | Delete fails | You may be deleting yourself or the last admin. The flash message explains which rule blocked it. |

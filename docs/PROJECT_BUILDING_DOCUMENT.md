@@ -21,7 +21,7 @@ date: "November 2026"
 **Instructor:** Japhet Rocamora Pagarigan\
 **Institution:** University of St. La Salle, La Salle Avenue, Bacolod City 6100, Negros Occidental, Philippines\
 **Telephone:** +63 34 434 6100\
-**Repository:** https://github.com/JolliDew/JolliDew\
+**Repository:** https://github.com/JolliDew/BeeDashDiner\
 **Planned public URL:** https://YOUR-SERVICE.onrender.com (replace with the real Render URL after deployment)
 
 | Member | Main role | Approx. contribution |
@@ -226,7 +226,7 @@ visible with `git log --date=short`.
 | Nov 18–19 | 10. Saving | Dirty-checked serialized autosave, pagehide/visibility keepalive save, local fallback, welcome-back toast, then the write-number ordering and the server-first load rule. | Klein | Honey survived a pagehide + reload test; the browser end-to-end run passed 14/14. |
 | Nov 18–19 | 11. Deployment package | Dockerfile, Render entrypoint, environment-based DB config, `render.yaml`, deployment guide, database export. | Klein, JD | Container ran against live Supabase; URL to be added after deploy. |
 | Nov 19 | 12. Three maps | Meadow Stand became an outdoor market, Hive Café a warm interior and Royal Hive a regal hall. The menu sign moved into the stall row so it cannot overlap or drift. | Ardion | Map measurements at 360, 568×320 and 1440: sign gap 3–8 px, zero overflow. |
-| Nov 19 | 13. Landing and brand | Added a public landing page, root redirect, home-first navigation, and standardised the visible product name to BeeDashDiner (the repo/folder stays `JolliDew`). | Ardion, Iszen | Landing screenshots at 320 and 1440; brand check. |
+| Nov 19 | 13. Landing and brand | Added a public landing page, root redirect, home-first navigation, and standardised the visible product name to BeeDashDiner (the repository is now BeeDashDiner; the local folder stays `JolliDew`). | Ardion, Iszen | Landing screenshots at 320 and 1440; brand check. |
 | Nov 19 | 14. Documentation | README, game rules, testing record, security/scalability proposal, reflections, video script. | Emman, Iszen | This document and `docs/`. |
 | Nov 19 | 15. Final audit | Reproduced and fixed the reward replay, the save-order race, the restart resurrection, the blocked first save, the upgrade-text mismatch, the truncated admin page and the unprotected save endpoint; corrected the documentation. | Klein, Emman | 61 JavaScript tests, both PHP suites, the live PostgreSQL suite and the 14-check browser run. |
 
@@ -583,7 +583,7 @@ backups for every critical task and hold a short stand-up each work session.
 
 ## 10.2 Source code and working sessions
 
-**Repository:** <https://github.com/JolliDew/JolliDew>\
+**Repository:** <https://github.com/JolliDew/BeeDashDiner>\
 **Branch:** `feat/scene-first-ui`
 
 The group worked in the sessions below. The dates are the commit dates, and the

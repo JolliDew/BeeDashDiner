@@ -125,7 +125,7 @@ Use a throwaway account and a throwaway database when possible.
       visitor sees **Continue playing** and saved level/honey.
 - [ ] The landing map gallery shows Meadow Stand, Hive Café and Royal Hive.
 - [ ] The brand is **BeeDashDiner** in every title, nav and heading; only the
-      repository/folder path says JolliDew.
+      local XAMPP folder path says JolliDew (the repository is BeeDashDiner).
 - [ ] The shared navigation appears on landing, login, register, menu, help,
       profile, admin and denied pages.
 - [ ] Logout returns to the landing page.

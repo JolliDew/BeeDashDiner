@@ -20,6 +20,9 @@ All notable changes to BeeDashDiner.
 - **Developer tools are admin-only.** `in-game.php` re-reads the role from the
   database and omits the 🛠 button and panel for players, so a normal account
   never receives the cheat UI.
+- **Repository renamed to BeeDashDiner.** GitHub redirects the old
+  `JolliDew/JolliDew` URL; the repository is private and the local XAMPP folder
+  keeps the `JolliDew` name for the documented paths.
 
 ### Verification
 
@@ -63,7 +66,8 @@ HUD and a three-button dock.
 - **Shared navigation:** one role-aware menu on every page (Home, Game, How to
   play, Profile, Admin for admins, Log out). Logout returns to the landing page.
 - **Unified brand:** the visible product name is now **BeeDashDiner** everywhere;
-  the GitHub repository and local XAMPP folder remain `JolliDew` for continuity.
+  the GitHub repository and local XAMPP folder were still named `JolliDew` at
+  that point (the repository was renamed later).
 - **Profile and media:** avatar upload with type, size and image checks; password
   change; saved level/honey summary.
 - **Google + local passwords:** Google-created accounts have a random hidden

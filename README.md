@@ -4,7 +4,7 @@ A small idle restaurant game built with **vanilla JavaScript modules**, **PHP**,
 
 > **Branch:** `feat/scene-first-ui`
 > **What it contains:** the scene-first UI (food-stall stations, café entrance, desktop playfield, procedural audio) on top of Emman's redesign, plus bug fixes, security hardening, full admin CRUD, save format v3, and tests.
-> **Name:** **BeeDashDiner** is the product name. The GitHub repository and local XAMPP folder remain `JolliDew` for continuity and submission paths.
+> **Name:** **BeeDashDiner** is the product name and the GitHub repository name. The local XAMPP folder stays `JolliDew` for continuity and submission paths.
 > **Group:** **AQM** · University of St. La Salle
 > **Course:** **CC106 — Cloud-Based Application Development** · Culminating Learning Evidence (CLE), end-term final project
 > **Program:** Bachelor of Science in Computer Science · 3rd Year, 1st Semester
@@ -80,7 +80,8 @@ See **[docs/GAMEPLAY.md](docs/GAMEPLAY.md)** for formulas and the mission table,
 ### 1. Get the branch
 
 ```bash
-git clone https://github.com/JolliDew/JolliDew.git
+# Clone into JolliDew so the local URLs in this README keep working.
+git clone https://github.com/JolliDew/BeeDashDiner.git JolliDew
 cd JolliDew
 git switch feat/scene-first-ui
 ```

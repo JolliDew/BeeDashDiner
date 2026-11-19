@@ -15,7 +15,7 @@ required.
    git push origin main
    ```
 
-2. In Render: **New → Blueprint**, connect `JolliDew/JolliDew`, and apply
+2. In Render: **New → Blueprint**, connect `JolliDew/BeeDashDiner`, and apply
    `render.yaml`. If you prefer a manual service, use **New → Web Service**,
    Docker, branch `main`, health check `/`.
 3. Paste the Supabase **Session pooler** URI as `DATABASE_URL`.
@@ -35,7 +35,7 @@ branch you want to deploy) from your own machine. Never commit
 ## 2. Create the Render service
 
 1. Sign in at <https://render.com>.
-2. Choose **New → Web Service** and connect the `JolliDew/JolliDew`
+2. Choose **New → Web Service** and connect the `JolliDew/BeeDashDiner`
    repository. It is private, so authorize the Render GitHub app for the
    JolliDew organization when GitHub asks.
 3. Runtime: **Docker**.

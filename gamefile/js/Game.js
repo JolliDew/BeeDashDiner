@@ -10,7 +10,7 @@ import { GLOBAL_UPGRADES, globalDef } from './upgrades.js';
 import { cosmeticDef } from './cosmetics.js';
 
 export class Game {
-  constructor(root, { devMode = false, userId = '0', apiUrl = 'api.php' } = {}) {
+  constructor(root, { devMode = false, userId = '0', apiUrl = 'api.php', csrf = '' } = {}) {
     this.root = root; this.devMode = devMode; this.timeScale = 1;
     this.hud = {
       honey: root.querySelector('#hud-honey'),
@@ -23,7 +23,7 @@ export class Game {
     this.saveDebounce = null;
     this.sound = new SoundEngine();
     this.soundBtn = null; this.audioMenu = null;
-    this.saves = new SaveService({ url: apiUrl, userId, onStatus: s => this.setSaveStatus(s) });
+    this.saves = new SaveService({ url: apiUrl, userId, csrf, onStatus: s => this.setSaveStatus(s) });
   }
 
   /** Show save feedback briefly, but keep errors on screen. */

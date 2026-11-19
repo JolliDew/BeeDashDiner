@@ -5,7 +5,8 @@ export function launch(root) {
   const game = new Game(root, {
     devMode: root.dataset.dev === '1',
     userId: root.dataset.user,
-    apiUrl: 'api.php'
+    apiUrl: 'api.php',
+    csrf: root.dataset.csrf || ''
   });
   return game.start();
 }

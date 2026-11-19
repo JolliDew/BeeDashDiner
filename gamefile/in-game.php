@@ -1,6 +1,7 @@
 <?php
 // HTML fragment injected by Mainmenu.js when the player presses "Play Game".
 require_once __DIR__ . '/src/Auth.php';
+require_once __DIR__ . '/src/Csrf.php';
 $userId = Auth::requireLogin(true);
 $devMode = true; // set to false for release: hides the 🛠 dev tools
 $cssV = fn(string $file): int => max(1, @filemtime(__DIR__ . '/' . $file) ?: 1);
@@ -12,7 +13,7 @@ header('Expires: 0');
 ?>
 <link rel="stylesheet" href="css/bee-game.css?v=<?= $cssV('css/bee-game.css') ?>">
 <link rel="stylesheet" href="css/bee-modals.css?v=<?= $cssV('css/bee-modals.css') ?>">
-<div class="game-screen" id="bee-game" data-dev="<?= $devMode ? '1' : '0' ?>" data-user="<?= (int)$userId ?>">
+<div class="game-screen" id="bee-game" data-dev="<?= $devMode ? '1' : '0' ?>" data-user="<?= (int)$userId ?>" data-csrf="<?= htmlspecialchars(Csrf::token(), ENT_QUOTES, 'UTF-8') ?>">
     <div class="game-canvas-area">
         <div class="bee-app">
             <div class="game-hud">

@@ -2,8 +2,11 @@ import { GameState } from './GameState.js';
 
 /** Saves to the server (api.php, tied to the logged-in account) with a local backup. */
 export class SaveService {
-  constructor({ url, userId, onStatus = () => {} }) {
+  constructor({ url, userId, csrf = '', onStatus = () => {} }) {
     this.url = url;
+    // The save endpoint rejects a POST without this token, so a malicious
+    // page cannot overwrite the signed-in player's progress.
+    this.csrf = csrf;
     this.key = 'beediner:' + userId;
     this.seqKey = this.key + ':seq';
     this.onStatus = onStatus;
@@ -119,7 +122,7 @@ export class SaveService {
     try {
       request = fetch(this.url + '?action=save', {
         method: 'POST', credentials: 'same-origin', keepalive: true,
-        headers: { 'Content-Type': 'application/json' }, body: this.body(state, seq)
+        headers: this.headers(), body: this.body(state, seq)
       });
     } catch (e) {
       return Promise.resolve(false); // the local backup is already written
@@ -140,7 +143,7 @@ export class SaveService {
       timer = setTimeout(() => controller.abort(), 12000);
       const r = await fetch(this.url + '?action=save', {
         method: 'POST', credentials: 'same-origin',
-        headers: { 'Content-Type': 'application/json' }, body: this.body(state, seq),
+        headers: this.headers(), body: this.body(state, seq),
         signal: controller.signal
       });
       return await this.handleResponse(r);
@@ -150,6 +153,13 @@ export class SaveService {
     } finally {
       if (timer) clearTimeout(timer);
     }
+  }
+
+  /** JSON plus the session's CSRF token when the page supplied one. */
+  headers() {
+    const headers = { 'Content-Type': 'application/json' };
+    if (this.csrf) headers['X-CSRF-Token'] = this.csrf;
+    return headers;
   }
 
   /** The request body: the plain save plus the write number. */

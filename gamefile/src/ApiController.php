@@ -16,6 +16,9 @@ class ApiController
             if ($action === 'load' && $method === 'GET') {
                 $this->out($this->repo->load($userId) ?? new stdClass());
             } elseif ($action === 'save' && $method === 'POST') {
+                if (!Csrf::check($_SERVER['HTTP_X_CSRF_TOKEN'] ?? null)) {
+                    $this->out(['error' => 'csrf'], 403);
+                }
                 $clean = SaveRepository::clean(json_decode(file_get_contents('php://input'), true));
                 if ($clean === null) {
                     $this->out(['error' => 'bad data'], 400);

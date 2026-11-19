@@ -18,6 +18,11 @@ class Auth
             'httponly' => true,
             'samesite' => 'Lax',
         ]);
+        // Small, safe defaults for every page. No inline script or frame is
+        // needed by the app, but the game still loads its own scripts.
+        header('X-Content-Type-Options: nosniff');
+        header('X-Frame-Options: DENY');
+        header('Referrer-Policy: strict-origin-when-cross-origin');
         session_start();
     }
 

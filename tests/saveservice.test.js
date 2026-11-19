@@ -139,11 +139,26 @@ test('pushNow sends a keepalive request and writes the local backup', async t =>
   let captured = null;
   globalThis.fetch = async (url, options) => { captured = { url, options }; return { ok: true }; };
 
-  const saves = new SaveService({ url: 'api.php', userId: '7' });
+  const saves = new SaveService({ url: 'api.php', userId: '7', csrf: 'tok-123' });
   saves.pushNow({ honey: 77 });
   assert.equal(captured.options.keepalive, true);
+  assert.equal(captured.options.headers['X-CSRF-Token'], 'tok-123');
   assert.equal(JSON.parse(captured.options.body).honey, 77);
   assert.equal(JSON.parse(store.getItem('beediner:7')).honey, 77);
+});
+
+test('a queued save also sends the CSRF token', async t => {
+  const originalFetch = globalThis.fetch;
+  const originalStorage = globalThis.localStorage;
+  t.after(() => { globalThis.fetch = originalFetch; globalThis.localStorage = originalStorage; });
+  globalThis.localStorage = storage();
+  let captured = null;
+  globalThis.fetch = async (url, options) => { captured = options; return { ok: true, status: 200 }; };
+
+  const saves = new SaveService({ url: 'api.php', userId: '7', csrf: 'tok-456' });
+  assert.equal(await saves.push({ honey: 5 }), true);
+  assert.equal(captured.headers['X-CSRF-Token'], 'tok-456');
+  assert.equal(captured.headers['Content-Type'], 'application/json');
 });
 
 test('pushNow reports a failed keepalive so it can be retried', async t => {

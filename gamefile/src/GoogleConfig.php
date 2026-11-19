@@ -14,9 +14,9 @@ class GoogleConfig
 {
     public static function load(): array
     {
-        $envId = trim((string)(getenv('GOOGLE_CLIENT_ID') ?: ''));
-        $envSecret = trim((string)(getenv('GOOGLE_CLIENT_SECRET') ?: ''));
-        $envRedirect = trim((string)(getenv('GOOGLE_REDIRECT_URI') ?: ''));
+        $envId = self::env('GOOGLE_CLIENT_ID');
+        $envSecret = self::env('GOOGLE_CLIENT_SECRET');
+        $envRedirect = self::env('GOOGLE_REDIRECT_URI');
 
         if ($envId !== '' && $envSecret !== '') {
             return [
@@ -35,6 +35,21 @@ class GoogleConfig
         }
 
         return ['client_id' => '', 'client_secret' => '', 'redirect_uri' => ''];
+    }
+
+    /**
+     * Read one environment value. Dashboard paste mistakes sometimes leave the
+     * variable name (or quotes) inside the value; strip those so the OAuth
+     * request still gets a usable client id and secret.
+     */
+    private static function env(string $key): string
+    {
+        $value = trim((string)(getenv($key) ?: ''));
+        $prefix = $key . '=';
+        if (str_starts_with($value, $prefix)) {
+            $value = trim(substr($value, strlen($prefix)));
+        }
+        return trim($value, "\"'");
     }
 
     /** True only when a usable client id and secret are present. */

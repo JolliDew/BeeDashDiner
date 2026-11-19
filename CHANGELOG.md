@@ -23,6 +23,9 @@ All notable changes to BeeDashDiner.
 - **Repository renamed to BeeDashDiner.** GitHub redirects the old
   `JolliDew/JolliDew` URL; the repository is private and the local XAMPP folder
   keeps the `JolliDew` name for the documented paths.
+- **Google settings accept dashboard paste mistakes.** `GoogleConfig` strips a
+  duplicated `KEY=` prefix and surrounding quotes from `GOOGLE_*` environment
+  values, then strips the key name if it was pasted into the value.
 
 ### Verification
 

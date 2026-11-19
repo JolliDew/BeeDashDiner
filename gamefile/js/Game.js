@@ -40,6 +40,8 @@ export class Game {
 
   async start() {
     this.state = await this.saves.load();
+    // The player may have left (Exit) while the save was still loading.
+    if (this.destroyed) return this;
     this.economy = new Economy(this.state);
     this.scene = new Scene(this.root.querySelector('#scene'), this.state, this.economy);
     this.scene.sound = this.sound;
@@ -50,8 +52,13 @@ export class Game {
     this.scene.build();
     this.panel.build();
     this.setupAudio();
-    this.changed();
+    // The baseline is the state that was loaded. Anything changed() does after
+    // this (paying out a mission reward, for example) is a real change and
+    // must still reach the server. Taking the baseline afterwards would mark
+    // that change as already saved and let the reward be paid again on every
+    // reload.
     this.lastSave = JSON.stringify(this.state);
+    this.changed();
 
     // Saving must happen even when the player closes the tab or switches apps.
     this._onVisibility = () => {
@@ -157,12 +164,19 @@ export class Game {
     this.saveDebounce = setTimeout(() => this.saveIfDirty(), 700);
   }
 
-  /** Immediate keepalive save for page hide/unload and Exit. */
+  /**
+   * Immediate keepalive save for page hide/unload and Exit.
+   * Resolves to true only when the server confirmed the save, so a failed
+   * keepalive stays "unsaved" and the next autosave tries again.
+   */
   saveNow() {
-    if (!this.state) return;
+    if (!this.state) return Promise.resolve(false);
+    const snapshot = JSON.stringify(this.state);
     this.saves.saveLocal(this.state);
-    this.saves.pushNow(this.state);
-    this.lastSave = JSON.stringify(this.state);
+    return this.saves.pushNow(this.state).then(ok => {
+      if (ok) this.lastSave = snapshot;
+      return ok;
+    }).catch(() => false);
   }
 
   /** Autosave only when the state actually changed since the last success. */
@@ -201,7 +215,9 @@ export class Game {
       this.hud.diamonds.setAttribute('aria-label', `Diamonds: ${diamonds}`);
     }
     if (this.hud.queue) {
-      const waiting = this.scene.customers.filter(c => c.state === 'wait').length;
+      // Count the reserved chairs, not only the guests who already reached
+      // their table. A guest walking in still holds a seat.
+      const waiting = this.scene.seats.filter(Boolean).length;
       this.hud.queue.textContent = `🪑 ${waiting}/${this.economy.seats}`;
       this.hud.queue.setAttribute('aria-label', `Seats occupied: ${waiting} of ${this.economy.seats}`);
     }
@@ -379,6 +395,10 @@ export class Game {
   }
 
   destroy() {
+    // Exit can be pressed while the save is still loading. The flag stops
+    // start() from booting a game loop that nobody can see any more.
+    if (this.destroyed) return Promise.resolve(false);
+    this.destroyed = true;
     this.running = false;
     cancelAnimationFrame(this.raf);
     clearInterval(this.autosave);
@@ -392,7 +412,8 @@ export class Game {
     clearTimeout(this.saveDebounce);
     if (this._onVisibility) document.removeEventListener('visibilitychange', this._onVisibility);
     if (this._onPageHide) window.removeEventListener('pagehide', this._onPageHide);
-    this.saveNow();
+    const saved = this.saveNow();
     this.panel?.destroy();
+    return saved;
   }
 }

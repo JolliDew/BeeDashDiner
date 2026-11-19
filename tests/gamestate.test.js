@@ -176,6 +176,41 @@ test('a stale mission index below the current level is repaired', () => {
   assert.equal(s.missions.finished, false);
 });
 
+test('a crafted mission index cannot jump past the missions of the current level', () => {
+  const s = GameState.fromJSON({
+    version: 3,
+    level: 1,
+    location: 0,
+    stations: [
+      { unlocked: true, recipe: 1 },
+      { unlocked: false, recipe: 0 },
+      { unlocked: false, recipe: 0 }
+    ],
+    missions: { index: 30, done: [], finished: true }
+  });
+  assert.equal(s.missions.index, 3, 'only the three missions of level 1 may be done');
+  assert.equal(s.missions.done.length, 3);
+  assert.equal(s.missions.finished, false, 'the game is not complete after one level');
+});
+
+test('a save with a hole in the station list is rejected', () => {
+  const broken = {
+    version: 3,
+    level: 1,
+    location: 0,
+    honey: 10,
+    stations: [
+      { unlocked: true, recipe: 1 },
+      null,
+      { unlocked: false, recipe: 0 }
+    ]
+  };
+  assert.equal(GameState.isValid(broken), false);
+  const s = GameState.fromJSON(broken);
+  assert.equal(s.level, 1);
+  assert.equal(s.honey, 50, 'a broken save falls back to a fresh game');
+});
+
 test('moving restaurants resets stations and staff but keeps global upgrades', () => {
   const s = new GameState();
   s.honey = 100;

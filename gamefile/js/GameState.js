@@ -1,5 +1,5 @@
 import { ITEMS, BALANCE as B, MAX_LEVEL, levelLocation, firstLevelForLocation, slotsAt } from './config.js';
-import { MISSIONS, firstMissionIndex } from './missions.js';
+import { MISSIONS, firstMissionIndex, missionsForLevel } from './missions.js';
 
 const int = (v, min, max) => {
   const n = Number(v);
@@ -49,6 +49,9 @@ export class GameState {
   static isValid(d) {
     if (!d || !Number.isInteger(d.location) || !ITEMS[d.location]) return false;
     if (!Array.isArray(d.stations) || d.stations.length !== ITEMS[d.location].length) return false;
+    // A hole in the station list would crash the repair below, so reject the
+    // whole save instead of half-reading it.
+    if (!d.stations.every(x => x && typeof x === 'object')) return false;
     if (d.version >= 2 && d.level !== undefined &&
       (!Number.isInteger(d.level) || d.level < 1 || d.level > MAX_LEVEL)) return false;
     return true;
@@ -94,7 +97,11 @@ export class GameState {
 
     const first = firstMissionIndex(s.level);
     const src = isV2 && d.missions && typeof d.missions === 'object' ? d.missions : null;
-    let index = src ? int(src.index, 0, MISSIONS.length) : first;
+    // A level owns exactly its own missions. Anything beyond that belongs to
+    // a later level, so the index is capped here. The server applies the very
+    // same rule, which keeps a crafted save from claiming every reward.
+    const last = Math.min(MISSIONS.length, first + missionsForLevel(s.level).length);
+    let index = src ? int(src.index, 0, last) : first;
     if (index < first) index = first;
 
     // Missions complete in one fixed order, so `done` is always exactly the

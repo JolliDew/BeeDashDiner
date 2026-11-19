@@ -78,7 +78,7 @@ $old = [
 $migrated = SaveRepository::clean($old);
 check($migrated !== null, 'a location-only save is accepted');
 check($migrated['level'] === 8, 'a Royal Hive v1 save starts at level 8');
-check($migrated['diamonds'] === 0 && $migrated['missions']['index'] === 0, 'new fields get defaults');
+check($migrated['diamonds'] === 0 && $migrated['missions']['index'] === 21, 'new fields get defaults');
 check($migrated['staff'] === 1, 'a missing staff value becomes one bee');
 
 // v2 per-station staff and late-game upgrades migrate to the global model.
@@ -139,6 +139,32 @@ $closed['staff'] = 0;
 $closedClean = SaveRepository::clean($closed);
 check($closedClean['stations'][0]['unlocked'] === true, 'the first station is forced open');
 check($closedClean['staff'] === 1, 'the first station gets at least one worker');
+
+// The mission index may only cover the missions of the player's own level.
+$crafted = $raw;
+$crafted['missions']['index'] = 30;
+$crafted['missions']['finished'] = true;
+$craftedClean = SaveRepository::clean($crafted);
+check($craftedClean['missions']['index'] === 18, 'a crafted mission index is capped at the level boundary');
+check($craftedClean['missions']['finished'] === false, 'the finished flag cannot be claimed early');
+
+$finished = $raw;
+$finished['level'] = 10;
+$finished['location'] = 2;
+$finished['stations'] = stations(5);
+$finished['missions']['index'] = 30;
+$finishedClean = SaveRepository::clean($finished);
+check($finishedClean['missions']['index'] === 30, 'the last mission of the last level is allowed');
+check($finishedClean['missions']['finished'] === true, 'the finished flag follows the mission index');
+
+// The write number tells the server which save is newer.
+check($clean['seq'] === 0, 'a save without a write number gets zero');
+$numbered = $raw;
+$numbered['seq'] = 42;
+check(SaveRepository::clean($numbered)['seq'] === 42, 'the write number is preserved');
+$negative = $raw;
+$negative['seq'] = -5;
+check(SaveRepository::clean($negative)['seq'] === 0, 'a negative write number is clamped');
 
 // Milestone slots match the client.
 check(SaveRepository::slotsForRecipe(0) === 1, 'recipe 0 opens one slot');

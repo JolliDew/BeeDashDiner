@@ -10,6 +10,13 @@ class SaveRepository
     private const MAX_DIAMONDS = 1000000000;
     private const MAX_HONEY = 1.0e15;
     private const MAX_STAFF = 20;
+    // The client has three missions per level and ten levels. The server uses
+    // the same numbers, so a crafted save cannot claim missions (and their
+    // rewards) that belong to a later level.
+    private const MISSIONS_PER_LEVEL = 3;
+    private const TOTAL_MISSIONS = 30;
+    // Upper bound for the client's write number.
+    private const MAX_SEQ = 1000000000000;
     private const GLOBAL_MAX = [
         'tipChance' => 10,
         'queue' => 10,
@@ -82,7 +89,10 @@ class SaveRepository
         $staff = $rawUp['staff'] ?? $legacyStaff;
         $staff = self::clampStaff($staff, $stations);
 
-        $index = self::clampInt($p['mission_index'] ?? 0, 0, 1000);
+        // A level owns exactly its own missions. Anything beyond that belongs
+        // to a later level, so it is repaired away just like the client does.
+        [$first, $last] = self::missionBounds($level);
+        $index = self::clampInt($p['mission_index'] ?? $first, $first, $last);
         $done = self::cleanDone($this->decode($p['missions_done'] ?? null, []));
 
         return [
@@ -97,10 +107,11 @@ class SaveRepository
             'missions' => [
                 'index' => $index,
                 'done' => array_slice($done, 0, $index),
-                'finished' => !empty($p['missions_finished']),
+                'finished' => $index >= self::TOTAL_MISSIONS,
             ],
             'stats' => self::cleanStats($this->decode($p['stats'] ?? null, [])),
             'cosmetics' => self::cleanCosmetics($this->decode($p['cosmetics'] ?? null, [])),
+            'seq' => self::clampInt($rawUp['seq'] ?? 0, 0, self::MAX_SEQ),
         ];
     }
 
@@ -150,7 +161,11 @@ class SaveRepository
 
         $rawStaff = array_key_exists('staff', $d) ? $d['staff'] : $legacyStaff;
         $missions = is_array($d['missions'] ?? null) ? $d['missions'] : [];
-        $index = self::clampInt($missions['index'] ?? 0, 0, 1000);
+        // The mission index may only cover the missions of the player's own
+        // level. The client applies the same rule, so a crafted payload
+        // cannot mark every mission (and every reward) as done.
+        [$first, $last] = self::missionBounds($level);
+        $index = self::clampInt($missions['index'] ?? $first, $first, $last);
         $done = self::cleanDone($missions['done'] ?? []);
 
         return [
@@ -169,46 +184,78 @@ class SaveRepository
             'missions' => [
                 'index' => $index,
                 'done' => array_slice($done, 0, $index),
-                'finished' => !empty($missions['finished']),
+                // The finished flag follows the index; the client cannot
+                // claim the game is complete before the last mission is done.
+                'finished' => $index >= self::TOTAL_MISSIONS,
             ],
             'stats' => self::cleanStats(is_array($d['stats'] ?? null) ? $d['stats'] : []),
             'cosmetics' => self::cleanCosmetics(is_array($d['cosmetics'] ?? null) ? $d['cosmetics'] : []),
+            'seq' => self::clampInt($d['seq'] ?? 0, 0, self::MAX_SEQ),
         ];
     }
 
-    public function save(int $userId, array $s): void
+    /**
+     * Writes one save.
+     *
+     * Every save carries a write number that only ever grows. The number is
+     * kept in the upgrades JSON, so no extra column is needed. A slow
+     * request that arrives after a newer one is rejected instead of undoing
+     * the newer progress.
+     *
+     * @return array{saved:bool,seq:int} saved=false when the write was too old
+     */
+    public function save(int $userId, array $s): array
     {
-        $progressSql = $this->isPostgres()
-            ? 'INSERT INTO player_progress
-                    (user_id, honey, location_no, level, diamonds, upgrades,
-                     mission_index, missions_done, missions_finished, stats, cosmetics)
-                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                 ON CONFLICT (user_id) DO UPDATE SET
-                    honey = EXCLUDED.honey, location_no = EXCLUDED.location_no, level = EXCLUDED.level,
-                    diamonds = EXCLUDED.diamonds, upgrades = EXCLUDED.upgrades,
-                    mission_index = EXCLUDED.mission_index, missions_done = EXCLUDED.missions_done,
-                    missions_finished = EXCLUDED.missions_finished, stats = EXCLUDED.stats,
-                    cosmetics = EXCLUDED.cosmetics, updated_at = CURRENT_TIMESTAMP'
-            : 'INSERT INTO player_progress
-                    (user_id, honey, location_no, level, diamonds, upgrades,
-                     mission_index, missions_done, missions_finished, stats, cosmetics)
-                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                 ON DUPLICATE KEY UPDATE
-                    honey = VALUES(honey), location_no = VALUES(location_no), level = VALUES(level),
-                    diamonds = VALUES(diamonds), upgrades = VALUES(upgrades),
-                    mission_index = VALUES(mission_index), missions_done = VALUES(missions_done),
-                    missions_finished = VALUES(missions_finished), stats = VALUES(stats),
-                    cosmetics = VALUES(cosmetics), updated_at = CURRENT_TIMESTAMP';
+        $incomingSeq = self::clampInt($s['seq'] ?? 0, 0, self::MAX_SEQ);
 
         $this->pdo->beginTransaction();
         try {
+            // Lock the row first so two saves cannot check and write at the
+            // same time.
+            $lock = $this->pdo->prepare(
+                'SELECT upgrades FROM player_progress WHERE user_id = ? FOR UPDATE'
+            );
+            $lock->execute([$userId]);
+            $stored = $lock->fetch();
+            $storedSeq = 0;
+            if ($stored) {
+                $rawStored = $this->decode($stored['upgrades'] ?? null, []);
+                $storedSeq = self::clampInt($rawStored['seq'] ?? 0, 0, self::MAX_SEQ);
+            }
+            if ($stored && $incomingSeq < $storedSeq) {
+                $this->pdo->rollBack();
+                return ['saved' => false, 'seq' => $storedSeq];
+            }
+
+            $progressSql = $this->isPostgres()
+                ? 'INSERT INTO player_progress
+                        (user_id, honey, location_no, level, diamonds, upgrades,
+                         mission_index, missions_done, missions_finished, stats, cosmetics)
+                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                     ON CONFLICT (user_id) DO UPDATE SET
+                        honey = EXCLUDED.honey, location_no = EXCLUDED.location_no, level = EXCLUDED.level,
+                        diamonds = EXCLUDED.diamonds, upgrades = EXCLUDED.upgrades,
+                        mission_index = EXCLUDED.mission_index, missions_done = EXCLUDED.missions_done,
+                        missions_finished = EXCLUDED.missions_finished, stats = EXCLUDED.stats,
+                        cosmetics = EXCLUDED.cosmetics, updated_at = CURRENT_TIMESTAMP'
+                : 'INSERT INTO player_progress
+                        (user_id, honey, location_no, level, diamonds, upgrades,
+                         mission_index, missions_done, missions_finished, stats, cosmetics)
+                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                     ON DUPLICATE KEY UPDATE
+                        honey = VALUES(honey), location_no = VALUES(location_no), level = VALUES(level),
+                        diamonds = VALUES(diamonds), upgrades = VALUES(upgrades),
+                        mission_index = VALUES(mission_index), missions_done = VALUES(missions_done),
+                        missions_finished = VALUES(missions_finished), stats = VALUES(stats),
+                        cosmetics = VALUES(cosmetics), updated_at = CURRENT_TIMESTAMP';
+
             $this->pdo->prepare($progressSql)->execute([
                 $userId,
                 $s['honey'],
                 $s['location'] + 1,
                 $s['level'],
                 $s['diamonds'],
-                self::encode($s['upgrades'] + ['staff' => $s['staff'] ?? 1]),
+                self::encode($s['upgrades'] + ['staff' => $s['staff'] ?? 1, 'seq' => $incomingSeq]),
                 $s['missions']['index'],
                 self::encode($s['missions']['done']),
                 $s['missions']['finished'] ? 1 : 0,
@@ -228,6 +275,7 @@ class SaveRepository
                 $ins->execute([$userId, $slot, $st['unlocked'] ? 1 : 0, 0, $st['recipe'], 0, 0]);
             }
             $this->pdo->commit();
+            return ['saved' => true, 'seq' => $incomingSeq];
         } catch (Throwable $e) {
             $this->pdo->rollBack();
             throw $e;
@@ -255,6 +303,24 @@ class SaveRepository
     private static function locationForLevel(int $level): int
     {
         return $level <= 4 ? 0 : ($level <= 7 ? 1 : 2);
+    }
+
+    /** The first mission that belongs to a level (0-based). */
+    private static function firstMissionIndex(int $level): int
+    {
+        return max(0, min(self::TOTAL_MISSIONS, ($level - 1) * self::MISSIONS_PER_LEVEL));
+    }
+
+    /**
+     * The mission indexes a level may hold: its own three missions, from the
+     * first one of the level up to and including the last.
+     *
+     * @return array{0:int,1:int}
+     */
+    private static function missionBounds(int $level): array
+    {
+        $first = self::firstMissionIndex($level);
+        return [$first, min(self::TOTAL_MISSIONS, $first + self::MISSIONS_PER_LEVEL)];
     }
 
     private static function clampInt(mixed $v, int $min, int $max): int

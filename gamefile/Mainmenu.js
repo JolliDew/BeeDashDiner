@@ -1,5 +1,9 @@
 let currentGame = null;
 let starting = false;
+// Every start attempt gets a number. Leaving the game cancels the attempt,
+// so a game that finishes loading after the player already left is destroyed
+// instead of running in the background with listeners and an autosave timer.
+let startToken = 0;
 
 /** Create/resume the shared AudioContext inside the Play click gesture. */
 function unlockAudio() {
@@ -27,6 +31,7 @@ function startGame() {
     if (starting || currentGame) return;
     unlockAudio();
     starting = true;
+    const token = ++startToken;
     const siteNav = document.querySelector('.site-nav');
     if (siteNav) siteNav.style.display = 'none';
 
@@ -43,6 +48,8 @@ function startGame() {
             return response.text();
         })
         .then(html => {
+            // The player left while the page was loading: drop the markup.
+            if (token !== startToken) return null;
             document.getElementById('main-menu').style.display = 'none';
 
             const gameContainer = document.createElement('div');
@@ -53,7 +60,12 @@ function startGame() {
 
             return import('./js/main.js').then(m => m.launch(gameContainer.querySelector('#bee-game')));
         })
-        .then(game => { currentGame = game; })
+        .then(game => {
+            if (!game) return;
+            // The game finished loading after the player pressed Exit.
+            if (token !== startToken) { game.destroy(); return; }
+            currentGame = game;
+        })
         .catch(error => {
             console.error('Error loading game:', error);
             returnToMenu();
@@ -62,13 +74,22 @@ function startGame() {
                 showMenuError('Could not start the game: ' + error.message + ' (see the browser console, F12, for details)');
             }
         })
-        .finally(() => { starting = false; });
+        .finally(() => { if (token === startToken) starting = false; });
 }
 
 function returnToMenu() {
+    // Cancel a start that is still loading so it cannot revive itself later.
+    startToken++;
+    starting = false;
     if (currentGame) {
-        currentGame.destroy(); // stops the loop and saves
+        const pending = currentGame.destroy(); // stops the loop and saves
         currentGame = null;
+        // Tell the player when the last change could not be stored.
+        if (pending && typeof pending.then === 'function') {
+            pending.then(ok => {
+                if (!ok) showMenuError('Your last change could not be saved. Check your connection and play again.');
+            });
+        }
     }
     const gameContainer = document.getElementById('game-container-wrapper');
     if (gameContainer) {
@@ -77,10 +98,4 @@ function returnToMenu() {
     document.getElementById('main-menu').style.display = 'block';
     const siteNav = document.querySelector('.site-nav');
     if (siteNav) siteNav.style.display = '';
-}
-
-function quitGame() {
-    if (confirm("Are you sure you want to quit?")) {
-        window.close();
-    }
 }

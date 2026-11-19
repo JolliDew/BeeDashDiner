@@ -20,8 +20,14 @@ class ApiController
                 if ($clean === null) {
                     $this->out(['error' => 'bad data'], 400);
                 }
-                $this->repo->save($userId, $clean);
-                $this->out(['saved' => true]);
+                $result = $this->repo->save($userId, $clean);
+                if (!$result['saved']) {
+                    // A newer save already reached the server, so this one was
+                    // too old to store. The client takes the number and tries
+                    // again with the next save.
+                    $this->out(['saved' => false, 'stale' => true, 'seq' => $result['seq']], 409);
+                }
+                $this->out(['saved' => true, 'seq' => $result['seq']]);
             } else {
                 $this->out(['error' => 'unknown action'], 400);
             }

@@ -75,7 +75,8 @@ try {
     check(is_array($clean), 'the v3 payload passes validation');
 
     $repo = new SaveRepository($pdo);
-    $repo->save($userId, $clean);
+    $first = $repo->save($userId, $clean);
+    check($first['saved'] === true, 'the first save is stored');
     $loaded = $repo->load($userId);
 
     check($loaded !== null, 'the save can be loaded back');
@@ -100,16 +101,29 @@ try {
     $clean['missions']['index'] = 18;
     $clean['missions']['finished'] = true;
     $clean['cosmetics']['owned'][] = 'bee_shades';
+    $clean['seq'] = 20;
 
-    $repo->save($userId, $clean);
+    $second = $repo->save($userId, $clean);
+    check($second['saved'] === true, 'the newer save is stored');
     $updated = $repo->load($userId);
 
     check($updated['level'] === 7 && abs($updated['honey'] - 9999.5) < 1e-9, 'the ON CONFLICT update path works');
     check($updated['staff'] === 5, 'global staff updates');
     check($updated['stations'][0]['recipe'] === 10, 'recipe progress updates');
     check($updated['upgrades']['cookSpeed'] === 5 && $updated['upgrades']['profitX2'] === 1, 'late-game global upgrades update');
-    check($updated['missions']['finished'] === true, 'the finished flag round-trips');
+    check($updated['missions']['finished'] === false, 'the finished flag follows the mission index');
     check(count($updated['cosmetics']['owned']) === 2, 'new cosmetics are appended');
+    check($updated['seq'] === 20, 'the write number round-trips');
+
+    // A slow request that arrives late must not undo the newer progress.
+    $stale = $clean;
+    $stale['honey'] = 1.0;
+    $stale['seq'] = 5;
+    $staleResult = $repo->save($userId, $stale);
+    check($staleResult['saved'] === false, 'an older save is rejected');
+    check($staleResult['seq'] === 20, 'the rejected save reports the stored write number');
+    $afterStale = $repo->load($userId);
+    check(abs($afterStale['honey'] - 9999.5) < 1e-9, 'the newer progress is still stored');
 } catch (Throwable $e) {
     $failures++;
     echo 'FAIL - ' . $e->getMessage() . "\n";

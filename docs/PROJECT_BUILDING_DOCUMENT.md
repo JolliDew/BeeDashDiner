@@ -198,28 +198,29 @@ or drift far away from them.
 
 ![The three restaurant maps: Meadow Stand, Hive Café and Royal Hive](docs/screenshots/maps-composite.png){width=100%}
 
-# 5. Development log
+# 5. Development log"
 
-The dates are the dates of the commits in the repository. The same work is
-visible with `git log --date=short`.
+The table follows the five weekly delivery periods. Week 1 began on
+26 October 2026; the individual commits remain available with
+`git log --date=short`.
 
-| Date | Stage | Work completed | Owner | Evidence |
-|:--------|:-----------|:-----------------------------------|:----------|:-------------------|
-| Nov 2–5 | 1. Setup | Consolidated the working copy into XAMPP `htdocs`; protected `.git`, the database config and the notes; fixed the Apache ACLs. | JD, Klein | Login returned 200; `.git` returned 404. |
-| Nov 6 | 2. Gameplay core | Ten-level progression, automatic workers, global staff and save v3; PostgreSQL/Supabase support next to MySQL. | Klein, JD | `npm test`; live Supabase round-trip. |
-| Nov 17 | 3. Redesign and admin | Adopted the redesign, fixed its save format, added hardened auth and the full admin CRUD with the audit log. | Klein, JD | Admin CRUD and audit checks; 45 tests at that point. |
-| Nov 18 | 4. UI shell | Fixed the clipped gradient title, unlocked scrolling on the auth pages, added a responsive main menu and a favicon. | Ardion | Menu at 320, 360, 568×320 and 1440. |
-| Nov 18 | 5. Scene | Replaced the station icons with food stalls, added a café door, kitchen wall, shelf, lamps, rug and plants. | Ardion, Klein | Game phone/desktop screenshots. |
-| Nov 18 | 6. HUD and desktop | Grouped honey/diamonds/chairs into one bar, made Exit an icon button, widened the playfield to 1000 px, slimmed the desktop dock. | Ardion | 320–1440 checks with zero overflow. |
-| Nov 18 | 7. Pacing | Removed the door burst, delayed the first customer, enforced a calm entry gap, started the workers from a hive. | Emman | Spawn log: first guest at 1.8 s, then a measured interval. |
-| Nov 18 | 8. Audio | Procedural Web Audio engine with compressor, reverb, volume sliders, soft timbres, slow ambient music, ducking and tab-hide suspension. | Klein | Context running; slider persistence; no console errors. |
-| Nov 18 | 9. Rubric features | Shared nav, profile/avatar upload, password change, access-denied page, restart, help/win copy, menu progress. | Klein, Emman | Live XAMPP checks for each flow. |
-| Nov 18–19 | 10. Saving | Dirty-checked serialized autosave, pagehide/visibility keepalive save, local fallback, welcome-back toast, then the write-number ordering and the server-first load rule. | Klein | Honey survived a pagehide + reload test; the browser end-to-end run passed 14/14. |
-| Nov 18–19 | 11. Deployment package | Dockerfile, Render entrypoint, environment-based DB config, `render.yaml`, deployment guide, database export. | Klein, JD | Container ran against live Supabase; deployed at https://beedashdiner.onrender.com. |
-| Nov 19 | 12. Three maps | Meadow Stand became an outdoor market, Hive Café a warm interior and Royal Hive a regal hall. The menu sign moved into the stall row so it cannot overlap or drift. | Ardion | Map measurements at 360, 568×320 and 1440: sign gap 3–8 px, zero overflow. |
-| Nov 19 | 13. Landing and brand | Added a public landing page, root redirect, home-first navigation, and standardised the visible product name to BeeDashDiner (the repository is now BeeDashDiner; the local folder stays `JolliDew`). | Ardion, Iszen | Landing screenshots at 320 and 1440; brand check. |
-| Nov 19 | 14. Documentation | README, game rules, testing record, security/scalability proposal, reflections, video script. | Emman, Iszen | This document and `docs/`. |
-| Nov 19 | 15. Final audit | Reproduced and fixed the reward replay, the save-order race, the restart resurrection, the blocked first save, the upgrade-text mismatch, the truncated admin page and the unprotected save endpoint; corrected the documentation. | Klein, Emman | 61 JavaScript tests, both PHP suites, the live PostgreSQL suite and the 14-check browser run. |
+| Week | Stage | Work completed | Owner | Evidence |
+|:--------------------|:-----------|:-----------------------------------|:----------|:-------------------|
+| Week 1 (Oct 26–30) | 1. Planning and SWOT | Compared the team and the assigned system, completed the SWOT, requirements and game concept, and agreed the scope. | Klein, Iszen | SWOT and requirements in this document. |
+| Week 1 (Oct 26–30) | 2. Design and repository | Created the GitHub repository and base HTML/CSS/Bootstrap pages; finalized the game design document and main-menu layout. | Ardion, JD | Repository; menu and auth screens. |
+| Week 1 (Oct 26–30) | 3. Core game loop | Built the first timer and customer-queue loop, seats and station scene skeleton. | Emman | Early playable loop. |
+| Week 2 (Nov 2–6) | 4. Setup and authentication | Consolidated the XAMPP copy, protected `.git` and credentials, added login/register with sessions and CSRF. | JD, Klein | Login returned 200; `.git` returned 404. |
+| Week 2 (Nov 2–6) | 5. Database and save API | Designed the schema, PDO save/load API and server-side validation; added local XAMPP testing for every member. | JD, Klein | Save/load round-trip; PHP tests. |
+| Week 2 (Nov 2–6) | 6. Gameplay core | Ten-level progression, automatic workers, global staff, save v3 and PostgreSQL/Supabase support beside MySQL. | Klein, JD | `npm test`; live Supabase round-trip. |
+| Week 3 (Nov 9–13) | 7. Locations and workers | Finalized Meadow Stand, Hive Café and Royal Hive, station unlocks and worker assignments. | Emman | Three maps; worker AI tests. |
+| Week 3 (Nov 9–13) | 8. Upgrade economy and admin | Implemented recipe/tip/queue/walk/cook/profit formulas and the admin CRUD with the audit log. | JD, Klein | Admin CRUD checks; economy tests. |
+| Week 3 (Nov 9–13) | 9. Visual assets | Replaced placeholder emoji stations with food stalls, café door, kitchen wall, shelf, lamps, rug and plants. | Ardion | Game phone/desktop screenshots. |
+| Week 4 (Nov 16–20) | 10. Scene-first UI | Grouped the HUD, widened the playfield, built the desktop dock, three distinct maps and the procedural audio engine. | Ardion, Klein | 320–1440 checks; audio panel; map screenshots. |
+| Week 4 (Nov 16–20) | 11. Saving and restart | Serialized autosave, pagehide/visibility keepalive, local fallback, write-number ordering, server-first loading and restart replacement. | Klein | 14/14 browser checks; live PostgreSQL suite. |
+| Week 4 (Nov 16–20) | 12. QA, dev tools and polish | Restricted developer tools to admins, fixed the admin page, aligned the profile form, polished the UI and corrected the documentation. | Klein, Emman, Ardion | 61 JavaScript tests; admin and profile checks. |
+| Week 5 (Nov 23–26) | 13. Cloud deployment | Deployed the Docker/Apache app to Render, connected Supabase PostgreSQL and configured Google OAuth and environment variables. | JD, Klein | Live at https://beedashdiner.onrender.com. |
+| Week 5 (Nov 23–26) | 14. Documentation and submission | Finalized the README, testing record, security/scalability proposal, reflections and project building document; prepared the Drive package. | Emman, Iszen | This document and `docs/`. |
+| Week 5 (Nov 23–26) | 15. Demo video and presentation | Prepared the recording script and speaker split for the Week 5 gameplay demo and mock presentation. | All five | `docs/DEMO_SCRIPT.md`. |
 
 ## 5.1 Short code excerpts
 

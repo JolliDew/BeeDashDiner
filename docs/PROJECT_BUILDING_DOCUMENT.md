@@ -37,36 +37,28 @@ date: "November 2026"
 
 # 2. SWOT analysis
 
-The SWOT was completed before feature work resumed. It focused on the team and
-the assigned system, not only on the game.
+The Week 1 deliverable compared two reference games from **NEPTUNE (TREEPLLA)**:
+*Cat Snack Bar: Cute Food Games* (2022) and *Cat Mafia: Idle Tycoon Games*
+(2026). Both are mobile idle-management games; BeeDashDiner is a browser game,
+so the comparison focuses on design, pacing and market position rather than
+platform parity. The goal was to decide what BeeDashDiner should imitate, avoid,
+exploit and defend against.
 
-| Strengths | Weaknesses |
-|---|---|
-| Working PHP/JavaScript codebase and a tested save format. | Roles overlapped heavily; one member carried much of the integration work. |
-| Experience with PHP sessions, PDO, Bootstrap and responsive CSS. | No prior Render deployment; Google OAuth credentials were not usable (redirect mismatch). |
-| Supabase/PostgreSQL database already provisioned. | No dedicated artist or sound designer; visuals and audio had to be built from CSS, emoji and synthesis. |
-| Strong QA habit: automated tests, headless browser checks and manual mobile checks. | Time was short and many rubric items (media upload, shared navigation, restart, deployment) were still missing. |
-
-| Opportunities | Threats |
-|---|---|
-| Render’s Docker deployment can host the PHP app with HTTPS for free. | Free hosting has ephemeral storage and sleeps after inactivity. |
-| Supabase provides a managed PostgreSQL database and SQL editor. | Deadline pressure; a failed deployment near submission would affect the video. |
-| A relaxing, audio-rich game is more memorable than a plain CRUD demo. | Browser autoplay rules block audio until a user gesture. |
-| The project guide rewards media upload and a complete building document. | Group availability was inconsistent, so work could stall if one member was unavailable. |
+| Area | Cat Snack Bar | Cat Mafia |
+|---|---|---|
+| **Strengths** | Polished, unified pastel art and smooth animation; frictionless onboarding with no tutorial; ten long levels, event maps, gear and offline rewards that retain players. | A distinctive parody identity that mixes cozy cat art with a mob theme; accessible but lightly strategic crew, hideout and territory management; rewarding offline progression that respects casual play. |
+| **Weaknesses** | Exponential upgrade costs create artificial late-game walls that require days of idle waiting; later progress depends on paying or watching ads; monthly passes and limited events create FOMO. | Progression slows into long idle time-walls; aggressive microtransactions and ads bypass the grind; the loop recycles the standard idle-tycoon formula used in the developer's other games. |
+| **Opportunities** | Expand the cat universe into other genres or merchandise; add guilds, leaderboards or friend visits to reduce the isolation of the idle genre. | Add gang-versus-gang PvP, leaderboards or cooperative syndicates; run seasonal events with new bosses, territories and themed gear. |
+| **Threats** | The mobile market is saturated with idle-management clones such as *Lumber Empire* and *Eatventure*; players burn out when the later loop adds no new mechanical depth. | The market is crowded with clones, and the game also competes with the developer's own portfolio; players churn when progress becomes only numerical grinding. |
 
 ## 2.1 Decisions that followed the SWOT
 
-1. **Deploy with Docker on Render.** The database stays on Supabase, so no
-   database migration was needed. The repository now includes a `Dockerfile`,
-   a Render entrypoint and `render.yaml`.
-2. **Prioritise rubric gaps over new gameplay.** Shared navigation, profile and
-   avatar upload, access-denied page, restart, explicit win condition and the
-   building document were added before optional content.
-3. **Keep the game calm and reliable.** Save-on-close, staggered customer
-   arrivals, a hive worker intro and a softer audio mix were chosen over adding
-   more restaurants or cosmetics.
-4. **Work in reviewable phases.** Each phase is tested and committed separately:
-   UI shell, scene art, desktop/HUD, saving, room polish and audio.
+1. **Compete on polish and identity, not scale.** BeeDashDiner uses a cohesive bee-café identity: three distinct restaurant maps, striped-awning stalls, a persistent menu sign and procedural audio built from CSS, emoji and Web Audio rather than a large art budget.
+2. **Avoid the late-game wall.** The game has ten levels with three missions each. Recipe milestones at 2, 6 and 10 open worker slots, milestones at 4 and 8 double a station's profit, and the next goal is always visible; there are no days-long idle gates.
+3. **No pay-to-win, ads, passes or FOMO.** Every station, recipe, cosmetic and level is earned with honey, diamonds or mission progress. There are no purchases, ad boosts or limited-time exclusive items.
+4. **Respect the player's time.** Progress saves automatically, on Exit and when the page is hidden; a local backup covers a failed request. The game has no lose state, and Restart progress replaces only the player's own save.
+5. **Make onboarding frictionless.** The landing page, How to Play page and in-game mission panel explain the goal and controls without a forced tutorial. The HUD keeps honey, diamonds, seats and the next mission visible.
+6. **Differentiate, but keep the scope finishable.** The bee café, three-map progression, mission structure, procedural audio and complete admin/cloud stack distinguish the project from a generic idle clone. Multiplayer, PvP, leaderboards, merchandise and seasonal events were deliberately left out of this version.
 
 # 3. Requirements and scope
 
@@ -206,7 +198,7 @@ The table follows the five weekly delivery periods. Week 1 began on
 
 | Week | Stage | Work completed | Owner | Evidence |
 |:--------------------|:-----------|:-----------------------------------|:----------|:-------------------|
-| Week 1 (Oct 26–30) | 1. Planning and SWOT | Compared the team and the assigned system, completed the SWOT, requirements and game concept, and agreed the scope. | Klein, Iszen | SWOT and requirements in this document. |
+| Week 1 (Oct 26–30) | 1. Reference SWOT | Compared Cat Snack Bar and Cat Mafia, completed the comparative SWOT, requirements and game concept, and agreed the scope. | Klein, Iszen | Comparative SWOT in this section. |
 | Week 1 (Oct 26–30) | 2. Design and repository | Created the GitHub repository and base HTML/CSS/Bootstrap pages; finalized the game design document and main-menu layout. | Ardion, JD | Repository; menu and auth screens. |
 | Week 1 (Oct 26–30) | 3. Core game loop | Built the first timer and customer-queue loop, seats and station scene skeleton. | Emman | Early playable loop. |
 | Week 2 (Nov 2–6) | 4. Setup and authentication | Consolidated the XAMPP copy, protected `.git` and credentials, added login/register with sessions and CSRF. | JD, Klein | Login returned 200; `.git` returned 404. |
@@ -525,9 +517,9 @@ save when the player pressed Exit, when the tab was hidden, and when an action
 changed the state, without letting two requests race. I learned how pagehide
 keepalive requests, dirty checks and local fallbacks work together. I also built
 the procedural audio engine, which taught me gain staging, compressors, reverb
-and browser autoplay rules. The SWOT was accurate about our overlapping roles;
-next time I would freeze the feature list earlier and protect more time for
-deployment testing.
+and browser autoplay rules. The reference-game SWOT showed that a polished identity and fair pacing
+matter more than feature count; next time I would freeze the feature list
+earlier and protect more time for deployment testing.
 
 ## John David Pascua Morandante — Backend, database, Google Cloud, repository
 
@@ -546,9 +538,10 @@ hardest problem was balancing a restaurant that could serve many customers
 without turning the screen into a crowd at the door. We changed the arrival
 burst into a measured entry gap and made the opening quieter. I learned that
 good QA is not only “does it run” but “does it feel right at 320px, at 1440px,
-and after a reload.” The SWOT correctly predicted that time and overlapping
-roles were our biggest threats. Next time I would schedule a playtest earlier
-and keep a written test script beside every build.
+and after a reload.” The reference-game SWOT showed that late-game grind and
+monetization are the fastest ways to lose players; we kept the mission structure
+and avoided those. Next time I would schedule a playtest earlier and keep a
+written test script beside every build.
 
 ## Ardion Nicolas Dela Cruz Tamagos — Design, frontend, art, QA
 
@@ -556,9 +549,9 @@ I worked on the visual direction and frontend polish. The most difficult part
 was making a scene built from emoji and CSS feel like a real café: stations
 became striped-awning stalls, the kitchen gained a shelf and lamps, and the
 floor gained a rug and plants. I learned a lot about CSS stacking contexts,
-responsive sizing and accessible contrast. The SWOT’s opportunity—making the
-game visually distinctive—was real, but it also took more iterations than
-expected. Next time I would lock the art direction earlier and test the smallest
+responsive sizing and accessible contrast. The SWOT showed that a distinctive visual identity is the
+main opportunity in a saturated idle market, but it also took more iterations
+than expected. Next time I would lock the art direction earlier and test the smallest
 phone size before adding detail.
 
 ## Iszen Paul Masculino Ventura — Group leader, ideas, documentation, QA
@@ -566,9 +559,10 @@ phone size before adding detail.
 As group leader I helped set the direction, divide the work and review the
 documentation. The hardest part was coordinating members with different
 availability and overlapping skills. I learned that a clear checklist and small
-reviewable commits are more useful than a large “final” merge. The SWOT’s threat
-about inconsistent availability did happen, so next time we would assign
-backups for every critical task and hold a short stand-up each work session.
+reviewable commits are more useful than a large “final” merge. The SWOT showed that market saturation and player burnout are
+the main external threats; the same lesson applied to our schedule when
+availability slipped, so next time we would assign backups for every critical
+task and hold a short stand-up each work session.
 
 # 10. Appendices
 

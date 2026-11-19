@@ -12,7 +12,7 @@ the current branch.
 | Reusable common navigation | ✅ | `includes/nav.php`, `css/site-nav.css` on every page |
 | Proper HTML/CSS, Bootstrap, IDs/classes | ✅ | Bootstrap modals/buttons; shared page/game CSS |
 | Session variables control content | ✅ | Role-aware nav and admin link |
-| Cloud deployment | ⏳ package ready | `Dockerfile`, `render.yaml`, `docs/DEPLOY_RENDER.md`; deploy and add URL |
+| Cloud deployment | ✅ | Live at https://beedashdiner.onrender.com |
 | Media upload/display | ✅ | Profile avatar upload with MIME/size/image checks and display in nav/profile |
 | Security checklist | ✅ | Hash, prepared statements, escaping, CSRF, roles, uploads, HTTPS-aware cookies |
 | 3+ related tables with keys + join | ✅ | `users`, `player_progress`, `player_stations`, `admin_audit`, `locations`, `menu_items`; join in `AdminRepository` |
@@ -33,7 +33,7 @@ the current branch.
 | Development log and screenshots | ✅ | Building document section 5 |
 | Testing record | ✅ | `docs/TESTING.md` + building document section 6 |
 | Security/scalability proposal | ✅ | Building document section 7 |
-| Deployment record | ✅ | Building document section 8 (URL pending) |
+| Deployment record | ✅ | Building document section 8; live URL recorded |
 | Contribution record | ✅ | Building document appendix |
 | Individual reflections | ✅ | Five reflections in building document section 9 |
 

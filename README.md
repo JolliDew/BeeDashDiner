@@ -193,6 +193,17 @@ http://localhost/JolliDew/gamefile/google-login.php
 
 If the automatic URI does not match, set `redirect_uri` in `google-config.php` to the exact registered value. The login only accepts Google accounts whose email is verified.
 
+On Render, do not commit `google-config.php`. Set these environment variables
+instead (and add the Render redirect URI to the same Google OAuth client):
+
+```text
+GOOGLE_CLIENT_ID=...
+GOOGLE_CLIENT_SECRET=...
+GOOGLE_REDIRECT_URI=https://beedashdiner.onrender.com/google-login.php
+```
+
+`src/GoogleConfig.php` reads the environment first, then the local file.
+
 Google-created accounts are stored with a random hidden password; the Google
 password is never shared with BeeDashDiner. Sign in with Google once, open
 **Profile**, and use **Set a local password** if you also want to log in with a

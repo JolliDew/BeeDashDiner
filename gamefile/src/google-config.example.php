@@ -7,6 +7,12 @@
  * Then paste your own values from Google Cloud Console > Credentials.
  * google-config.php is ignored by git, so real secrets never get committed.
  *
+ * On Render (or any host), the file is not shipped. Set the environment
+ * variables instead:
+ *   GOOGLE_CLIENT_ID
+ *   GOOGLE_CLIENT_SECRET
+ *   GOOGLE_REDIRECT_URI   (for example https://beedashdiner.onrender.com/google-login.php)
+ *
  * Register the exact redirect URI(s) used by the demo in Google Cloud Console:
  *   built-in server: http://127.0.0.1:8000/google-login.php
  *   XAMPP:           http://localhost/JolliDew/gamefile/google-login.php

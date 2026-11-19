@@ -70,6 +70,7 @@ delivers, records the sale/tip, and returns to idle at its home station.
 | `src/SaveRepository.php` | Validates/clamps saves, migrates v1/v2 shapes, reads/writes both drivers. |
 | `src/Auth.php` | Session cookie settings, login/logout, role, `refresh()`. |
 | `src/Csrf.php` | Per-session CSRF token for forms and the save API. |
+| `src/GoogleConfig.php` | Resolves Google OAuth settings from environment variables or the ignored local file. |
 | `src/AdminRepository.php` | User CRUD, pagination, progress reset, deletion, audit. |
 | `google-login.php` | OAuth 2.0 code flow with state + verified email. |
 | `admin.php` | Admin UI and POST actions. |

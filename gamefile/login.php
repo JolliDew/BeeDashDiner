@@ -2,9 +2,10 @@
 require_once 'db.php';
 require_once 'src/Auth.php';
 require_once 'src/Csrf.php';
+require_once 'src/GoogleConfig.php';
 Auth::start();
 $authCssV = @filemtime(__DIR__ . '/logindesign.css') ?: 1;
-$googleAvailable = is_file(__DIR__ . '/src/google-config.php');
+$googleAvailable = GoogleConfig::available();
 if (Auth::userId() !== null) {
     header('Location: Mainmenu.php');
     exit();

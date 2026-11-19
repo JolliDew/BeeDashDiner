@@ -12,13 +12,10 @@
  */
 require_once 'db.php';
 require_once 'src/Auth.php';
+require_once 'src/GoogleConfig.php';
 Auth::start();
 
-$configPath = __DIR__ . '/src/google-config.php';
-if (!is_file($configPath)) {
-    $configPath = __DIR__ . '/src/google-config.example.php';
-}
-$google = require $configPath;
+$google = GoogleConfig::load();
 
 $client_id = trim((string)($google['client_id'] ?? ''));
 $client_secret = trim((string)($google['client_secret'] ?? ''));
@@ -39,17 +36,19 @@ function google_login_error(string $message, int $code = 400): void
     exit();
 }
 
-if (str_starts_with($client_id, 'YOUR_') || str_starts_with($client_secret, 'YOUR_')) {
+if (!GoogleConfig::available()) {
     google_login_error(
-        'Google sign-in is not configured yet. Copy src/google-config.example.php to '
-        . 'src/google-config.php and add your Google Cloud credentials.',
+        'Google sign-in is not configured yet. On Render set GOOGLE_CLIENT_ID and '
+        . 'GOOGLE_CLIENT_SECRET (and GOOGLE_REDIRECT_URI); on XAMPP copy '
+        . 'src/google-config.example.php to src/google-config.php and fill it in.',
         503
     );
 }
 
 // Prefer the exact URI registered in Google Cloud Console. When it is omitted,
 // build it from the current request (handy for `php -S` and XAMPP demos).
-$scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+$scheme = ((!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
+    || (($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '') === 'https')) ? 'https' : 'http';
 $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
 $dir = rtrim(str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'] ?? '/')), '/');
 $redirect_uri = $configured_redirect !== ''

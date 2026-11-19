@@ -47,10 +47,20 @@ branch you want to deploy) from your own machine. Never commit
    | Key | Value |
    |---|---|
    | `DATABASE_URL` | Supabase PostgreSQL **Session pooler** URI |
+   | `GOOGLE_CLIENT_ID` | The OAuth client ID from Google Cloud Console |
+   | `GOOGLE_CLIENT_SECRET` | The OAuth client secret |
+   | `GOOGLE_REDIRECT_URI` | `https://beedashdiner.onrender.com/google-login.php` |
 
-   Find it in Supabase under **Project Settings → Database → Connection string
-   → URI**. Use the session pooler, replace `[YOUR-PASSWORD]`, and keep
-   `sslmode=require` if it is present. The container also forces SSL.
+   Find the database URI in Supabase under **Project Settings → Database →
+   Connection string → URI**. Use the session pooler, replace
+   `[YOUR-PASSWORD]`, and keep `sslmode=require` if it is present. The container
+   also forces SSL.
+
+   Google sign-in is optional locally, but the deployed demo needs the three
+   `GOOGLE_*` values or the button stays hidden. Add the exact redirect URI
+   above in **Google Cloud Console → APIs & Services → Credentials → OAuth 2.0
+   Client IDs → your client → Authorized redirect URIs → Add URI → Save**. It
+   must match character for character.
 
 8. Create the service. Render builds the `Dockerfile` and gives you a public
    `https://…onrender.com` URL.
@@ -152,7 +162,7 @@ Render terminates TLS at its proxy and sends `X-Forwarded-Proto: https`.
 | CSS missing | `AllowOverride All` is applied in the Dockerfile and `.htaccess` is present |
 | Avatar upload fails | `uploads/` is writable by `www-data`; check the Render logs |
 | Admin link missing | The `users.role` value is `admin`; log out and back in |
-| Google button missing | Expected: the sign-in and registration pages show it only when `gamefile/src/google-config.php` exists |
+| Google button missing | Set `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` in Render (or add `gamefile/src/google-config.php` locally), then redeploy |
 
 ## 9. Redeploy
 

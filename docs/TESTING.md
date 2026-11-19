@@ -177,7 +177,7 @@ Use a throwaway account and a throwaway database when possible.
 ### Google login (optional)
 
 - [ ] Add the exact redirect URI in Google Cloud Console.
-- [ ] `google-config.php` has real values and is ignored.
+- [ ] `google-config.php` has real values and is ignored; on Render the three `GOOGLE_*` environment variables are set.
 - [ ] Google login creates an account on first use and reuses it on the second.
 - [ ] An unverified Google email is rejected.
 - [ ] Bad/missing `state` is rejected.

@@ -2,11 +2,12 @@
 require_once 'db.php';
 require_once 'src/Auth.php';
 require_once 'src/Csrf.php';
+require_once 'src/GoogleConfig.php';
 Auth::start();
 $authCssV = @filemtime(__DIR__ . '/logindesign.css') ?: 1;
 // The Google button is only useful when the OAuth client is configured.
 // Without a config file the link would lead to an error page.
-$googleAvailable = is_file(__DIR__ . '/src/google-config.php');
+$googleAvailable = GoogleConfig::available();
 header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
 header('Pragma: no-cache');
 if (Auth::userId() !== null) {

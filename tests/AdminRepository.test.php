@@ -124,9 +124,13 @@ throws(fn() => $repo->setPassword($alice, 'short'), 'setPassword enforces the mi
 $pdo->exec('INSERT INTO player_progress (user_id, honey, level) VALUES (' . (int)$alice . ', 500, 4)');
 $pdo->exec('INSERT INTO player_stations (user_id, slot, unlocked, recipe_lvl) VALUES (' . (int)$alice . ', 0, 1, 3)');
 $repo->resetProgress($alice);
-check($repo->find($alice)['level'] === null, 'resetProgress deletes the progress row');
+$afterReset = $repo->find($alice);
+check((int)$afterReset['level'] === 1, 'resetProgress starts the player over at level 1');
+check((float)$afterReset['honey'] === 50.0, 'resetProgress starts the player over with the starting honey');
 $count = (int)$pdo->query('SELECT COUNT(*) FROM player_stations WHERE user_id = ' . (int)$alice)->fetchColumn();
-check($count === 0, 'resetProgress deletes station rows');
+check($count === 3, 'resetProgress writes the three stations of the first restaurant');
+$oldRecipe = (int)$pdo->query('SELECT recipe_lvl FROM player_stations WHERE user_id = ' . (int)$alice . ' AND slot = 0')->fetchColumn();
+check($oldRecipe === 0, 'resetProgress clears the station progress');
 
 $repo->audit($bob, 'user.update', $alice, 'Test update');
 $audits = $repo->audits(10);

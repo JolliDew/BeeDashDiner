@@ -58,6 +58,9 @@ export class Game {
     // that change as already saved and let the reward be paid again on every
     // reload.
     this.lastSave = JSON.stringify(this.state);
+    // The game counts as running before the first change, so a mission
+    // reward paid during the opening is scheduled to be saved right away.
+    this.running = true;
     this.changed();
 
     // Saving must happen even when the player closes the tab or switches apps.
@@ -78,7 +81,7 @@ export class Game {
     }
 
     this.autosave = setInterval(() => this.saveIfDirty(), 10000);
-    this.last = performance.now(); this.acc = 0; this.running = true;
+    this.last = performance.now(); this.acc = 0;
     this.raf = requestAnimationFrame(t => this.loop(t));
     return this;
   }
@@ -159,7 +162,7 @@ export class Game {
 
   /** Save shortly after an action, instead of waiting for the 10s interval. */
   saveSoon() {
-    if (!this.running) return;
+    if (this.destroyed || !this.state) return;
     clearTimeout(this.saveDebounce);
     this.saveDebounce = setTimeout(() => this.saveIfDirty(), 700);
   }

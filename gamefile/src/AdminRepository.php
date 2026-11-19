@@ -3,6 +3,8 @@
  * Account administration for admin.php. Works with both MySQL/MariaDB and
  * PostgreSQL; the only driver-specific code is the INSERT ... RETURNING id.
  */
+require_once __DIR__ . '/SaveRepository.php';
+
 class AdminRepository
 {
     public const ROLES = ['player', 'admin'];
@@ -120,18 +122,16 @@ class AdminRepository
             ->execute([password_hash($password, PASSWORD_DEFAULT), $id]);
     }
 
-    /** Delete save rows but keep the account. */
+    /**
+     * Start the player over but keep the account.
+     *
+     * The save row is replaced by a fresh game with a much higher write
+     * number, so a save that the player's browser still has on its way
+     * cannot bring the old progress back.
+     */
     public function resetProgress(int $id): void
     {
-        $this->pdo->beginTransaction();
-        try {
-            $this->pdo->prepare('DELETE FROM player_stations WHERE user_id = ?')->execute([$id]);
-            $this->pdo->prepare('DELETE FROM player_progress WHERE user_id = ?')->execute([$id]);
-            $this->pdo->commit();
-        } catch (Throwable $e) {
-            $this->pdo->rollBack();
-            throw $e;
-        }
+        (new SaveRepository($this->pdo))->reset($id);
     }
 
     /** Delete the account and every row that belongs to it. */

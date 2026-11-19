@@ -17,6 +17,11 @@ class SaveRepository
     private const TOTAL_MISSIONS = 30;
     // Upper bound for the client's write number.
     private const MAX_SEQ = 1000000000000;
+    // A reset moves the write number this far ahead, so a save that is still
+    // on its way cannot undo the reset.
+    private const RESET_SEQ_JUMP = 1000;
+    // The honey a new game starts with (the same value as BALANCE.startHoney).
+    private const START_HONEY = 50;
     private const GLOBAL_MAX = [
         'tipChance' => 10,
         'queue' => 10,
@@ -212,73 +217,135 @@ class SaveRepository
         try {
             // Lock the row first so two saves cannot check and write at the
             // same time.
-            $lock = $this->pdo->prepare(
-                'SELECT upgrades FROM player_progress WHERE user_id = ? FOR UPDATE'
-            );
-            $lock->execute([$userId]);
-            $stored = $lock->fetch();
-            $storedSeq = 0;
-            if ($stored) {
-                $rawStored = $this->decode($stored['upgrades'] ?? null, []);
-                $storedSeq = self::clampInt($rawStored['seq'] ?? 0, 0, self::MAX_SEQ);
-            }
-            if ($stored && $incomingSeq < $storedSeq) {
+            $storedSeq = $this->lockAndReadSeq($userId);
+            if ($storedSeq !== null && $incomingSeq < $storedSeq) {
                 $this->pdo->rollBack();
                 return ['saved' => false, 'seq' => $storedSeq];
             }
-
-            $progressSql = $this->isPostgres()
-                ? 'INSERT INTO player_progress
-                        (user_id, honey, location_no, level, diamonds, upgrades,
-                         mission_index, missions_done, missions_finished, stats, cosmetics)
-                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                     ON CONFLICT (user_id) DO UPDATE SET
-                        honey = EXCLUDED.honey, location_no = EXCLUDED.location_no, level = EXCLUDED.level,
-                        diamonds = EXCLUDED.diamonds, upgrades = EXCLUDED.upgrades,
-                        mission_index = EXCLUDED.mission_index, missions_done = EXCLUDED.missions_done,
-                        missions_finished = EXCLUDED.missions_finished, stats = EXCLUDED.stats,
-                        cosmetics = EXCLUDED.cosmetics, updated_at = CURRENT_TIMESTAMP'
-                : 'INSERT INTO player_progress
-                        (user_id, honey, location_no, level, diamonds, upgrades,
-                         mission_index, missions_done, missions_finished, stats, cosmetics)
-                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                     ON DUPLICATE KEY UPDATE
-                        honey = VALUES(honey), location_no = VALUES(location_no), level = VALUES(level),
-                        diamonds = VALUES(diamonds), upgrades = VALUES(upgrades),
-                        mission_index = VALUES(mission_index), missions_done = VALUES(missions_done),
-                        missions_finished = VALUES(missions_finished), stats = VALUES(stats),
-                        cosmetics = VALUES(cosmetics), updated_at = CURRENT_TIMESTAMP';
-
-            $this->pdo->prepare($progressSql)->execute([
-                $userId,
-                $s['honey'],
-                $s['location'] + 1,
-                $s['level'],
-                $s['diamonds'],
-                self::encode($s['upgrades'] + ['staff' => $s['staff'] ?? 1, 'seq' => $incomingSeq]),
-                $s['missions']['index'],
-                self::encode($s['missions']['done']),
-                $s['missions']['finished'] ? 1 : 0,
-                self::encode($s['stats']),
-                self::encode($s['cosmetics']),
-            ]);
-
-            $this->pdo->prepare('DELETE FROM player_stations WHERE user_id = ?')->execute([$userId]);
-            $ins = $this->pdo->prepare(
-                'INSERT INTO player_stations
-                    (user_id, slot, unlocked, staff, recipe_lvl, work_lvl, profit_x2)
-                 VALUES (?, ?, ?, ?, ?, ?, ?)'
-            );
-            foreach ($s['stations'] as $slot => $st) {
-                // staff/work_lvl/profit_x2 are legacy columns. New saves keep
-                // the real values in player_progress (staff) and upgrades.
-                $ins->execute([$userId, $slot, $st['unlocked'] ? 1 : 0, 0, $st['recipe'], 0, 0]);
-            }
+            $this->writeRow($userId, $s, $incomingSeq);
             $this->pdo->commit();
             return ['saved' => true, 'seq' => $incomingSeq];
         } catch (Throwable $e) {
             $this->pdo->rollBack();
             throw $e;
+        }
+    }
+
+    /**
+     * Starts a player over.
+     *
+     * The row is replaced by a fresh game instead of being deleted, and the
+     * write number is moved well past the old one. A save that was already on
+     * its way (the keepalive from Exit, for example) is therefore too old to
+     * be stored and cannot bring the old progress back.
+     */
+    public function reset(int $userId): void
+    {
+        $this->pdo->beginTransaction();
+        try {
+            $storedSeq = $this->lockAndReadSeq($userId) ?? 0;
+            $seq = min(self::MAX_SEQ, $storedSeq + self::RESET_SEQ_JUMP);
+            $this->writeRow($userId, self::freshSave(), $seq);
+            $this->pdo->commit();
+        } catch (Throwable $e) {
+            $this->pdo->rollBack();
+            throw $e;
+        }
+    }
+
+    /** The starting values of a new game. */
+    public static function freshSave(): array
+    {
+        $stations = [];
+        for ($i = 0; $i < self::STATIONS_PER_LOCATION[0]; $i++) {
+            $stations[] = ['unlocked' => $i === 0, 'recipe' => 0];
+        }
+        return [
+            'version' => 3,
+            'honey' => self::START_HONEY,
+            'location' => 0,
+            'level' => 1,
+            'diamonds' => 0,
+            'staff' => 1,
+            'stations' => $stations,
+            'upgrades' => [],
+            'missions' => ['index' => 0, 'done' => [], 'finished' => false],
+            'stats' => ['served' => 0, 'earned' => 0, 'tips' => 0, 'tipHoney' => 0],
+            'cosmetics' => ['owned' => [], 'equipped' => ['bee' => '', 'theme' => '']],
+        ];
+    }
+
+    /**
+     * Locks the progress row and returns its write number, or null when the
+     * player has no row yet.
+     */
+    private function lockAndReadSeq(int $userId): ?int
+    {
+        $sql = 'SELECT upgrades FROM player_progress WHERE user_id = ?';
+        // SQLite has no row locks. It is only used by the test suite, where a
+        // single connection cannot race with itself.
+        if ($this->driver() !== 'sqlite') {
+            $sql .= ' FOR UPDATE';
+        }
+        $lock = $this->pdo->prepare($sql);
+        $lock->execute([$userId]);
+        $stored = $lock->fetch();
+        if (!$stored) {
+            return null;
+        }
+        $rawStored = $this->decode($stored['upgrades'] ?? null, []);
+        return self::clampInt($rawStored['seq'] ?? 0, 0, self::MAX_SEQ);
+    }
+
+    /** Writes the progress row and the station rows of one player. */
+    private function writeRow(int $userId, array $s, int $seq): void
+    {
+        $progressSql = $this->isMySql()
+            ? 'INSERT INTO player_progress
+                    (user_id, honey, location_no, level, diamonds, upgrades,
+                     mission_index, missions_done, missions_finished, stats, cosmetics)
+                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                 ON DUPLICATE KEY UPDATE
+                    honey = VALUES(honey), location_no = VALUES(location_no), level = VALUES(level),
+                    diamonds = VALUES(diamonds), upgrades = VALUES(upgrades),
+                    mission_index = VALUES(mission_index), missions_done = VALUES(missions_done),
+                    missions_finished = VALUES(missions_finished), stats = VALUES(stats),
+                    cosmetics = VALUES(cosmetics), updated_at = CURRENT_TIMESTAMP'
+            : 'INSERT INTO player_progress
+                    (user_id, honey, location_no, level, diamonds, upgrades,
+                     mission_index, missions_done, missions_finished, stats, cosmetics)
+                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                 ON CONFLICT (user_id) DO UPDATE SET
+                    honey = EXCLUDED.honey, location_no = EXCLUDED.location_no, level = EXCLUDED.level,
+                    diamonds = EXCLUDED.diamonds, upgrades = EXCLUDED.upgrades,
+                    mission_index = EXCLUDED.mission_index, missions_done = EXCLUDED.missions_done,
+                    missions_finished = EXCLUDED.missions_finished, stats = EXCLUDED.stats,
+                    cosmetics = EXCLUDED.cosmetics, updated_at = CURRENT_TIMESTAMP';
+
+        $this->pdo->prepare($progressSql)->execute([
+            $userId,
+            $s['honey'],
+            $s['location'] + 1,
+            $s['level'],
+            $s['diamonds'],
+            self::encode($s['upgrades'] + ['staff' => $s['staff'] ?? 1, 'seq' => $seq]),
+            $s['missions']['index'],
+            self::encode($s['missions']['done']),
+            $s['missions']['finished'] ? 1 : 0,
+            self::encode($s['stats']),
+            self::encode($s['cosmetics']),
+        ]);
+
+        $this->pdo->prepare('DELETE FROM player_stations WHERE user_id = ?')->execute([$userId]);
+        $ins = $this->pdo->prepare(
+            'INSERT INTO player_stations
+                (user_id, slot, unlocked, staff, recipe_lvl, work_lvl, profit_x2)
+             VALUES (?, ?, ?, ?, ?, ?, ?)'
+        );
+        foreach ($s['stations'] as $slot => $st) {
+            // staff/work_lvl/profit_x2 are legacy columns. New saves keep
+            // the real values in player_progress (staff) and upgrades.
+            $ins->execute([$userId, $slot, $st['unlocked'] ? 1 : 0, 0, $st['recipe'], 0, 0]);
         }
     }
 
@@ -297,7 +364,17 @@ class SaveRepository
     /** PostgreSQL needs ON CONFLICT; MySQL/MariaDB use ON DUPLICATE KEY. */
     private function isPostgres(): bool
     {
-        return $this->pdo->getAttribute(PDO::ATTR_DRIVER_NAME) === 'pgsql';
+        return $this->driver() === 'pgsql';
+    }
+
+    private function isMySql(): bool
+    {
+        return in_array($this->driver(), ['mysql', 'mariadb'], true);
+    }
+
+    private function driver(): string
+    {
+        return (string)$this->pdo->getAttribute(PDO::ATTR_DRIVER_NAME);
     }
 
     private static function locationForLevel(int $level): int

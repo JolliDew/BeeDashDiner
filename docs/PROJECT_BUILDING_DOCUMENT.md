@@ -5,6 +5,7 @@ author:
   - "Group AQM · University of St. La Salle"
   - "BS Computer Science · 3rd Year, 1st Semester"
   - "La Salle Avenue, Bacolod City 6100, Negros Occidental, Philippines · +63 34 434 6100"
+  - "Instructor: Japhet Rocamora Pagarigan"
 date: "November 2026"
 ---
 

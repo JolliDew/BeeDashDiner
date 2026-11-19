@@ -54,6 +54,13 @@ header#title-block-header p.author + p.author {
     font-weight: 400;
 }
 
+/* The instructor line closes the title block. */
+header#title-block-header p.author:last-of-type {
+    margin-top: 10px;
+    color: #3a2a17;
+    font-weight: 600;
+}
+
 header#title-block-header p.date {
     color: #6b5a37;
     font-size: 11pt;

@@ -1,4 +1,10 @@
 /* Shared styling for Help, Profile and Access-denied pages. */
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
 body.page {
     margin: 0;
     min-height: 100vh;
@@ -132,7 +138,27 @@ body.page {
 }
 
 .form-row input[type="file"] {
-    padding: 8px;
+    padding: 8px 10px;
+    color: #fff6df;
+    cursor: pointer;
+}
+
+/* Chrome/Edge draw a native button inside the file input. Theme it so it
+   does not look like a stray white control on the dark card. */
+.form-row input[type="file"]::file-selector-button {
+    margin-right: 10px;
+    padding: 7px 12px;
+    border: 1px solid #c9a35c;
+    border-radius: 6px;
+    background: #ffd84d;
+    color: #241d12;
+    font: inherit;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.form-row input[type="file"]::file-selector-button:hover {
+    background: #f0c53c;
 }
 
 .form-row input:focus-visible,

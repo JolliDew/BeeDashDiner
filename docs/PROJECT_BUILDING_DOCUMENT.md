@@ -506,9 +506,10 @@ Problems met and solutions:
   The image copies `db.container.php` to `db.php` and reads `DATABASE_URL`.
 - **HTTPS cookies:** Render terminates TLS at its proxy. `Auth::start()` now
   checks `X-Forwarded-Proto`.
-- **Google OAuth:** the redirect URI mismatch could not be fixed without Google
-  Console access. The Google button is hidden on both the sign-in and the
-  registration page when no config file exists; the password path remains
+- **Google OAuth:** Render needs `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` and
+  `GOOGLE_REDIRECT_URI`; the callback must also be registered for the deployed
+  domain in Google Cloud Console. The Google button appears only when a client
+  ID and secret are configured, and the username/password path remains
   available.
 - **Ephemeral uploads:** documented as a free-plan limitation; Supabase Storage
   is the recommended next step.

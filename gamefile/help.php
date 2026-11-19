@@ -43,7 +43,7 @@ $loggedIn = Auth::userId() !== null;
         </ul>
 
         <h2>Winning and restarting</h2>
-        <p>There is no way to lose. The win condition is completing all ten levels. If you want a fresh start, use <strong>Restart progress</strong> on the main menu — it permanently deletes only your own save after confirmation.</p>
+        <p>There is no way to lose. The win condition is completing all ten levels. If you want a fresh start, use <strong>Restart progress</strong> on the main menu — after confirmation it replaces only your own save with a fresh game.</p>
 
         <div class="page-actions">
             <?php if ($loggedIn): ?>

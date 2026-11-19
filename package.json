@@ -1,6 +1,6 @@
 {
   "name": "jollidew",
-  "version": "2.2.0",
+  "version": "2.2.1",
   "private": true,
   "description": "BeeDashDiner bee restaurant game - upgrades, missions and automatic workers",
   "type": "module",

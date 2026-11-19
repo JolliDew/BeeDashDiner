@@ -2,6 +2,29 @@
 
 All notable changes to BeeDashDiner.
 
+## [2.2.1] — final audit
+
+### Fixed
+
+- **Admin page rendered only its first card.** `includes/nav.php` is included
+  into each page's scope and used `$q`, overwriting the admin search term with
+  a `PDOStatement`; `htmlspecialchars()` then threw and the page stopped after
+  the "Create account" heading. The partial now uses `$nav*` locals.
+- **The save API had no CSRF check.** A save POST now requires the session
+  token in `X-CSRF-Token`. The token is printed into the injected game markup
+  and sent by `SaveService`, so another site cannot overwrite a player's save.
+- **Course name corrected.** The course is CC106 — Cloud Development; CLE is
+  the Culminating Learning Evidence (the end-term final project). The building
+  document, README, rubric checklist, demo script and landing footer say so.
+
+### Verification
+
+- 61 JavaScript tests, both PHP suites, the live PostgreSQL suite and the
+  14-check headless browser run pass.
+- Admin CRUD (create, update, reset password, reset progress, delete) exercised
+  over HTTP against the live database; the five audit rows it produced were
+  removed afterwards.
+
 ## [2.2.0] — scene-first UI
 
 **Branch:** `feat/scene-first-ui`

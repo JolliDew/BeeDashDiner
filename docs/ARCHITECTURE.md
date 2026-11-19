@@ -69,7 +69,7 @@ delivers, records the sale/tip, and returns to idle at its home station.
 | `src/ApiController.php` | Routes `?action=load` and `?action=save`. |
 | `src/SaveRepository.php` | Validates/clamps saves, migrates v1/v2 shapes, reads/writes both drivers. |
 | `src/Auth.php` | Session cookie settings, login/logout, role, `refresh()`. |
-| `src/Csrf.php` | Per-session CSRF token for forms. |
+| `src/Csrf.php` | Per-session CSRF token for forms and the save API. |
 | `src/AdminRepository.php` | User CRUD, pagination, progress reset, deletion, audit. |
 | `google-login.php` | OAuth 2.0 code flow with state + verified email. |
 | `admin.php` | Admin UI and POST actions. |
@@ -149,7 +149,8 @@ both on load and after a `409`.
 - `role` is `player` or `admin`; only `admin.php` checks for `admin`.
 - Google login requires a verified email (`email_verified`/`verified_email`) and
   uses an OAuth `state` value checked with `hash_equals`.
-- All login/register/admin forms carry a CSRF token.
+- All login/register/admin forms carry a CSRF token, and the save API
+  requires the same token in `X-CSRF-Token`.
 
 ---
 

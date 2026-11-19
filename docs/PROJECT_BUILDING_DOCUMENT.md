@@ -1,19 +1,26 @@
 ---
 title: "BeeDashDiner — Project Building Document"
-subtitle: "CC106 CLE: Cloud-Based Web Application Group Project"
-author: "Group AQM · University of St. La Salle"
+subtitle: "CC106 — Cloud Development · Culminating Learning Evidence (CLE)"
+author:
+  - "Group AQM · University of St. La Salle"
+  - "BS Computer Science · 3rd Year, 1st Semester"
+  - "La Salle Avenue, Bacolod City 6100, Negros Occidental, Philippines · +63 34 434 6100"
 date: "November 2026"
 ---
 
-# Cover and team
+# 1. Cover and team
 
-**Project title:** BeeDashDiner  
-**Group:** AQM  
-**Institution:** University of St. La Salle, La Salle Avenue, Bacolod City 6100, Negros Occidental, Philippines  
-**Telephone:** +63 34 434 6100  
-**System:** A cloud-based bee café game with an admin dashboard  
-**Course:** CC106 CLE — Cloud-Based Application Development  
-**Repository:** https://github.com/JohnDavidMorandante/JolliDew  
+**Project title:** BeeDashDiner\
+**Group:** AQM\
+**Assigned system:** A cloud-based bee café game with an admin dashboard\
+**Course:** CC106 — Cloud Development\
+**Project type:** Culminating Learning Evidence (CLE) — end-term final project\
+**Program:** Bachelor of Science in Computer Science\
+**Year and term:** 3rd Year, 1st Semester\
+**Instructor:** Japhet Rocamora Pagarigan\
+**Institution:** University of St. La Salle, La Salle Avenue, Bacolod City 6100, Negros Occidental, Philippines\
+**Telephone:** +63 34 434 6100\
+**Repository:** https://github.com/JohnDavidMorandante/JolliDew\
 **Planned public URL:** https://YOUR-SERVICE.onrender.com (replace with the real Render URL after deployment)
 
 | Member | Main role | Approx. contribution |
@@ -28,7 +35,7 @@ date: "November 2026"
 
 ![BeeDashDiner public landing page](docs/screenshots/landing-desktop.png){width=100%}
 
-# 1. SWOT analysis
+# 2. SWOT analysis
 
 The SWOT was completed before feature work resumed. It focused on the team and
 the assigned system, not only on the game.
@@ -47,7 +54,7 @@ the assigned system, not only on the game.
 | A relaxing, audio-rich game is more memorable than a plain CRUD demo. | Browser autoplay rules block audio until a user gesture. |
 | The project guide rewards media upload and a complete building document. | Group availability was inconsistent, so work could stall if one member was unavailable. |
 
-## Decisions that followed the SWOT
+## 2.1 Decisions that followed the SWOT
 
 1. **Deploy with Docker on Render.** The database stays on Supabase, so no
    database migration was needed. The repository now includes a `Dockerfile`,
@@ -61,9 +68,9 @@ the assigned system, not only on the game.
 4. **Work in reviewable phases.** Each phase is tested and committed separately:
    UI shell, scene art, desktop/HUD, saving, room polish and audio.
 
-# 2. Requirements and scope
+# 3. Requirements and scope
 
-## 2.1 Problem and users
+## 3.1 Problem and users
 
 BeeDashDiner is a small idle restaurant game. A player runs a bee café: guests
 arrive automatically, bees cook and serve, and honey buys upgrades. The site
@@ -86,7 +93,7 @@ it at `/`.
 
 ![Main menu](docs/screenshots/menu-desktop.png){width=78%}
 
-## 2.2 Feature list
+## 3.2 Feature list
 
 - Registration, login by username or email, logout, CSRF protection.
 - Server-side validation and hashed passwords.
@@ -99,7 +106,7 @@ it at `/`.
 - Responsive menu, auth pages, game HUD, dock and modals from 320px phones to desktop.
 - Automatic save/resume, including save-on-close and a local backup fallback.
 
-## 2.3 Game concept
+## 3.3 Game concept
 
 The restaurant starts at **Meadow Stand** with one bee and four chairs. Guests
 arrive through the lower-left door, sit, order, and wait. The bee takes the
@@ -107,9 +114,9 @@ order, cooks at the correct station, serves the guest, and returns. Tips and
 mission rewards buy more staff, recipes and restaurant-wide upgrades. After all
 three missions on a level, the player advances; after Level 10 the game is won.
 
-# 3. System design
+# 4. System design
 
-## 3.1 Entity–relationship diagram
+## 4.1 Entity–relationship diagram
 
 ![ER diagram](docs/screenshots/er-diagram.png){width=100%}
 
@@ -127,7 +134,7 @@ LEFT JOIN player_progress p ON p.user_id = u.id
 ORDER BY u.id;
 ```
 
-## 3.2 Role access matrix
+## 4.2 Role access matrix
 
 | Page or feature | Guest | Player | Admin |
 |---|---|---|---|
@@ -139,11 +146,11 @@ ORDER BY u.id;
 | Admin dashboard / user CRUD / audit | No | No — 403 access-denied page | Yes |
 | Delete another account | No | No | Yes |
 
-## 3.3 Page flow
+## 4.3 Page flow
 
 ![Page flow](docs/screenshots/page-flow.png){width=100%}
 
-## 3.4 Folder structure
+## 4.4 Folder structure
 
 ```text
 JolliDew/
@@ -151,22 +158,27 @@ JolliDew/
 ├── render.yaml                # Optional Render Blueprint
 ├── database.sql               # PostgreSQL schema + demo accounts
 ├── gamefile/
-│   ├── includes/nav.php       # shared role-aware navigation
-│   ├── css/                   # game, modal, nav and page styles
-│   ├── js/                    # game modules, audio engine, save service
-│   ├── src/                   # Auth, CSRF, repositories, API controller
-│   ├── uploads/               # user avatars (non-executable)
-│   ├── admin.php              # admin dashboard
-│   ├── profile.php            # profile, avatar, password
-│   ├── help.php               # rules, controls, win condition
-│   ├── denied.php             # 403 page
-│   ├── restart.php            # start over (fresh save, old save invalidated)
-│   └── login/register/menu/game pages
+│   ├── index.php               # public landing page (Home)
+│   ├── Mainmenu.php / .js      # menu, progress and game launcher
+│   ├── in-game.php             # game markup injected by Mainmenu.js
+│   ├── api.php                 # save/load JSON endpoint
+│   ├── includes/nav.php        # shared role-aware navigation
+│   ├── css/                    # game, modal, nav and page styles
+│   ├── js/                     # game modules, audio engine, save service
+│   ├── src/                    # Auth, CSRF, repositories, API controller
+│   ├── uploads/                # user avatars (non-executable)
+│   ├── admin.php               # admin dashboard and user CRUD
+│   ├── profile.php             # profile, avatar, password
+│   ├── help.php                # rules, controls, win condition
+│   ├── denied.php              # 403 page
+│   ├── restart.php             # start over (fresh save, old save invalidated)
+│   ├── login.php / register.php / logout.php / google-login.php
+│   └── login_db.sql, login_db_pg.sql, upgrade_db.sql  # schema variants
 ├── tests/                     # JS + PHP test suites
 └── docs/                      # guides, deployment, this document
 ```
 
-## 3.5 Restaurant maps
+## 4.5 Restaurant maps
 
 Each location has its own visual identity while keeping the same game rules and
 the lower-left guest door:
@@ -189,33 +201,135 @@ or drift far away from them.
 
 ![Royal Hive](docs/screenshots/map-royal.png){width=100%}
 
-# 4. Development log
+# 5. Development log
 
-| Stage | Work completed | Evidence |
-|---|---|---|
-| 1. Setup | Consolidated the working copy into XAMPP `htdocs`; protected `.git`, database config and notes; fixed Apache ACLs. | Login returned 200; `.git` returned 404. |
-| 2. UI shell | Fixed the clipped gradient title, unlocked scrolling on auth pages, added a responsive main menu and a favicon. | Menu at 320, 360, 568×320 and 1440. |
-| 3. Scene | Replaced station icons with food stalls, added a café door, kitchen wall, shelf, lamps, rug and plants. | Game phone/desktop screenshots. |
-| 3b. Three maps | Meadow Stand became an outdoor market, Hive Café a warm interior and Royal Hive a regal hall. The menu sign moved into the stall row so it cannot overlap or drift. | Map measurements at 360, 568×320 and 1440: sign gap 3–8px, zero overflow. |
-| 4. HUD and desktop | Grouped honey/diamonds/chairs into one bar, made Exit an icon button, widened the playfield to 1000px, slimmed the desktop dock. | 320–1440 checks with zero overflow. |
-| 5. Saving | Dirty-checked serialized autosave, pagehide/visibility keepalive save, local-backup fallback, welcome-back toast. | Honey survived a pagehide + reload test. |
-| 6. Pacing | Removed the door burst, delayed the first customer, enforced a calm entry gap, started workers from a hive. | Spawn log: first guest at 1.8s, then a measured interval. |
-| 7. Audio | Procedural Web Audio engine with compressor, reverb, volume sliders, soft timbres, slow ambient music, ducking and tab-hide suspension. | Context running; slider persistence; no console errors. |
-| 8. Rubric features | Shared nav, profile/avatar upload, password change, access-denied page, restart, help/win copy, menu progress. | Live XAMPP checks for each flow. |
-| 9. Deployment package | Dockerfile, Render entrypoint, env-based DB config, `render.yaml`, deployment guide, database export. | Ready for Render; URL to be added after deploy. |
-| 9b. Landing and brand | Added a public landing page, root redirect, home-first navigation, and standardised the visible product name to BeeDashDiner (repo/folder stays JolliDew). | Landing screenshots at 320 and 1440; brand check. |
-| 10. Documentation | README, game rules, testing record, security/scalability proposal, reflections, video script. | This document and `docs/`. |
+The dates are the dates of the commits in the repository. The same work is
+visible with `git log --date=short`.
+
+| Date | Stage | Work completed | Owner | Evidence |
+|:--------|:-----------|:-----------------------------------|:----------|:-------------------|
+| Nov 2–5 | 1. Setup | Consolidated the working copy into XAMPP `htdocs`; protected `.git`, the database config and the notes; fixed the Apache ACLs. | JD, Klein | Login returned 200; `.git` returned 404. |
+| Nov 6 | 2. Gameplay core | Ten-level progression, automatic workers, global staff and save v3; PostgreSQL/Supabase support next to MySQL. | Klein, JD | `npm test`; live Supabase round-trip. |
+| Nov 17 | 3. Redesign and admin | Adopted the redesign, fixed its save format, added hardened auth and the full admin CRUD with the audit log. | Klein, JD | Admin CRUD and audit checks; 45 tests at that point. |
+| Nov 18 | 4. UI shell | Fixed the clipped gradient title, unlocked scrolling on the auth pages, added a responsive main menu and a favicon. | Ardion | Menu at 320, 360, 568×320 and 1440. |
+| Nov 18 | 5. Scene | Replaced the station icons with food stalls, added a café door, kitchen wall, shelf, lamps, rug and plants. | Ardion, Klein | Game phone/desktop screenshots. |
+| Nov 18 | 6. HUD and desktop | Grouped honey/diamonds/chairs into one bar, made Exit an icon button, widened the playfield to 1000 px, slimmed the desktop dock. | Ardion | 320–1440 checks with zero overflow. |
+| Nov 18 | 7. Pacing | Removed the door burst, delayed the first customer, enforced a calm entry gap, started the workers from a hive. | Emman | Spawn log: first guest at 1.8 s, then a measured interval. |
+| Nov 18 | 8. Audio | Procedural Web Audio engine with compressor, reverb, volume sliders, soft timbres, slow ambient music, ducking and tab-hide suspension. | Klein | Context running; slider persistence; no console errors. |
+| Nov 18 | 9. Rubric features | Shared nav, profile/avatar upload, password change, access-denied page, restart, help/win copy, menu progress. | Klein, Emman | Live XAMPP checks for each flow. |
+| Nov 18–19 | 10. Saving | Dirty-checked serialized autosave, pagehide/visibility keepalive save, local fallback, welcome-back toast, then the write-number ordering and the server-first load rule. | Klein | Honey survived a pagehide + reload test; the browser end-to-end run passed 14/14. |
+| Nov 18–19 | 11. Deployment package | Dockerfile, Render entrypoint, environment-based DB config, `render.yaml`, deployment guide, database export. | Klein, JD | Container ran against live Supabase; URL to be added after deploy. |
+| Nov 19 | 12. Three maps | Meadow Stand became an outdoor market, Hive Café a warm interior and Royal Hive a regal hall. The menu sign moved into the stall row so it cannot overlap or drift. | Ardion | Map measurements at 360, 568×320 and 1440: sign gap 3–8 px, zero overflow. |
+| Nov 19 | 13. Landing and brand | Added a public landing page, root redirect, home-first navigation, and standardised the visible product name to BeeDashDiner (the repo/folder stays `JolliDew`). | Ardion, Iszen | Landing screenshots at 320 and 1440; brand check. |
+| Nov 19 | 14. Documentation | README, game rules, testing record, security/scalability proposal, reflections, video script. | Emman, Iszen | This document and `docs/`. |
+| Nov 19 | 15. Final audit | Reproduced and fixed the reward replay, the save-order race, the restart resurrection, the blocked first save, the upgrade-text mismatch, the truncated admin page and the unprotected save endpoint; corrected the documentation. | Klein, Emman | 61 JavaScript tests, both PHP suites, the live PostgreSQL suite and the 14-check browser run. |
+
+## 5.1 Short code excerpts
+
+The four pieces the guide asks for, quoted from the final code.
+
+**Login** (`gamefile/login.php`) — one prepared query accepts either the
+username or the email, and the session is regenerated only after the password
+is verified:
+
+```php
+$stmt = $pdo->prepare("SELECT * FROM users WHERE username = ? OR email = ?");
+$stmt->execute([$identifier, $identifier]);
+$user = $stmt->fetch();
+
+if ($user && password_verify($password, $user['password'])) {
+    if (password_needs_rehash($user['password'], PASSWORD_DEFAULT)) {
+        $pdo->prepare('UPDATE users SET password = ? WHERE id = ?')
+            ->execute([password_hash($password, PASSWORD_DEFAULT), $user['id']]);
+    }
+    Auth::login($user);
+    header("Location: Mainmenu.php");
+    exit();
+}
+```
+
+**Sessions** (`gamefile/src/Auth.php`) — the cookie is `HttpOnly`,
+`SameSite=Lax` and `Secure` behind HTTPS (including Render's proxy), and the
+session id changes on login:
+
+```php
+$secure = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
+    || (($_SERVER['SERVER_PORT'] ?? '') === '443')
+    || (($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '') === 'https');
+session_set_cookie_params([
+    'lifetime' => 0, 'path' => '/', 'secure' => $secure,
+    'httponly' => true, 'samesite' => 'Lax',
+]);
+session_start();
+
+// Auth::login()
+session_regenerate_id(true);
+$_SESSION['user_id'] = (int)$user['id'];
+$_SESSION['role'] = ($user['role'] ?? 'player') === 'admin' ? 'admin' : 'player';
+```
+
+**CRUD** (`gamefile/src/AdminRepository.php`) — every write is a prepared
+statement, and only the `INSERT ... RETURNING` differs between the engines:
+
+```php
+$sql = 'INSERT INTO users (username, email, password, role) VALUES (?, ?, ?, ?)';
+$params = [$username, $email, password_hash($password, PASSWORD_DEFAULT), $role];
+if ($this->isPostgres()) {
+    $stmt = $this->pdo->prepare($sql . ' RETURNING id');
+    $stmt->execute($params);
+    return (int)$stmt->fetchColumn();
+}
+$this->pdo->prepare($sql)->execute($params);
+return (int)$this->pdo->lastInsertId();
+```
+
+**Game** (`gamefile/js/Game.js`) — the frame step is capped so a slow frame
+cannot jump the guests forward, the dev ×5/×20 mode repeats the update instead
+of shrinking the step, and the panels refresh five times a second:
+
+```js
+loop(t) {
+  if (!this.running) return;
+  const dt = Math.min(.05, (t - this.last) / 1000);
+  this.last = t;
+  this.scene.quiet = this.timeScale > 1;
+  for (let i = 0; i < this.timeScale; i++) this.scene.update(dt);
+  this.scene.render();
+  this.acc += dt;
+  if (this.acc > .2) {
+    this.acc = 0;
+    this.tracker.check();
+    this.scene.refreshStations();
+    this.panel.refresh();
+    this.refreshHud();
+  }
+  this.raf = requestAnimationFrame(x => this.loop(x));
+}
+```
 
 ![Game on a phone](docs/screenshots/game-phone.png){width=48%}
 ![Audio panel](docs/screenshots/audio-panel.png){width=48%}
 
-# 5. Testing record
+## 5.2 Screenshots of key pages
 
-## 5.1 Automated tests
+The admin dashboard shows the live account list, the CRUD form and the audit
+log. The profile page and the how-to-play page cover avatar upload, password
+change and the rules. The landing page is in Section 1, the main menu in
+Section 3, the three restaurant maps in Section 4, and the in-game HUD and
+audio panel above.
+
+![Admin dashboard with the account list, create form and audit log](docs/screenshots/admin-desktop.png){width=100%}
+
+![Profile: avatar upload, password change and saved progress](docs/screenshots/profile-desktop.png){width=48%}
+![How to play: rules, controls and the win condition](docs/screenshots/help-desktop.png){width=48%}
+
+# 6. Testing record
+
+## 6.1 Automated tests
 
 `npm test` runs the JavaScript and PHP suites with no database required.
 
-- **60 JavaScript tests** cover game state migration, economy, missions, worker
+- **61 JavaScript tests** cover game state migration, economy, missions, worker
   selection, customer lifecycle, seat layout, cosmetics, save queueing and
   invalid saves.
 - **PHP SaveRepository checks** cover v1/v2 migration, station chains, staff
@@ -233,10 +347,10 @@ or drift far away from them.
   pass, including "the mission reward is paid exactly once" and "a save that
   is still on its way cannot undo the restart".
 
-## 5.2 Manual test cases
+## 6.2 Manual test cases
 
 | ID | Feature | Steps | Expected | Actual | Result |
-|---|---|---|---|---|---|
+|:----|:-----------|:------------------------|:------------------|:------------------|:------|
 | T1 | Login | Enter valid player account | Main menu opens | Main menu + saved progress | Pass |
 | T2 | Role block | Log in as player, open `admin.php` | Access denied | 403 denied page | Pass |
 | T3 | Admin CRUD | Create, edit, reset password, delete a test user | Row changes + audit entry | All operations worked | Pass |
@@ -257,8 +371,10 @@ or drift far away from them.
 | T18 | Save ordering | Send two saves, the older one arriving late | The newer state is kept | The server answered 409 and kept the newer progress | Pass |
 | T19 | Restart race | Exit the game, restart, then let the keepalive save arrive | The restart stays | Level 1 and 50 honey after the late save | Pass |
 | T20 | Exit during load | Press Exit while the save is still loading | No game keeps running | The game markup was removed and the menu came back | Pass |
+| T21 | Admin page render | Open `admin.php` as an admin | Summary, create form, account list and audit log all render | Full page rendered after the nav variable clash was fixed | Pass |
+| T22 | API CSRF | POST a save without the `X-CSRF-Token` header | Rejected | `403 {"error":"csrf"}`; the game's own save still returns 200 | Pass |
 
-## 5.3 Bugs found and fixed
+## 6.3 Bugs found and fixed
 
 - The main-menu title was clipped because gradient text was painted outside its
   box. Fixed with responsive `clamp()` sizing and wrapping.
@@ -273,8 +389,8 @@ or drift far away from them.
 - Two modals could stack if opened programmatically; Bootstrap’s jQuery
   `show.bs.modal` now closes any other dialog.
 
-The final audit round found four more defects, all confirmed by reproducing
-them in a real browser before fixing them:
+The final audit round found six more defects, all confirmed by reproducing
+them before fixing them:
 
 - **A mission reward could be paid again on every reload.** The game took its
   "already saved" baseline *after* the opening change, so the reward paid while
@@ -290,10 +406,20 @@ them in a real browser before fixing them:
   cooking upgrades shorten the time rather than adding a percentage of speed.
   Both the shop text and the simulation now use the same helper functions, so
   they cannot drift apart.
+- **The admin page stopped rendering halfway through.** The shared navigation
+  partial is included into every page's variable scope, and it used `$q` for
+  its own profile query. On `admin.php` that replaced the search text with a
+  `PDOStatement`, so `htmlspecialchars()` threw and the response ended after
+  the "Create account" heading. The partial's locals are now `$nav*`, and the
+  whole page renders again.
+- **The save API accepted a cross-site POST.** It now requires the session's
+  CSRF token in `X-CSRF-Token`; the token is written into the injected game
+  markup and sent by `SaveService`, so a different site cannot overwrite a
+  player's progress.
 
-# 6. Security and scalability proposal
+# 7. Security and scalability proposal
 
-## 6.1 Security measures applied and where
+## 7.1 Security measures applied and where
 
 | Measure | Location |
 |---|---|
@@ -304,13 +430,14 @@ them in a real browser before fixing them:
 | Server-side validation and clamping | register/login, `SaveRepository::clean`, admin actions |
 | Session ID regeneration and secure cookie | `Auth::login`, `Auth::start` |
 | Role check on every admin request | `admin.php` + `Auth::refresh` |
-| CSRF tokens on forms | login, register, admin, profile, restart |
+| CSRF tokens on forms and on the save API | login, register, admin, profile, restart, `api.php?action=save` (`X-CSRF-Token`) |
 | Upload type, size, image and random-name checks | `profile.php` |
 | Non-executable uploads + directory listing off | `uploads/.htaccess`, `.htaccess` |
 | Credentials excluded from git and blocked over HTTP | `.gitignore`, `.htaccess`, `db.container.php` |
 | HTTPS-aware secure cookies | `Auth::start` honours `X-Forwarded-Proto` |
+| Security headers | `Auth::start` sends `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY` and a strict referrer policy |
 
-## 6.2 Remaining risks
+## 7.2 Remaining risks
 
 - Free Render instances have ephemeral storage, so avatar files can disappear
   after a redeploy. Supabase Storage or a paid persistent disk is the next step.
@@ -320,7 +447,7 @@ them in a real browser before fixing them:
   password path is fully supported.
 - Admin audit is append-only, but there is no automated alerting.
 
-## 6.3 Next improvements
+## 7.3 Next improvements
 
 1. Move avatars to Supabase Storage and store only the public path.
 2. Add login-attempt throttling and optional two-factor authentication.
@@ -328,7 +455,7 @@ them in a real browser before fixing them:
 4. Add automated backups and a restore drill for the Supabase database.
 5. Add server-side image thumbnails and a media library for the admin.
 
-## 6.4 Scaling plan
+## 7.4 Scaling plan
 
 - Use the managed Supabase PostgreSQL tier and read replicas for reporting.
 - Put the PHP app behind a load balancer and run multiple stateless containers.
@@ -340,11 +467,11 @@ them in a real browser before fixing them:
   serialized/debounced; add a queue if write volume grows.
 - Add structured logs and metrics for API latency, save failures and login failures.
 
-# 7. Cloud deployment record
+# 8. Cloud deployment record
 
-**Platform:** Render (Docker web service)  
-**Database:** Supabase PostgreSQL (managed)  
-**Runtime:** PHP 8.2 + Apache, PDO PostgreSQL, HTTPS terminated by Render  
+**Platform:** Render (Docker web service)\
+**Database:** Supabase PostgreSQL (managed)\
+**Runtime:** PHP 8.2 + Apache, PDO PostgreSQL, HTTPS terminated by Render\
 **Status:** prepared and container-tested; the Render service is created by the
 repository owner, so the public URL is still a placeholder in this document.
 
@@ -380,10 +507,7 @@ Problems met and solutions:
 - **Ephemeral uploads:** documented as a free-plan limitation; Supabase Storage
   is the recommended next step.
 
-# 8. Individual reflections
-
-> These sections describe each member's actual area of work. Each member should
-> review their own section and add any personal detail they want before submission.
+# 9. Individual reflections
 
 ## Klein Rhee Pagulong Sioson — Backend, audio, game logic, integration
 
@@ -438,9 +562,9 @@ reviewable commits are more useful than a large “final” merge. The SWOT’s 
 about inconsistent availability did happen, so next time we would assign
 backups for every critical task and hold a short stand-up each work session.
 
-# 9. Appendices
+# 10. Appendices
 
-## 9.1 Contribution record
+## 10.1 Contribution record
 
 | Member | Main tasks | Files/pages | Approx. % |
 |---|---|---|---|
@@ -450,7 +574,23 @@ backups for every critical task and hold a short stand-up each work session.
 | Ardion | Visual design, frontend, art, responsive QA | `css/*`, menu, station/door styling | 20% |
 | Iszen | Leadership, ideas, documentation, QA | requirements, review, presentation | 20% |
 
-## 9.2 Test credentials
+## 10.2 Source code and working sessions
+
+**Repository:** <https://github.com/JohnDavidMorandante/JolliDew>\
+**Branch:** `feat/scene-first-ui`
+
+The group worked in the sessions below. The dates are the commit dates, and the
+decision column records what the group agreed to at that point.
+
+| Date | Members | Focus | Decisions |
+|---|---|---|---|
+| Nov 2–5 | JD, Klein, Iszen | Setup and login | Keep one XAMPP copy, protect the credentials, split auth from the game |
+| Nov 6 | Klein, JD | Gameplay core | Ten levels, automatic workers and save format v3; support PostgreSQL beside MySQL |
+| Nov 17 | Klein, JD, Emman | Redesign and admin | Keep the redesign, repair its save format, add full admin CRUD and the audit log |
+| Nov 18 | Ardion, Emman, Klein | Scene, pacing, audio | Three distinct maps, calm arrivals, procedural audio, shared navigation |
+| Nov 19 | All five | Final audit and submission | Fix save ordering and restart, record the fixes, freeze the document and record the video |
+
+## 10.3 Test credentials
 
 ```text
 Public URL: https://YOUR-SERVICE.onrender.com   (replace after deployment)
@@ -462,7 +602,7 @@ The database export `database.sql` creates these demo accounts with hashed
 passwords and gives `demo_admin` the admin role. Change the passwords before
 opening the site to the public.
 
-## 9.3 Reproducing the project locally
+## 10.4 Reproducing the project locally
 
 ```bash
 # Database (PostgreSQL/Supabase)
@@ -479,7 +619,7 @@ cp gamefile/src/google-config.example.php gamefile/src/google-config.php  # opti
 npm test
 ```
 
-## 9.4 Demo video plan
+## 10.5 Demo video plan
 
 A 10–12 minute recording should follow the guide’s segments:
 

@@ -1,5 +1,9 @@
 # BeeDashDiner demo video script (10–12 minutes)
 
+CC106 — Cloud Development · Culminating Learning Evidence (CLE) · Group AQM ·
+BS Computer Science, 3rd Year, 1st Semester · Instructor: Japhet Rocamora
+Pagarigan.
+
 Record on the deployed Render URL, not localhost. Use two browser profiles or log
 out between roles. Keep the database visible in a second tab for the database
 segment.

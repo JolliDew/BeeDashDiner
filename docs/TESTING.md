@@ -31,7 +31,7 @@ npm run test:php    -> php tests/SaveRepository.test.php
 Expected:
 
 ```text
-60 JavaScript tests passing
+61 JavaScript tests passing
 PHP SaveRepository checks passing
 PHP AdminRepository checks passing (in-memory SQLite)
 ```
@@ -190,6 +190,10 @@ Use a throwaway account and a throwaway database when possible.
 - [ ] Logged-out `api.php?action=load` returns 401 JSON.
 - [ ] A malformed save returns 400.
 - [ ] POSTing an admin form without a CSRF token is rejected.
+- [ ] POSTing a save without `X-CSRF-Token` returns 403; the game's own save
+      still returns 200.
+- [ ] `admin.php` renders the account list and the audit table, not just the
+      summary cards.
 - [ ] Session cookie is `HttpOnly` and `SameSite=Lax` (check DevTools).
 
 ### Responsive/accessibility
@@ -230,21 +234,29 @@ git grep -nE '<<<<<<<|=======|>>>>>>>' || true
 
 ## 6. Last verified
 
-On **2026-11-17**, the branch was checked with:
+On **2026-11-19**, the branch was checked with:
 
-- PHP 8.5.0 and Node.js 24.21.0;
-- an isolated **MariaDB 10.4.28** instance (XAMPP binaries, temporary data dir);
-- **Chrome headless** at 440×900.
+- PHP 8.5.0 (CLI) and PHP 8.2.4 through **XAMPP Apache**, Node.js 24.21.0;
+- an isolated **MariaDB 10.4.28** instance (XAMPP binaries, temporary data dir)
+  and the live **Supabase PostgreSQL** database;
+- **Chrome headless** at 320×568, 360×800, 568×320 and 1440×900.
 
 Results:
 
-- `npm test`: 60 JavaScript tests and both PHP suites pass;
+- `npm test`: 61 JavaScript tests and both PHP suites pass;
+- `npm run test:pg`: the live PostgreSQL save suite passes;
 - `gamefile/login_db.sql` imports cleanly twice;
 - `gamefile/upgrade_db.sql` applies to the live `origin/main` schema and is re-runnable;
 - register → login → CLI promotion → admin create/edit/password/reset/delete,
   CSRF rejection, player 403, last-admin guards, audit rows, API save round-trip;
+- `admin.php` renders the summary, create form, account list and audit log;
+- a save POST without `X-CSRF-Token` returns 403, while the game's own save
+  returns 200;
+- profile avatar upload and password change, then login with the new password;
 - main menu → game → station modal (mouse and keyboard) → global/cosmetics
   modals → autosave → exit, with no JavaScript exceptions or failed requests;
+- the 14-check browser run: mission reward paid once and pushed, no replay on
+  reload, restart sticks (including a racing keepalive), exit during load;
 - an unmigrated database still plays the game, while `admin.php` shows the
   migration message instead of a misleading 403.
 

@@ -6,6 +6,9 @@ A small idle restaurant game built with **vanilla JavaScript modules**, **PHP**,
 > **What it contains:** the scene-first UI (food-stall stations, café entrance, desktop playfield, procedural audio) on top of Emman's redesign, plus bug fixes, security hardening, full admin CRUD, save format v3, and tests.
 > **Name:** **BeeDashDiner** is the product name. The GitHub repository and local XAMPP folder remain `JolliDew` for continuity and submission paths.
 > **Group:** **AQM** · University of St. La Salle
+> **Course:** **CC106 — Cloud Development** · Culminating Learning Evidence (CLE), end-term final project
+> **Program:** Bachelor of Science in Computer Science · 3rd Year, 1st Semester
+> **Instructor:** Japhet Rocamora Pagarigan
 
 The backend uses **PDO** and supports both **MySQL/MariaDB** (XAMPP) and **PostgreSQL** (including Supabase). The gameplay and API code are identical on both engines.
 
@@ -56,7 +59,7 @@ passwords are intentionally simple and exist only for grading.
 | **Public landing** | A responsive home page with the game preview, three-map gallery, feature summary and Play/Create-account calls to action. |
 | **Restart** | A confirmed **Restart progress** action replaces only the signed-in player's save with a fresh game. A save that is still on its way cannot undo it. |
 | **Save v3** | Global staff, global upgrades, and compact station records. Old v1/v2 saves migrate automatically. |
-| **Security** | Config-driven Google OAuth with verified-email checks, CSRF-protected forms, secure session cookies, and no committed secrets. |
+| **Security** | Config-driven Google OAuth with verified-email checks, CSRF-protected forms and save API, secure session cookies, and no committed secrets. |
 
 See **[docs/GAMEPLAY.md](docs/GAMEPLAY.md)** for formulas and the mission table, **[docs/ADMIN.md](docs/ADMIN.md)** for the admin workflow, **[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)** for the code map, and **[docs/TESTING.md](docs/TESTING.md)** for the test checklist.
 
@@ -299,7 +302,8 @@ Safety rules:
 
 - You cannot delete your own account.
 - You cannot demote or delete the last admin.
-- Every action uses a POST form with a CSRF token.
+- Every action uses a POST form with a CSRF token; the game's save POST
+  sends the session token in `X-CSRF-Token`.
 - The database deletes progress and account rows explicitly, so behavior is the same on MySQL and PostgreSQL.
 
 Full details: **[docs/ADMIN.md](docs/ADMIN.md)**.
@@ -369,7 +373,7 @@ npm run test:pg   # optional live PostgreSQL round-trip
 Expected:
 
 ```text
-60 JavaScript tests passing
+61 JavaScript tests passing
 PHP SaveRepository checks passing
 PHP AdminRepository checks passing (in-memory SQLite)
 ```

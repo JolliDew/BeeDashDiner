@@ -138,7 +138,7 @@ if ($me) {
     </section>
 
     <footer class="landing-footer">
-        BeeDashDiner · AQM · University of St. La Salle · CC106 CLE · <a href="help.php">Rules</a> ·
+        BeeDashDiner · AQM · University of St. La Salle · CC106 — Cloud Development · <a href="help.php">Rules</a> ·
         <?php if ($loggedIn): ?>
             <a href="Mainmenu.php">Game</a> · <a href="profile.php">Profile</a>
         <?php else: ?>

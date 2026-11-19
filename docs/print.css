@@ -45,6 +45,15 @@ header#title-block-header p.author {
     font-weight: 700;
 }
 
+/* The institution address and telephone follow the group name on the
+   title page. */
+header#title-block-header p.author + p.author {
+    margin: 2px 0 0;
+    color: #5a4929;
+    font-size: 10.5pt;
+    font-weight: 400;
+}
+
 header#title-block-header p.date {
     color: #6b5a37;
     font-size: 11pt;
@@ -60,7 +69,8 @@ header#title-block-header p.date {
 }
 
 #TOC li {
-    margin: 5px 0;
+    margin: 3px 0;
+    font-size: 9.6pt;
 }
 
 h1 {
@@ -98,11 +108,21 @@ p {
 }
 
 img {
-    display: block;
+    display: inline-block;
     max-width: 100%;
     height: auto;
-    margin: 10px auto;
+    margin: 8px 4px;
+    vertical-align: middle;
     border: 1px solid #d8c39b;
+}
+
+p:has(> img) {
+    text-align: center;
+}
+
+figure img {
+    display: block;
+    margin: 10px auto;
 }
 
 figure {

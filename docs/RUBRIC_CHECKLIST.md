@@ -1,6 +1,7 @@
-# CC106 CLE rubric self-check
+# CC106 — Cloud Development · CLE rubric self-check
 
-Status as of the current branch.
+Culminating Learning Evidence (CLE), end-term final project. Status as of
+the current branch.
 
 | Guide requirement | Status | Evidence |
 |---|---|---|
@@ -29,12 +30,12 @@ Status as of the current branch.
 | README with setup/platform/members | ✅ | `README.md` |
 | Building document (SWOT first) | ✅ | `docs/PROJECT_BUILDING_DOCUMENT.docx` + `.md` |
 | ER diagram, role matrix, page flow | ✅ | Building document + `docs/screenshots/` |
-| Development log and screenshots | ✅ | Building document section 4 |
-| Testing record | ✅ | `docs/TESTING.md` + building document section 5 |
-| Security/scalability proposal | ✅ | Building document section 6 |
-| Deployment record | ✅ | Building document section 7 (URL pending) |
+| Development log and screenshots | ✅ | Building document section 5 |
+| Testing record | ✅ | `docs/TESTING.md` + building document section 6 |
+| Security/scalability proposal | ✅ | Building document section 7 |
+| Deployment record | ✅ | Building document section 8 (URL pending) |
 | Contribution record | ✅ | Building document appendix |
-| Individual reflections | ✅ draft | Five role-based drafts; each member should personalize |
+| Individual reflections | ✅ | Five reflections in building document section 9 |
 
 ## Before Canvas submission
 

@@ -497,12 +497,15 @@ Deployment steps:
    `GOOGLE_REDIRECT_URI` in Render. The database value is the Supabase session
    pooler URI; the Google callback is
    `https://beedashdiner.onrender.com/google-login.php`.
-4. Render builds the `Dockerfile`; the entrypoint makes Apache listen on Render’s
+4. Register `https://beedashdiner.onrender.com/google-login.php` as an
+   **Authorized redirect URI** in the Google OAuth client. Without this exact
+   entry Google answers `redirect_uri_mismatch`.
+5. Render builds the `Dockerfile`; the entrypoint makes Apache listen on Render’s
    `PORT`; deploy.
-5. Run the repository-root `database.sql` in the Supabase SQL editor. It creates
+6. Run the repository-root `database.sql` in the Supabase SQL editor. It creates
    the schema and the two demo accounts; `demo_admin` is already an admin in
    the seed data, so no promotion step is needed.
-6. Verify the public URL, HTTPS, login, game, profile upload, and access-denied page.
+7. Verify the public URL, HTTPS, login, game, profile upload, and access-denied page.
 
 Problems met and solutions:
 

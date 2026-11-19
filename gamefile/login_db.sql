@@ -62,7 +62,8 @@ CREATE TABLE IF NOT EXISTS player_progress (
   stats TEXT NULL,
   cosmetics TEXT NULL,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  INDEX idx_player_progress_updated (updated_at)
+  INDEX idx_player_progress_updated (updated_at),
+  CONSTRAINT fk_progress_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
 -- Station progress for the current location.
@@ -77,12 +78,13 @@ CREATE TABLE IF NOT EXISTS player_stations (
   recipe_lvl TINYINT NOT NULL DEFAULT 0,     -- max 10
   work_lvl TINYINT NOT NULL DEFAULT 0,       -- legacy, migrated to cookSpeed
   profit_x2 TINYINT NOT NULL DEFAULT 0,      -- legacy, migrated to profitX2
-  PRIMARY KEY (user_id, slot)
+  PRIMARY KEY (user_id, slot),
+  CONSTRAINT fk_station_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
--- Optional (only if users.id is plain INT):
+-- An older database that was created before these constraints existed can
+-- add them once with:
 -- ALTER TABLE player_progress ADD FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE;
 -- ALTER TABLE player_stations ADD FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE;
--- admin.php deletes progress rows explicitly, so cascades are not required.
 
 -- Reference data (mirrors js/config.js)
 CREATE TABLE IF NOT EXISTS locations (

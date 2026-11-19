@@ -194,6 +194,8 @@ Use a throwaway account and a throwaway database when possible.
       still returns 200.
 - [ ] `admin.php` renders the account list and the audit table, not just the
       summary cards.
+- [ ] A player account receives `data-dev="0"` and no 🛠 button; an admin
+      receives `data-dev="1"` and the panel.
 - [ ] Session cookie is `HttpOnly` and `SameSite=Lax` (check DevTools).
 
 ### Responsive/accessibility

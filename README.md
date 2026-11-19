@@ -6,7 +6,7 @@ A small idle restaurant game built with **vanilla JavaScript modules**, **PHP**,
 > **What it contains:** the scene-first UI (food-stall stations, café entrance, desktop playfield, procedural audio) on top of Emman's redesign, plus bug fixes, security hardening, full admin CRUD, save format v3, and tests.
 > **Name:** **BeeDashDiner** is the product name. The GitHub repository and local XAMPP folder remain `JolliDew` for continuity and submission paths.
 > **Group:** **AQM** · University of St. La Salle
-> **Course:** **CC106 — Cloud Development** · Culminating Learning Evidence (CLE), end-term final project
+> **Course:** **CC106 — Cloud-Based Application Development** · Culminating Learning Evidence (CLE), end-term final project
 > **Program:** Bachelor of Science in Computer Science · 3rd Year, 1st Semester
 > **Instructor:** Japhet Rocamora Pagarigan
 
@@ -80,7 +80,7 @@ See **[docs/GAMEPLAY.md](docs/GAMEPLAY.md)** for formulas and the mission table,
 ### 1. Get the branch
 
 ```bash
-git clone https://github.com/JohnDavidMorandante/JolliDew.git
+git clone https://github.com/JolliDew/JolliDew.git
 cd JolliDew
 git switch feat/scene-first-ui
 ```
@@ -287,6 +287,8 @@ One bee accessory can be equipped at a time. Cosmetics do not affect income or s
 ## 🛠 Admin panel
 
 Open **Admin Panel** from the main menu (admins only), or go to `admin.php`.
+The in-game 🛠 developer tools are also admin-only: a player's game is served
+with `data-dev="0"` and no panel, so normal accounts cannot use the cheats.
 
 Admins can:
 

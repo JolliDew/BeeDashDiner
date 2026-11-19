@@ -46,7 +46,7 @@ Mainmenu.php ── Play Game ──► fetch in-game.php
 | `js/MissionTracker.js` | Ordered mission completion and one-time rewards. |
 | `js/SaveService.js` | Serialized server save/load; the server wins, `localStorage` is the fallback when the server cannot be reached. |
 | `js/Sound.js` | Procedural Web Audio SFX and ambient music; no sample files. |
-| `js/DevTools.js` | Optional developer panel (`$devMode` in `in-game.php`). |
+| `js/DevTools.js` | Admin-only developer panel; `in-game.php` enables it only when the refreshed role is `admin`. |
 | `js/cosmetics.js` | Cosmetic definitions and equip rules. |
 | `css/bee-game.css`, `css/bee-modals.css` | Flat-scoped game and modal styles. |
 

@@ -1,6 +1,6 @@
 ---
 title: "BeeDashDiner — Project Building Document"
-subtitle: "CC106 — Cloud Development · Culminating Learning Evidence (CLE)"
+subtitle: "CC106 — Cloud-Based Application Development"
 author:
   - "Group AQM · University of St. La Salle"
   - "BS Computer Science · 3rd Year, 1st Semester"
@@ -14,14 +14,14 @@ date: "November 2026"
 **Project title:** BeeDashDiner\
 **Group:** AQM\
 **Assigned system:** A cloud-based bee café game with an admin dashboard\
-**Course:** CC106 — Cloud Development\
+**Course:** CC106 — Cloud-Based Application Development\
 **Project type:** Culminating Learning Evidence (CLE) — end-term final project\
 **Program:** Bachelor of Science in Computer Science\
 **Year and term:** 3rd Year, 1st Semester\
 **Instructor:** Japhet Rocamora Pagarigan\
 **Institution:** University of St. La Salle, La Salle Avenue, Bacolod City 6100, Negros Occidental, Philippines\
 **Telephone:** +63 34 434 6100\
-**Repository:** https://github.com/JohnDavidMorandante/JolliDew\
+**Repository:** https://github.com/JolliDew/JolliDew\
 **Planned public URL:** https://YOUR-SERVICE.onrender.com (replace with the real Render URL after deployment)
 
 | Member | Main role | Approx. contribution |
@@ -145,6 +145,7 @@ ORDER BY u.id;
 | Profile / own avatar | No | Yes, own only | Yes, own only |
 | Restart own progress | No | Yes, own only | Yes, own only |
 | Admin dashboard / user CRUD / audit | No | No — 403 access-denied page | Yes |
+| Developer tools (🛠) | No | No | Yes |
 | Delete another account | No | No | Yes |
 
 ## 4.3 Page flow
@@ -437,6 +438,7 @@ them before fixing them:
 | Credentials excluded from git and blocked over HTTP | `.gitignore`, `.htaccess`, `db.container.php` |
 | HTTPS-aware secure cookies | `Auth::start` honours `X-Forwarded-Proto` |
 | Security headers | `Auth::start` sends `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY` and a strict referrer policy |
+| Developer tools are admin-only | `in-game.php` re-reads the role and omits the 🛠 button/panel for players (`data-dev="0"`) |
 
 ## 7.2 Remaining risks
 
@@ -577,7 +579,7 @@ backups for every critical task and hold a short stand-up each work session.
 
 ## 10.2 Source code and working sessions
 
-**Repository:** <https://github.com/JohnDavidMorandante/JolliDew>\
+**Repository:** <https://github.com/JolliDew/JolliDew>\
 **Branch:** `feat/scene-first-ui`
 
 The group worked in the sessions below. The dates are the commit dates, and the

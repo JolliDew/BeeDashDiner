@@ -4,6 +4,28 @@ The application is a PHP 8.2 + Apache app. The database stays on Supabase
 (PostgreSQL). Render builds the included `Dockerfile`; no buildpack settings are
 required.
 
+## Quick path (JolliDew organization)
+
+1. Fast-forward `main` and push it (or push the feature branch and pick it in
+   step 2):
+
+   ```bash
+   git checkout main
+   git merge --ff-only feat/scene-first-ui
+   git push origin main
+   ```
+
+2. In Render: **New → Blueprint**, connect `JolliDew/JolliDew`, and apply
+   `render.yaml`. If you prefer a manual service, use **New → Web Service**,
+   Docker, branch `main`, health check `/`.
+3. Paste the Supabase **Session pooler** URI as `DATABASE_URL`.
+4. Deploy, open the `https://…onrender.com` URL, and log in with
+   `demo_player` / `demo_admin`.
+5. Replace `YOUR-SERVICE` in `README.md`, this guide and the building document,
+   then rebuild the PDF/DOCX and the submission zip.
+
+The detailed steps and the database checks follow.
+
 ## 1. Push the repository
 
 Render deploys from GitHub. Push `feat/scene-first-ui` (or merge it into the
@@ -13,7 +35,9 @@ branch you want to deploy) from your own machine. Never commit
 ## 2. Create the Render service
 
 1. Sign in at <https://render.com>.
-2. Choose **New → Web Service** and connect the JolliDew repository.
+2. Choose **New → Web Service** and connect the `JolliDew/JolliDew`
+   repository. It is private, so authorize the Render GitHub app for the
+   JolliDew organization when GitHub asks.
 3. Runtime: **Docker**.
 4. Branch: the branch you pushed.
 5. Plan: **Free** (or the plan your account provides).

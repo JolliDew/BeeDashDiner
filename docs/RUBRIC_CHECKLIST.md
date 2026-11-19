@@ -1,4 +1,4 @@
-# CC106 — Cloud Development · CLE rubric self-check
+# CC106 — Cloud-Based Application Development · CLE rubric self-check
 
 Culminating Learning Evidence (CLE), end-term final project. Status as of
 the current branch.

@@ -13,9 +13,13 @@ All notable changes to BeeDashDiner.
 - **The save API had no CSRF check.** A save POST now requires the session
   token in `X-CSRF-Token`. The token is printed into the injected game markup
   and sent by `SaveService`, so another site cannot overwrite a player's save.
-- **Course name corrected.** The course is CC106 — Cloud Development; CLE is
-  the Culminating Learning Evidence (the end-term final project). The building
+- **Course name corrected.** The course is CC106 — Cloud-Based Application
+  Development, the official USLS BS Computer Science title; CLE is the
+  Culminating Learning Evidence (the end-term final project). The building
   document, README, rubric checklist, demo script and landing footer say so.
+- **Developer tools are admin-only.** `in-game.php` re-reads the role from the
+  database and omits the 🛠 button and panel for players, so a normal account
+  never receives the cheat UI.
 
 ### Verification
 

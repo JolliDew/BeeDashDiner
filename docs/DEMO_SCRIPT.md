@@ -1,6 +1,6 @@
 # BeeDashDiner demo video script (10–12 minutes)
 
-CC106 — Cloud Development · Culminating Learning Evidence (CLE) · Group AQM ·
+CC106 — Cloud-Based Application Development · Culminating Learning Evidence (CLE) · Group AQM ·
 BS Computer Science, 3rd Year, 1st Semester · Instructor: Japhet Rocamora
 Pagarigan.
 

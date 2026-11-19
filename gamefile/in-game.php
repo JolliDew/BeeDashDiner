@@ -24,8 +24,8 @@ header('Expires: 0');
                     </div>
                     <div class="hud-actions">
                         <div class="sound-wrap">
-                            <button id="soundbtn" class="sound-btn" type="button" title="Audio settings" aria-label="Audio settings" aria-haspopup="dialog" aria-expanded="false" aria-controls="audio-menu" aria-pressed="true">🔊</button>
-                            <div id="audio-menu" class="audio-menu" role="dialog" aria-label="Audio settings" hidden>
+                            <button id="soundbtn" class="sound-btn" type="button" title="Audio settings" aria-label="Audio settings" aria-haspopup="dialog" aria-expanded="false" aria-controls="audio-menu">🔊</button>
+                            <div id="audio-menu" class="audio-menu" role="dialog" aria-label="Audio settings" tabindex="-1" hidden>
                                 <label class="audio-row" for="sfx-vol">
                                     <span>Sound effects</span>
                                     <input id="sfx-vol" type="range" min="0" max="100" step="5" value="70" data-audio="sfx" aria-label="Sound effects volume">
@@ -38,7 +38,7 @@ header('Expires: 0');
                                 </label>
                             </div>
                         </div>
-                        <button id="devbtn" type="button" title="Dev mode" aria-label="Toggle developer tools" hidden>🛠</button>
+                        <button id="devbtn" type="button" title="Dev mode" aria-label="Toggle developer tools" aria-expanded="false" aria-controls="dev" hidden>🛠</button>
                         <button class="menu-btn exit-btn" type="button" onclick="returnToMenu()" title="Exit to main menu" aria-label="Exit to main menu">
                             <span aria-hidden="true">🚪</span>
                         </button>

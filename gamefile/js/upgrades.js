@@ -1,8 +1,7 @@
-import { BALANCE as B } from './config.js';
+import { tipChanceAt, walkSpeedBonus, cookSpeedBonus } from './config.js';
 
-/** The actual tip chance shown in the UI, using the same formula as Economy. */
-const tipChanceAt = level =>
-  Math.round(Math.min(B.tips.maxChance, B.tips.baseChance + B.tips.chanceStep * level) * 100);
+/** The tip chance shown in the UI, using the same formula as Economy. */
+const tipChanceAtPct = level => Math.round(tipChanceAt(level) * 100);
 
 export const GLOBAL_UPGRADES = [
   {
@@ -13,8 +12,8 @@ export const GLOBAL_UPGRADES = [
     maxLevel: 10,
     baseCost: 150,
     growth: 1.6,
-    effect: l => `${tipChanceAt(l)}% tip chance`,
-    describe: l => `Tip chance is now ${tipChanceAt(l)}%.`,
+    effect: l => `${tipChanceAtPct(l)}% tip chance`,
+    describe: l => `Tip chance is now ${tipChanceAtPct(l)}%.`,
   },
   {
     id: 'queue',
@@ -35,8 +34,8 @@ export const GLOBAL_UPGRADES = [
     maxLevel: 5,
     baseCost: 400,
     growth: 1.9,
-    effect: l => `${l * 5}% faster walking`,
-    describe: l => `Workers move ${l * 5}% faster between stations and tables.`,
+    effect: l => `${walkSpeedBonus(l)}% faster walking`,
+    describe: l => `Workers move ${walkSpeedBonus(l)}% faster between stations and tables.`,
   },
   {
     id: 'cookSpeed',
@@ -46,8 +45,8 @@ export const GLOBAL_UPGRADES = [
     maxLevel: 5,
     baseCost: 8000,
     growth: 2,
-    effect: l => `${l * 4}% faster cooking`,
-    describe: l => `Every station cooks ${l * 4}% faster.`,
+    effect: l => `${cookSpeedBonus(l)}% faster cooking`,
+    describe: l => `Every station cooks ${cookSpeedBonus(l)}% faster.`,
   },
   {
     id: 'profitX2',

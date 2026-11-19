@@ -1,4 +1,4 @@
--- Upgrade an existing JolliDew database to the gameplay-expansion schema.
+-- Upgrade an existing BeeDashDiner database to the gameplay-expansion schema.
 --
 -- Run this once in phpMyAdmin (Import tab) or:
 --   mysql -uroot jollidew_db < gamefile/upgrade_db.sql

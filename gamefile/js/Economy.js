@@ -1,4 +1,4 @@
-import { BALANCE as B, slotsAt, profitMultAt } from './config.js';
+import { BALANCE as B, slotsAt, profitMultAt, tipChanceAt, walkTimeAt } from './config.js';
 import { GLOBAL_UPGRADES } from './upgrades.js';
 
 export class Economy {
@@ -9,24 +9,19 @@ export class Economy {
   get level() { return this.state.level; }
 
   get seats() { return B.seatBase + B.queueStep * (this.state.upgrades.queue || 0); }
-  get rows() { return Math.ceil(this.seats / B.cols); }
 
   get walkTime() {
-    return Math.max(.8, B.walk * (1 - B.walkStep * (this.state.upgrades.walkSpeed || 0)));
+    return walkTimeAt(this.state.upgrades.walkSpeed || 0);
   }
 
   get tipChance() {
-    const t = B.tips;
-    return Math.min(t.maxChance, t.baseChance + t.chanceStep * (this.state.upgrades.tipChance || 0));
+    return tipChanceAt(this.state.upgrades.tipChance || 0);
   }
 
   tipAmount(price, rng = Math.random()) {
     const t = B.tips;
     return price * (t.minPct + rng * (t.maxPct - t.minPct));
   }
-
-  maxBees() { return B.maxBees; }
-  maxRecipe() { return B.maxRecipe; }
 
   globalLevel(id) { return this.state.upgrades[id] || 0; }
 

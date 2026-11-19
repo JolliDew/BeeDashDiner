@@ -1,6 +1,9 @@
--- PostgreSQL / Supabase schema for BeeDashDiner.
+-- Complete PostgreSQL / Supabase schema for BeeDashDiner, including the
+-- two demo accounts used for grading.
 -- Run in the Supabase SQL Editor, or:
---   psql "$DATABASE_URL" -f gamefile/login_db_pg.sql
+--   psql "$DATABASE_URL" -f database.sql
+--
+-- gamefile/login_db_pg.sql is the same schema without the demo accounts.
 --
 -- Safe to re-run: tables use IF NOT EXISTS, missing columns are added with
 -- ALTER TABLE ... IF NOT EXISTS, and seed rows use ON CONFLICT.
@@ -25,6 +28,7 @@ CREATE TABLE IF NOT EXISTS users (
 ALTER TABLE users ADD COLUMN IF NOT EXISTS role VARCHAR(20) NOT NULL DEFAULT 'player';
 -- Profile picture uploaded by the player (path relative to gamefile/).
 ALTER TABLE users ADD COLUMN IF NOT EXISTS avatar VARCHAR(255) NULL;
+-- Google-created accounts start with a random hidden password (password_set = 0).
 ALTER TABLE users ADD COLUMN IF NOT EXISTS auth_provider VARCHAR(20) NOT NULL DEFAULT 'local';
 ALTER TABLE users ADD COLUMN IF NOT EXISTS password_set SMALLINT NOT NULL DEFAULT 1;
 
@@ -44,7 +48,7 @@ CREATE INDEX IF NOT EXISTS idx_admin_audit_target ON admin_audit (target_user_id
 CREATE INDEX IF NOT EXISTS idx_admin_audit_created ON admin_audit (created_at);
 
 -- One row per account: honey, tier, currencies and saved gameplay blobs.
--- location_no: 1 Meadow Stand, 2 Hive Cafe, 3 Royal Hive.
+-- location_no: 1 Meadow Stand, 2 Hive Café, 3 Royal Hive.
 -- level: 1..10 (see gamefile/js/config.js LEVELS).
 -- upgrades / missions_done / stats / cosmetics are JSON text.
 -- The current staff count is stored as upgrades.staff (one global hive team).
@@ -112,7 +116,7 @@ CREATE TABLE IF NOT EXISTS locations (
 -- chair per level; gamefile/js/config.js remains the gameplay authority.
 INSERT INTO locations (location_no, name, cost_multiplier, seats, next_cost) VALUES
   (1, 'Meadow Stand', 1, 4, 6500),
-  (2, 'Hive Cafe', 6, 4, 48000),
+  (2, 'Hive Café', 6, 4, 48000),
   (3, 'Royal Hive', 36, 4, NULL)
 ON CONFLICT (location_no) DO UPDATE SET
   name = EXCLUDED.name,

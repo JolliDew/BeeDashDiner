@@ -1,4 +1,7 @@
+-- BeeDashDiner schema for MySQL / MariaDB (the XAMPP database).
 -- phpMyAdmin: Import tab > choose this file > Go.  Safe to re-run (IF NOT EXISTS).
+-- MariaDB (what XAMPP ships) supports ADD COLUMN IF NOT EXISTS. On MySQL 8,
+-- remove "IF NOT EXISTS" from the ALTER lines and run the file once.
 CREATE DATABASE IF NOT EXISTS jollidew_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 USE jollidew_db;
 -- Make CLI imports (mysql < login_db.sql) use UTF-8 too, not just phpMyAdmin.
@@ -42,7 +45,7 @@ CREATE TABLE IF NOT EXISTS admin_audit (
 );
 
 -- One row per account: honey, tier, currencies and saved gameplay blobs.
--- location_no: 1 Meadow Stand, 2 Hive Cafe, 3 Royal Hive.
+-- location_no: 1 Meadow Stand, 2 Hive Café, 3 Royal Hive.
 -- level: 1..10 (see gamefile/js/config.js LEVELS).
 -- upgrades / missions_done / stats / cosmetics are JSON text.
 -- The current staff count is stored as upgrades.staff (one global hive team).
@@ -87,7 +90,7 @@ CREATE TABLE IF NOT EXISTS locations (
 );
 -- seats is the base queue capacity. The Bigger waiting area upgrade adds one
 -- chair per level; gamefile/js/config.js remains the gameplay authority.
-INSERT INTO locations VALUES (1,'Meadow Stand',1,4,6500),(2,'Hive Cafe',6,4,48000),(3,'Royal Hive',36,4,NULL)
+INSERT INTO locations VALUES (1,'Meadow Stand',1,4,6500),(2,'Hive Café',6,4,48000),(3,'Royal Hive',36,4,NULL)
 ON DUPLICATE KEY UPDATE name=VALUES(name), seats=VALUES(seats);
 
 CREATE TABLE IF NOT EXISTS menu_items (

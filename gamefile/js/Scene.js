@@ -2,6 +2,9 @@ import { ASSETS, ITEMS, CUSTOMERS, MAPS, BALANCE as B, art, fmt } from './config
 import { Bee, Customer } from './entities.js';
 import { pickJob } from './WorkerAI.js';
 
+/** Scene parts that carry no meaning for a screen reader. */
+const DECORATIVE = new Set(['ent', 'seat', 'pop', 'kitchen', 'rug', 'plant', 'aisle', 'door']);
+
 export class Scene {
   constructor(host, state, economy) {
     this.host = host; this.state = state; this.economy = economy;
@@ -35,6 +38,10 @@ export class Scene {
     const d = document.createElement('div');
     d.className = cls; d.innerHTML = html;
     if (cls !== 'stn') d.style.pointerEvents = 'none';
+    // The scene entities are decoration. Only the stations are real controls,
+    // so the bees, guests, chairs and floating numbers stay out of the way
+    // of a screen reader.
+    if (DECORATIVE.has(cls)) d.setAttribute('aria-hidden', 'true');
     this.host.appendChild(d);
     return d;
   }
@@ -96,7 +103,7 @@ export class Scene {
     // The sign lives with the stalls, not at a fixed kitchen percentage. It can
     // therefore never be covered by an awning on short screens or float far
     // above them on tall ones.
-    const area = this.mk('station-area', `<span class="station-sign">${menuLabel}</span><span class="station-row"></span>`);
+    const area = this.mk('station-area', `<span class="station-sign" aria-hidden="true">${menuLabel}</span><span class="station-row"></span>`);
     const row = area.querySelector('.station-row');
     this.state.stations.forEach((s, i) => {
       // Each station is drawn as a small food stall: striped awning, serving
@@ -200,6 +207,15 @@ export class Scene {
       const wk = el.querySelector('.swk');
       set(wk, s.unlocked ? `🐝 ${busy}/${slots}` : '');
       if (wk) wk.classList.toggle('full', s.unlocked && busy >= slots);
+
+      // The name alone did not tell a screen reader what the stall is doing,
+      // so the label carries the live state as well.
+      const name = ITEMS[st.location][i][1];
+      const label = s.unlocked
+        ? `${name}, recipe level ${s.recipe}, ${busy} of ${slots} bees working`
+          + (can ? ', upgrade available' : '')
+        : `${name}, locked` + (can ? ', unlock available' : '');
+      if (el.getAttribute('aria-label') !== label) el.setAttribute('aria-label', label);
     });
     this.seatEls.forEach((e, k) => e.classList.toggle('taken', !!this.seats[k]));
   }

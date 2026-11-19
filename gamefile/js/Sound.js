@@ -174,6 +174,30 @@ export class SoundEngine {
     this.musicRunning = false;
     this.stopMusic();
     this.detachUnlock();
+    this.disconnect();
+  }
+
+  /**
+   * Release the audio graph. The shared AudioContext stays open (the next
+   * game reuses it), but the nodes of this game are disconnected so nothing
+   * keeps playing after the game is closed.
+   */
+  disconnect() {
+    clearTimeout(this.duckTimer);
+    this.duckTimer = null;
+    const nodes = [
+      this.sfxBus, this.sfxFilter, this.sfxSend,
+      this.musicBus, this.musicFilter, this.musicSend,
+      this.reverb, this.wet, this.master, this.compressor,
+    ];
+    for (const node of nodes) {
+      try { node?.disconnect(); } catch (e) { /* the node was already gone */ }
+    }
+    this.sfxBus = null; this.sfxFilter = null; this.sfxSend = null;
+    this.musicBus = null; this.musicFilter = null; this.musicSend = null;
+    this.reverb = null; this.wet = null; this.master = null; this.compressor = null;
+    this.noiseBuffer = null;
+    this.ctx = null;
   }
 
   pause() {
@@ -338,10 +362,6 @@ export class SoundEngine {
       this.playTone(f, { dur: .22, type: 'triangle', vol: .08, delay: i * .12 });
     });
     this.playTone(1318.5, { dur: .3, type: 'sine', vol: .05, delay: .5 });
-  }
-
-  deny() {
-    this.playTone(196, { end: 147, dur: .20, type: 'sine', vol: .05 });
   }
 
   /* ---------------------------------------------------------------- music */

@@ -7,7 +7,15 @@ export const ASSETS = {
   honeyIcon: ''
 };
 export const art = (path, emoji) => path ? `<img class="art" src="${path}" alt="">` : emoji;
-export const fmt = n => n >= 1e6 ? (n / 1e6).toFixed(1) + 'M' : n >= 1e4 ? (n / 1e3).toFixed(1) + 'k' : Math.floor(n) + '';
+/** Short number for the HUD: 1.2k, 3.4M, 5.6B, 7.8T. */
+export const fmt = n => {
+  const v = Number(n) || 0;
+  if (v >= 1e12) return (v / 1e12).toFixed(1) + 'T';
+  if (v >= 1e9) return (v / 1e9).toFixed(1) + 'B';
+  if (v >= 1e6) return (v / 1e6).toFixed(1) + 'M';
+  if (v >= 1e4) return (v / 1e3).toFixed(1) + 'k';
+  return Math.floor(v) + '';
+};
 
 export const ITEMS = [
   [['🌼', 'Nectar Sip'], ['🍞', 'Honey Toast'], ['🥣', 'Pollen Soup']],
@@ -40,7 +48,6 @@ export const LEVELS = [
   { level: 10, location: 2, reward: { honey: 20000, diamonds: 10 } },
 ];
 export const MAX_LEVEL = LEVELS.length;
-export const LEVEL_LOCATIONS = LEVELS.map(l => l.location);
 export const levelLocation = level =>
   LEVELS[Math.max(1, Math.min(MAX_LEVEL, level)) - 1].location;
 export const firstLevelForLocation = loc =>
@@ -86,3 +93,32 @@ export const slotsAt = recipe => 1 + milestonesReached(recipe).filter(m => m.typ
 export const profitMultAt = recipe =>
   BALANCE.milestoneProfit ** milestonesReached(recipe).filter(m => m.type === 'profit').length;
 export const nextMilestone = recipe => MILESTONES.find(m => recipe < m.recipe) || null;
+
+/*
+ * The upgrade panel shows the real effect of an upgrade, so the numbers in
+ * the shop and the numbers in the simulation can never drift apart.
+ */
+
+/** The tip chance at a given tip-jar level (0-10). */
+export const tipChanceAt = level =>
+  Math.min(BALANCE.tips.maxChance, BALANCE.tips.baseChance + BALANCE.tips.chanceStep * level);
+
+/** How long a walk takes at a given wing-workout level. */
+export const walkTimeAt = level =>
+  Math.max(.8, BALANCE.walk * (1 - BALANCE.walkStep * level));
+
+/**
+ * How much faster walking really is, as a percentage. The upgrade shortens
+ * the walk, so the speed gain is larger than the time saved: 20% less time
+ * is a 25% higher speed.
+ */
+export const walkSpeedBonus = level =>
+  Math.round((BALANCE.walk / walkTimeAt(level) - 1) * 100);
+
+/**
+ * How much faster cooking really is, as a percentage. The shortest dish takes
+ * two seconds, so the 0.4 second floor of the cooking time never applies and
+ * the factor alone decides the speed.
+ */
+export const cookSpeedBonus = level =>
+  Math.round((1 / (1 - BALANCE.cookStep * level) - 1) * 100);

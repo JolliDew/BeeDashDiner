@@ -5,6 +5,11 @@ export class DevTools {
     this.panel = root.querySelector('#dev');
     this.toggle = root.querySelector('#devbtn');
     this.toggle.hidden = false;
+    // The toggle opens a panel, so it reports whether that panel is open.
+    this.toggle.setAttribute('aria-expanded', 'false');
+    this.toggle.setAttribute('aria-controls', 'dev');
+    this.panel.setAttribute('role', 'group');
+    this.panel.setAttribute('aria-label', 'Developer tools');
     this.panel.innerHTML = `<b>DEV</b>
       <button data-d="honey1000">+1k 🍯</button><button data-d="honey100000">+100k 🍯</button><button data-d="honey10000000">+10M 🍯</button>
       <button data-d="dia10">+10 💎</button>
@@ -14,7 +19,11 @@ export class DevTools {
       <button data-d="unlock">Unlock all</button><button data-d="max">Max all</button>
       <button data-d="x1" class="on">×1</button><button data-d="x5">×5</button><button data-d="x20">×20</button>
       <button data-d="reset">Reset save</button>`;
-    this.toggle.onclick = () => { this.panel.hidden = !this.panel.hidden; };
+    this.toggle.onclick = () => {
+      const open = this.panel.hidden;
+      this.panel.hidden = !open;
+      this.toggle.setAttribute('aria-expanded', String(open));
+    };
     this.panel.addEventListener('click', e => this.onClick(e));
   }
 

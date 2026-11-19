@@ -4,7 +4,7 @@ import assert from 'node:assert/strict';
 import { GameState } from '../gamefile/js/GameState.js';
 import { Economy } from '../gamefile/js/Economy.js';
 import { GLOBAL_UPGRADES } from '../gamefile/js/upgrades.js';
-import { BALANCE as B, MILESTONES, slotsAt, profitMultAt } from '../gamefile/js/config.js';
+import { BALANCE as B, MILESTONES, slotsAt, profitMultAt, fmt } from '../gamefile/js/config.js';
 
 const close = (a, b) => assert.ok(Math.abs(a - b) < 1e-9, `${a} !== ${b}`);
 
@@ -87,6 +87,37 @@ test('walking upgrades change travel time but never below 0.8s', () => {
   close(eco.walkTime, B.walk);
   state.upgrades.walkSpeed = 5;
   close(eco.walkTime, Math.max(.8, B.walk * (1 - B.walkStep * 5)));
+});
+
+test('the shop shows the real speed gain of the walking and cooking upgrades', () => {
+  const state = new GameState();
+  const eco = new Economy(state);
+  const wing = GLOBAL_UPGRADES.find(d => d.id === 'walkSpeed');
+  const drills = GLOBAL_UPGRADES.find(d => d.id === 'cookSpeed');
+
+  // The upgrade shortens the time, so the speed gain is bigger than the time
+  // saved: 25% less walking time is a third more speed.
+  state.upgrades.walkSpeed = 5;
+  const walkFactor = B.walk / eco.walkTime;
+  const walkPct = Math.round((walkFactor - 1) * 100);
+  assert.match(wing.effect(5), new RegExp(`${walkPct}% faster walking`));
+  assert.match(wing.describe(5), new RegExp(`${walkPct}% faster`));
+
+  state.upgrades.walkSpeed = 0;
+  state.upgrades.cookSpeed = 5;
+  const cookFactor = B.cookSecs[0] / eco.cookTime(0);
+  const cookPct = Math.round((cookFactor - 1) * 100);
+  assert.match(drills.effect(5), new RegExp(`${cookPct}% faster cooking`));
+  assert.match(drills.describe(5), new RegExp(`${cookPct}% faster`));
+});
+
+test('the number formatter keeps billions and trillions readable', () => {
+  assert.equal(fmt(999), '999');
+  assert.equal(fmt(1234), '1234');
+  assert.equal(fmt(12345), '12.3k');
+  assert.equal(fmt(1234567), '1.2M');
+  assert.equal(fmt(1234567890), '1.2B');
+  assert.equal(fmt(1234567890123), '1.2T');
 });
 
 test('worker cap is the number of open slots, capped by maxBees', () => {

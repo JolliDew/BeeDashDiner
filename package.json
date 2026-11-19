@@ -1,8 +1,8 @@
 {
   "name": "jollidew",
-  "version": "2.0.0",
+  "version": "2.2.0",
   "private": true,
-  "description": "JolliDew bee restaurant game - upgrades, missions and automatic workers",
+  "description": "BeeDashDiner bee restaurant game - upgrades, missions and automatic workers",
   "type": "module",
   "scripts": {
     "test": "npm run test:js && npm run test:php",

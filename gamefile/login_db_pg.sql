@@ -1,6 +1,9 @@
--- PostgreSQL / Supabase schema for JolliDew.
+-- PostgreSQL / Supabase schema for BeeDashDiner.
 -- Run in the Supabase SQL Editor, or:
 --   psql "$DATABASE_URL" -f gamefile/login_db_pg.sql
+--
+-- This file is the schema without the demo accounts. Use the repository root
+-- database.sql when you want the demo_player and demo_admin accounts as well.
 --
 -- Safe to re-run: tables use IF NOT EXISTS, missing columns are added with
 -- ALTER TABLE ... IF NOT EXISTS, and seed rows use ON CONFLICT.
@@ -45,7 +48,7 @@ CREATE INDEX IF NOT EXISTS idx_admin_audit_target ON admin_audit (target_user_id
 CREATE INDEX IF NOT EXISTS idx_admin_audit_created ON admin_audit (created_at);
 
 -- One row per account: honey, tier, currencies and saved gameplay blobs.
--- location_no: 1 Meadow Stand, 2 Hive Cafe, 3 Royal Hive.
+-- location_no: 1 Meadow Stand, 2 Hive Café, 3 Royal Hive.
 -- level: 1..10 (see gamefile/js/config.js LEVELS).
 -- upgrades / missions_done / stats / cosmetics are JSON text.
 -- The current staff count is stored as upgrades.staff (one global hive team).
@@ -113,7 +116,7 @@ CREATE TABLE IF NOT EXISTS locations (
 -- chair per level; gamefile/js/config.js remains the gameplay authority.
 INSERT INTO locations (location_no, name, cost_multiplier, seats, next_cost) VALUES
   (1, 'Meadow Stand', 1, 4, 6500),
-  (2, 'Hive Cafe', 6, 4, 48000),
+  (2, 'Hive Café', 6, 4, 48000),
   (3, 'Royal Hive', 36, 4, NULL)
 ON CONFLICT (location_no) DO UPDATE SET
   name = EXCLUDED.name,

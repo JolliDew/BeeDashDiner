@@ -100,7 +100,12 @@ export class Game {
       const open = this.audioMenu.hidden;
       this.audioMenu.hidden = !open;
       this.soundBtn.setAttribute('aria-expanded', String(open));
-      if (open) this.audioMenu.querySelector('button')?.focus();
+      // The panel holds sliders, not buttons, so the first control is the
+      // right place to put the focus.
+      if (open) {
+        const first = this.audioMenu.querySelector('input, button, [tabindex]');
+        if (first) first.focus();
+      }
       this.sound?.click();
     };
     this.soundBtn?.addEventListener('click', this._onSoundBtn);
@@ -149,7 +154,9 @@ export class Game {
     const music = this.sound?.musicVol ?? 0;
     const any = sfx > 0 || music > 0;
     this.soundBtn.textContent = any ? '🔊' : '🔇';
-    this.soundBtn.setAttribute('aria-pressed', String(any));
+    // The button opens a panel, so aria-expanded describes it. aria-pressed
+    // would mean something else entirely and would confuse a screen reader.
+    this.soundBtn.setAttribute('aria-label', any ? 'Audio settings (sound on)' : 'Audio settings (muted)');
     this.soundBtn.title = any ? 'Audio settings (on)' : 'Audio settings (muted)';
     if (!this.audioMenu) return;
     this.audioMenu.querySelectorAll('input[data-audio]').forEach(input => {

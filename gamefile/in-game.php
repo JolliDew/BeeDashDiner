@@ -1,9 +1,18 @@
 <?php
 // HTML fragment injected by Mainmenu.js when the player presses "Play Game".
+require_once __DIR__ . '/db.php';
 require_once __DIR__ . '/src/Auth.php';
 require_once __DIR__ . '/src/Csrf.php';
-$userId = Auth::requireLogin(true);
-$devMode = true; // set to false for release: hides the 🛠 dev tools
+
+// Re-read the role from the database. Developer tools are an admin-only
+// feature, so a normal player never receives the panel or its markup.
+$me = Auth::refresh($pdo);
+if (!$me) {
+    http_response_code(401);
+    exit('Please log in again.');
+}
+$userId = (int)$me['id'];
+$devMode = ($me['role'] ?? 'player') === 'admin';
 $cssV = fn(string $file): int => max(1, @filemtime(__DIR__ . '/' . $file) ?: 1);
 
 // The injected game markup and its styles must never come from an old cache.
@@ -39,7 +48,7 @@ header('Expires: 0');
                                 </label>
                             </div>
                         </div>
-                        <button id="devbtn" type="button" title="Dev mode" aria-label="Toggle developer tools" aria-expanded="false" aria-controls="dev" hidden>🛠</button>
+                        <?php if ($devMode): ?><button id="devbtn" type="button" title="Dev mode" aria-label="Toggle developer tools" aria-expanded="false" aria-controls="dev" hidden>🛠</button><?php endif; ?>
                         <button class="menu-btn exit-btn" type="button" onclick="returnToMenu()" title="Exit to main menu" aria-label="Exit to main menu">
                             <span aria-hidden="true">🚪</span>
                         </button>
@@ -50,7 +59,7 @@ header('Expires: 0');
                     <span id="hud-save" aria-live="polite">Loading…</span>
                 </div>
             </div>
-            <div id="dev" hidden></div>
+            <?php if ($devMode): ?><div id="dev" hidden></div><?php endif; ?>
             <div id="scene"></div>
             <div id="panel"></div>
         </div>

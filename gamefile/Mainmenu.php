@@ -39,7 +39,7 @@ header('Expires: 0');
     <!-- Bootstrap first so Mainmenu.css wins any clash. The game modals need Bootstrap 4 + jQuery. -->
     <link rel="stylesheet" href="vendor/bootstrap/bootstrap.min.css">
     <link rel="stylesheet" href="Mainmenu.css?v=<?= $menuCssV ?>">
-    <link rel="stylesheet" href="css/site-nav.css">
+    <link rel="stylesheet" href="css/site-nav.css?v=<?= @filemtime(__DIR__ . '/css/site-nav.css') ?: 1 ?>">
 </head>
 <body class="has-nav">
     <?php $navActive = 'game'; include 'includes/nav.php'; ?>

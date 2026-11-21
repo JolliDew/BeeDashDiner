@@ -162,7 +162,7 @@ $link = fn(int $p): string => 'admin.php?' . http_build_query(['q' => $q, 'page'
     <title>Admin - BeeDashDiner</title>
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
     <link rel="stylesheet" href="vendor/bootstrap/bootstrap.min.css">
-    <link rel="stylesheet" href="css/site-nav.css">
+    <link rel="stylesheet" href="css/site-nav.css?v=<?= @filemtime(__DIR__ . '/css/site-nav.css') ?: 1 ?>">
     <style>
         body { background: #16120c; color: #fff6df; }
         a { color: #ffd84d; }

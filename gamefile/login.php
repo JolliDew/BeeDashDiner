@@ -60,7 +60,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
     <!-- Uses the same separate CSS file -->
     <link rel="stylesheet" href="logindesign.css?v=<?= $authCssV ?>">
-    <link rel="stylesheet" href="css/site-nav.css">
+    <link rel="stylesheet" href="css/site-nav.css?v=<?= @filemtime(__DIR__ . '/css/site-nav.css') ?: 1 ?>">
 </head>
 <body class="has-nav">
     <?php $navActive = 'login'; include 'includes/nav.php'; ?>

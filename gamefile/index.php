@@ -29,7 +29,7 @@ if ($me) {
     <meta property="og:type" content="website">
     <meta property="og:image" content="assets/meadow.png">
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
-    <link rel="stylesheet" href="css/site-nav.css">
+    <link rel="stylesheet" href="css/site-nav.css?v=<?= @filemtime(__DIR__ . '/css/site-nav.css') ?: 1 ?>">
     <link rel="stylesheet" href="css/pages.css">
     <link rel="stylesheet" href="css/landing.css">
 </head>

@@ -1,12 +1,33 @@
 /* Shared navigation. Loaded by every page, before the page-specific styles. */
 
-/* The dark colour normally comes from the page body. Painting the root too
-   means any exposed canvas (a dynamic-viewport sliver, a scrollbar gutter)
-   shows the theme colour instead of the browser's white. color-scheme keeps
-   scrollbars and native controls dark to match the rest of the app. */
+/* Paint the root dark as well as the body, so any exposed canvas (a
+   dynamic-viewport sliver, a scrollbar gutter) shows the theme colour instead
+   of the browser's default white. */
 html {
     background: #12121c;
-    color-scheme: dark;
+    scrollbar-color: #6b5a37 #12121c; /* Firefox */
+}
+
+/* Dark scrollbars on every page. A default (light) scrollbar reads as a bright
+   line down the side or along the bottom of an otherwise dark screen, so the
+   track and thumb are themed to match the app. */
+::-webkit-scrollbar {
+    width: 12px;
+    height: 12px;
+}
+
+::-webkit-scrollbar-track {
+    background: #12121c;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #4a3b22;
+    border: 2px solid #12121c;
+    border-radius: 7px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #6b5a37;
 }
 
 body.has-nav {

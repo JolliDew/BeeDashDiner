@@ -7,6 +7,7 @@
 
 html {
   height: 100%;
+  background-color: #111; /* dark canvas: an exposed sliver must never be white */
 }
 
 body {
@@ -18,8 +19,10 @@ body {
   padding: 24px 16px;
   overflow-x: hidden;
   overflow-y: auto;  /* the register form and the phone keyboard must scroll */
-  min-height: 100vh;
-  min-height: 100dvh;
+  /* Height of the <html> box rather than the dynamic viewport: 100vh / 100dvh
+     can be a hair taller than the layout viewport, which leaves a permanent
+     thin scrollbar and a light seam down the right and bottom edges. */
+  min-height: 100%;
 }
 
 /* Background Animated Lines */
@@ -121,6 +124,7 @@ body {
 /* Card Box Styling (With high z-index so it sits on top of the background) */
 .card {
     background: #ffffff;
+    color-scheme: light;         /* the card is a light surface: native controls stay light */
     width: 100%;                 /* Fill the padded page on mobile */
     max-width: 400px;            /* Caps at 400px on tablets/desktops */
     padding: 24px;
@@ -203,6 +207,7 @@ body {
     font-size: 14px;
     outline: none;
     color: #1f2937;
+    background-color: #ffffff;   /* fields are always light, whatever the page scheme */
     transition: border-color 0.2s, ring 0.2s;
 }
 

@@ -8,6 +8,11 @@
 html {
   height: 100%;
   background-color: #111; /* dark canvas: an exposed sliver must never be white */
+  /* These pages are a single centred column, so nothing ever needs to scroll
+     sideways. If the browser does show a horizontal scrollbar it steals ~12px
+     of height, the layout viewport shrinks, and the page ends with a light 1px
+     seam where it meets the scrollbar. Clipping the root rules that out. */
+  overflow-x: hidden;
 }
 
 body {

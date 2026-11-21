@@ -4,8 +4,11 @@
    dynamic-viewport sliver, a scrollbar gutter) shows the theme colour instead
    of the browser's default white. */
 html {
-    background: #12121c;
-    scrollbar-color: #6b5a37 #12121c; /* Firefox */
+    /* One shared dark shade. If the page background and the exposed canvas
+       differ even slightly, the join reads as a faint band at the viewport
+       edge, so html and the page bodies use the same colour. */
+    background: #111;
+    scrollbar-color: #6b5a37 #111; /* Firefox */
 }
 
 /* Dark scrollbars on every page. A default (light) scrollbar reads as a bright
@@ -17,12 +20,12 @@ html {
 }
 
 ::-webkit-scrollbar-track {
-    background: #12121c;
+    background: #111;
 }
 
 ::-webkit-scrollbar-thumb {
     background: #4a3b22;
-    border: 2px solid #12121c;
+    border: 2px solid #111;
     border-radius: 7px;
 }
 

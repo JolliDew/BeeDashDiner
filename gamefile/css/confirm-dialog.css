@@ -1,0 +1,109 @@
+/* Shared confirmation dialog. Loaded by includes/confirm-dialog.php.
+   One dark theme with gold accents, so it looks the same on the game menu
+   and the admin panel. No Bootstrap JavaScript required. */
+
+.cd-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 2000;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    background: rgba(0, 0, 0, .55);
+    -webkit-backdrop-filter: blur(2px);
+    backdrop-filter: blur(2px);
+}
+
+.cd-overlay.is-open {
+    display: flex;
+}
+
+/* Stop the page behind the dialog from scrolling. */
+body.cd-open {
+    overflow: hidden;
+}
+
+.cd-box {
+    width: 100%;
+    max-width: 420px;
+    max-height: calc(100vh - 32px);
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+    background: #241f33;
+    color: #fff6df;
+    border: 1px solid rgba(255, 216, 77, .28);
+    border-radius: 14px;
+    box-shadow: 0 18px 50px rgba(0, 0, 0, .6);
+    overflow: hidden;
+    animation: cd-in .16s ease-out;
+}
+
+@keyframes cd-in {
+    from { transform: translateY(6px); opacity: .6; }
+    to   { transform: none; opacity: 1; }
+}
+
+.cd-title {
+    margin: 0;
+    padding: 13px 18px;
+    font-size: 1.02rem;
+    font-weight: 800;
+    color: #ffd84d;
+    border-bottom: 1px solid rgba(255, 216, 77, .18);
+}
+
+.cd-msg {
+    margin: 0;
+    padding: 16px 18px;
+    color: #e7dcc2;
+    line-height: 1.5;
+    font-size: .95rem;
+    overflow-y: auto;
+}
+
+.cd-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    padding: 12px 18px;
+    border-top: 1px solid rgba(255, 216, 77, .18);
+}
+
+.cd-btn {
+    font: inherit;
+    font-weight: 700;
+    border: 0;
+    border-radius: 8px;
+    padding: 9px 16px;
+    cursor: pointer;
+}
+
+.cd-btn-cancel {
+    background: #4a4560;
+    color: #ffffff;
+}
+
+.cd-btn-cancel:hover {
+    background: #565073;
+}
+
+.cd-btn-danger {
+    background: #c62828;
+    color: #ffffff;
+}
+
+.cd-btn-danger:hover {
+    background: #b71c1c;
+}
+
+.cd-btn:focus-visible {
+    outline: 3px solid #ffd84d;
+    outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .cd-box { animation: none; }
+}

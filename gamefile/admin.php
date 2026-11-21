@@ -288,7 +288,11 @@ $link = fn(int $p): string => 'admin.php?' . http_build_query(['q' => $q, 'page'
                         </div>
                     </form>
                     <div class="col-md-5 mb-2 text-md-right">
-                        <form method="post" class="d-inline" onsubmit="return confirm('Delete every saved game for this account?');">
+                        <form method="post" class="d-inline"
+                              data-confirm="Delete every saved game for this account?"
+                              data-confirm-title="Reset progress?"
+                              data-confirm-ok="Yes, reset"
+                              onsubmit="return window.confirmDialog ? confirmDialog.open(this) : confirm('Delete every saved game for this account?');">
                             <?= Csrf::field() ?>
                             <input type="hidden" name="action" value="reset_progress">
                             <input type="hidden" name="id" value="<?= (int)$edit['id'] ?>">
@@ -297,7 +301,11 @@ $link = fn(int $p): string => 'admin.php?' . http_build_query(['q' => $q, 'page'
                             <button class="btn btn-outline-warning" type="submit">Reset progress</button>
                         </form>
                         <?php if ((int)$edit['id'] !== (int)$me['id']): ?>
-                            <form method="post" class="d-inline" onsubmit="return confirm('Delete this account and all of its progress? This cannot be undone.');">
+                            <form method="post" class="d-inline"
+                                  data-confirm="Delete this account and all of its progress? This cannot be undone."
+                                  data-confirm-title="Delete user?"
+                                  data-confirm-ok="Delete user"
+                                  onsubmit="return window.confirmDialog ? confirmDialog.open(this) : confirm('Delete this account and all of its progress? This cannot be undone.');">
                                 <?= Csrf::field() ?>
                                 <input type="hidden" name="action" value="delete">
                                 <input type="hidden" name="id" value="<?= (int)$edit['id'] ?>">
@@ -316,7 +324,7 @@ $link = fn(int $p): string => 'admin.php?' . http_build_query(['q' => $q, 'page'
         <div class="card-header d-flex justify-content-between align-items-center flex-wrap">
             <span class="font-weight-bold">Accounts</span>
             <form method="get" class="form-inline mt-2 mt-sm-0">
-                <input class="form-control form-control-sm mr-2" style="min-width:240px" name="q" value="<?= e($q) ?>" placeholder="Search username or email">
+                <input class="form-control form-control-sm mr-2" style="width:240px;max-width:100%" name="q" value="<?= e($q) ?>" placeholder="Search username or email">
                 <button class="btn btn-sm btn-outline-warning" type="submit">Search</button>
                 <?php if ($q !== ''): ?><a class="btn btn-sm btn-link" href="admin.php">Clear</a><?php endif; ?>
             </form>
@@ -389,5 +397,6 @@ $link = fn(int $p): string => 'admin.php?' . http_build_query(['q' => $q, 'page'
         </div>
     </div>
 </div>
+<?php include 'includes/confirm-dialog.php'; ?>
 </body>
 </html>

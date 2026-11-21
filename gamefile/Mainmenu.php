@@ -12,6 +12,7 @@ if (!$me) {
 }
 $isAdmin = ($me['role'] ?? 'player') === 'admin';
 $menuCssV = @filemtime(__DIR__ . '/Mainmenu.css') ?: 1;
+$menuJsV = @filemtime(__DIR__ . '/Mainmenu.js') ?: 1;
 $menuProgress = null;
 try {
     $q = $pdo->prepare('SELECT level, honey, missions_finished FROM player_progress WHERE user_id = ?');
@@ -76,7 +77,10 @@ header('Expires: 0');
         <a class="menu-help" href="help.php">How to play</a>
 
         <form action="restart.php" method="POST" class="restart-form"
-              onsubmit="return confirm('Delete all saved progress for this account? This cannot be undone.');">
+              data-confirm="Delete all saved progress for this account? This cannot be undone."
+              data-confirm-title="Restart progress?"
+              data-confirm-ok="Yes, restart"
+              onsubmit="return window.confirmDialog ? confirmDialog.open(this) : confirm('Delete all saved progress for this account? This cannot be undone.');">
             <?= Csrf::field() ?>
             <button class="restart-btn" type="submit">Restart progress</button>
         </form>
@@ -85,6 +89,7 @@ header('Expires: 0');
     <!-- Link to your JavaScript file -->
     <script src="vendor/jquery/jquery.min.js"></script>
     <script src="vendor/bootstrap/bootstrap.bundle.min.js"></script>
-    <script src="Mainmenu.js"></script>
+    <script src="Mainmenu.js?v=<?= $menuJsV ?>"></script>
+    <?php include 'includes/confirm-dialog.php'; ?>
 </body>
 </html>

@@ -77,10 +77,56 @@ function startGame() {
         .finally(() => { if (token === startToken) starting = false; });
 }
 
+/**
+ * Refresh the menu's Level/honey line from the state the player just left, so
+ * exiting the game updates the menu immediately instead of only after a reload.
+ * No-ops when there is no state (for example, when a start attempt failed).
+ */
+function syncMenuProgress(state) {
+    const menu = document.getElementById('main-menu');
+    if (!menu || !state) return;
+
+    const level = Math.max(1, Math.min(10, parseInt(state.level, 10) || 1));
+    const honey = Number(state.honey) || 0;
+    const finished = !!(state.missions && state.missions.finished);
+
+    // The server only prints this line once a save exists; create it on the
+    // first game so the update still shows.
+    let line = menu.querySelector('.menu-progress');
+    if (!line) {
+        line = document.createElement('p');
+        line.className = 'menu-progress';
+        const buttons = menu.querySelector('.menu-buttons');
+        if (buttons) menu.insertBefore(line, buttons);
+        else menu.appendChild(line);
+    }
+    line.textContent = 'Level ' + level + '/10 · 🍯 ' +
+        honey.toLocaleString('en-US', { maximumFractionDigits: 0 });
+
+    const won = finished ? '🏆 Game complete — you finished all 10 levels!' : '';
+    let win = menu.querySelector('.menu-win');
+    if (won && !win) {
+        win = document.createElement('p');
+        win.className = 'menu-win';
+        line.after(win);
+    }
+    if (win) {
+        if (won) win.textContent = won;
+        else win.remove();
+    }
+}
+
 function returnToMenu() {
     // Cancel a start that is still loading so it cannot revive itself later.
     startToken++;
     starting = false;
+    // Read the progress before destroy() clears the game so the menu can show
+    // it right away. Only primitives are kept, so a later change cannot leak in.
+    const lastState = currentGame && currentGame.state ? {
+        level: currentGame.state.level,
+        honey: currentGame.state.honey,
+        missions: { finished: !!(currentGame.state.missions && currentGame.state.missions.finished) }
+    } : null;
     if (currentGame) {
         const pending = currentGame.destroy(); // stops the loop and saves
         currentGame = null;
@@ -95,6 +141,8 @@ function returnToMenu() {
     if (gameContainer) {
         gameContainer.remove();
     }
+    // Update the menu before revealing it, so the old values never flash.
+    syncMenuProgress(lastState);
     document.getElementById('main-menu').style.display = 'block';
     const siteNav = document.querySelector('.site-nav');
     if (siteNav) siteNav.style.display = '';

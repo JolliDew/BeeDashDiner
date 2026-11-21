@@ -1,0 +1,380 @@
+/* BeeDashDiner demo recording script — print stylesheet for WeasyPrint */
+
+@page {
+    size: A4;
+    margin: 17mm 16mm 18mm 16mm;
+    @top-left {
+        content: "BeeDashDiner · Demo Recording Script";
+        font-family: "Helvetica Neue", Arial, sans-serif;
+        font-size: 7.4pt;
+        color: #9a8568;
+    }
+    @top-right {
+        content: "Group AQM · CC106 CLE";
+        font-family: "Helvetica Neue", Arial, sans-serif;
+        font-size: 7.4pt;
+        color: #9a8568;
+    }
+    @bottom-center {
+        content: "Page " counter(page) " of " counter(pages);
+        font-family: "Helvetica Neue", Arial, sans-serif;
+        font-size: 7.4pt;
+        color: #8a7a66;
+    }
+}
+
+@page :first {
+    size: A4;
+    margin: 0;
+    background: #1b150d;
+    @top-left { content: none; }
+    @top-right { content: none; }
+    @bottom-center { content: none; }
+}
+
+html {
+    font-size: 9.6pt;
+}
+
+body {
+    font-family: "Helvetica Neue", Helvetica, Arial, "Liberation Sans", sans-serif;
+    font-size: 9.4pt;
+    line-height: 1.38;
+    color: #241c12;
+    margin: 0;
+}
+
+/* ---------- cover ---------- */
+
+.cover {
+    position: relative;
+    box-sizing: border-box;
+    width: 210mm;
+    height: 297mm;
+    padding: 34mm 28mm 30mm 28mm;
+    background: #1b150d;
+    color: #f7f0e2;
+    page-break-after: always;
+}
+
+.cover .eyebrow {
+    margin: 0 0 16mm;
+    font-size: 8.4pt;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #d9b25e;
+}
+
+.cover .cover-title {
+    margin: 0;
+    font-size: 44pt;
+    line-height: 1.02;
+    letter-spacing: -0.02em;
+    color: #f2b705;
+    border: none;
+    page-break-before: avoid;
+}
+
+.cover .cover-sub {
+    margin: 4mm 0 0;
+    font-size: 21pt;
+    line-height: 1.15;
+    color: #fff8e6;
+}
+
+.cover .cover-tag {
+    margin: 7mm 0 0;
+    font-size: 10pt;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #c9a86a;
+}
+
+.cover .cover-meta {
+    margin-top: 22mm;
+    padding-top: 6mm;
+    border-top: 1px solid #4a3a24;
+    font-size: 9.4pt;
+    line-height: 1.6;
+    color: #e6d6bb;
+}
+
+.cover .cover-meta p {
+    margin: 0;
+}
+
+.cover .cover-note {
+    position: absolute;
+    left: 28mm;
+    right: 28mm;
+    bottom: 26mm;
+    padding: 5mm 6mm;
+    background: #2a2115;
+    border-left: 3px solid #f2b705;
+    font-size: 9pt;
+    line-height: 1.5;
+    color: #efe3cd;
+}
+
+.cover .cover-note p {
+    margin: 0;
+}
+
+.cover .cover-note strong {
+    color: #f2b705;
+}
+
+/* ---------- headings ---------- */
+
+h1 {
+    font-size: 19pt;
+    line-height: 1.15;
+    color: #1b150d;
+    margin: 0 0 4mm;
+    padding-bottom: 2.5mm;
+    border-bottom: 2.2px solid #e0a800;
+    page-break-before: always;
+    break-before: page;
+    page-break-after: avoid;
+    break-after: avoid;
+}
+
+h2 {
+    font-size: 11.8pt;
+    color: #3a2a12;
+    margin: 4mm 0 1.6mm;
+    page-break-after: avoid;
+    break-after: avoid;
+}
+
+h3 {
+    font-size: 10pt;
+    color: #7a4b00;
+    margin: 2.8mm 0 0.7mm;
+    page-break-after: avoid;
+    break-after: avoid;
+}
+
+p {
+    margin: 0 0 1.4mm;
+    orphans: 2;
+    widows: 2;
+}
+
+strong {
+    color: #1b150d;
+}
+
+/* ---------- lists ---------- */
+
+ul,
+ol {
+    margin: 0.8mm 0 2.4mm 5mm;
+    padding: 0;
+}
+
+li {
+    margin: 0.55mm 0;
+}
+
+/* ---------- spoken lines ---------- */
+
+blockquote {
+    margin: 0.9mm 0 2.4mm;
+    padding: 1.8mm 2.8mm;
+    background: #fff8e6;
+    border-left: 3px solid #e0a800;
+    color: #3a2a12;
+    font-size: 9.5pt;
+    line-height: 1.45;
+    page-break-inside: avoid;
+    break-inside: avoid;
+}
+
+blockquote p {
+    margin: 0;
+}
+
+blockquote p + p {
+    margin-top: 1.2mm;
+}
+
+/* ---------- boxes ---------- */
+
+.assign {
+    margin: 1.6mm 0 3mm;
+    padding: 2mm 2.8mm;
+    background: #eef6f1;
+    border: 1px solid #cfe3d7;
+    border-radius: 2px;
+    font-size: 8.4pt;
+    line-height: 1.45;
+    color: #24402f;
+    page-break-inside: avoid;
+    break-inside: avoid;
+}
+
+.assign strong {
+    color: #173326;
+}
+
+.tip,
+.warn {
+    margin: 3mm 0;
+    padding: 2.4mm 3.2mm;
+    font-size: 8.9pt;
+    line-height: 1.45;
+    page-break-inside: avoid;
+    break-inside: avoid;
+}
+
+.tip {
+    background: #eef4fb;
+    border-left: 3px solid #2f6fb2;
+    color: #1d3b5c;
+}
+
+.warn {
+    background: #fdecea;
+    border-left: 3px solid #c0392b;
+    color: #5a2019;
+}
+
+.tip p,
+.warn p {
+    margin: 0;
+}
+
+/* ---------- tables ---------- */
+
+table {
+    width: 100%;
+    margin: 1.7mm 0 3.4mm;
+    border-collapse: collapse;
+    font-size: 8.4pt;
+    line-height: 1.35;
+    page-break-inside: auto;
+    break-inside: auto;
+}
+
+thead {
+    display: table-header-group;
+}
+
+tr {
+    page-break-inside: avoid;
+    break-inside: avoid;
+}
+
+th {
+    background: #1b150d;
+    color: #fff8e6;
+    text-align: left;
+    font-weight: 600;
+    padding: 1.6mm 2mm;
+    border: 1px solid #1b150d;
+}
+
+td {
+    padding: 1.5mm 2mm;
+    border: 1px solid #e4dccd;
+    vertical-align: top;
+}
+
+tbody tr:nth-child(even) td {
+    background: #fbf8f1;
+}
+
+/* ---------- code ---------- */
+
+code {
+    font-family: "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+    font-size: 8.3pt;
+    background: #f3efe7;
+    color: #3a2a12;
+    padding: 0.15mm 0.65mm;
+    border-radius: 1.5px;
+}
+
+pre {
+    margin: 2mm 0 3.5mm;
+    padding: 2.6mm 3mm;
+    background: #1b150d;
+    color: #f5efe3;
+    border-radius: 2px;
+    font-size: 8.2pt;
+    line-height: 1.4;
+    white-space: pre-wrap;
+    page-break-inside: avoid;
+    break-inside: avoid;
+}
+
+pre code {
+    background: none;
+    color: #f5efe3;
+    padding: 0;
+    font-size: 8.2pt;
+}
+
+/* ---------- links ---------- */
+
+a {
+    color: #8a5a00;
+    text-decoration: none;
+}
+
+
+/* ---------- task lists ---------- */
+
+ul.task-list {
+    list-style: none;
+    margin-left: 0;
+    padding-left: 0;
+}
+
+ul.task-list li {
+    list-style: none;
+    margin: 0.6mm 0;
+}
+
+input[type="checkbox"] {
+    width: 3.1mm;
+    height: 3.1mm;
+    margin: 0 1.8mm 0 0;
+    vertical-align: -0.35mm;
+}
+
+
+.page-break-before {
+    break-before: page;
+    page-break-before: always;
+}
+
+
+/* ---------- manual checkboxes ---------- */
+
+.checks p {
+    margin: 0 0 1.1mm;
+    padding-left: 4.2mm;
+    text-indent: -4.2mm;
+}
+
+
+/* ---------- hanging bullet paragraphs ---------- */
+
+.never-do p {
+    margin: 0 0 1.2mm;
+    padding-left: 4mm;
+    text-indent: -4mm;
+}
+
+.never-do p::first-line {
+    color: #241c12;
+}
+
+
+.submit-table th:first-child,
+.submit-table td:first-child {
+    width: 7%;
+    text-align: center;
+}

@@ -1,4 +1,14 @@
 /* Shared navigation. Loaded by every page, before the page-specific styles. */
+
+/* The dark colour normally comes from the page body. Painting the root too
+   means any exposed canvas (a dynamic-viewport sliver, a scrollbar gutter)
+   shows the theme colour instead of the browser's white. color-scheme keeps
+   scrollbars and native controls dark to match the rest of the app. */
+html {
+    background: #12121c;
+    color-scheme: dark;
+}
+
 body.has-nav {
     padding-top: 72px;
 }
@@ -88,14 +98,26 @@ body.has-nav {
 
 .nav-toggle {
     display: none;
-    padding: 4px 8px;
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    align-items: center;
+    justify-content: center;
     border: 1px solid #5a4929;
     border-radius: 8px;
     background: transparent;
     color: #fff6df;
-    font-size: 20px;
-    line-height: 1;
     cursor: pointer;
+}
+
+/* Three bars drawn in CSS so they stay perfectly centred in the square. */
+.nav-toggle-bars {
+    position: relative;
+    width: 18px;
+    height: 2px;
+    border-radius: 2px;
+    background: currentColor;
+    box-shadow: 0 -6px 0 currentColor, 0 6px 0 currentColor;
 }
 
 .nav-toggle:focus-visible,
@@ -107,7 +129,7 @@ body.has-nav {
 
 @media (max-width: 720px) {
     .nav-toggle {
-        display: inline-block;
+        display: inline-flex;
     }
 
     .site-nav-links {

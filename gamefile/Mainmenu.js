@@ -51,6 +51,8 @@ function startGame() {
             // The player left while the page was loading: drop the markup.
             if (token !== startToken) return null;
             document.getElementById('main-menu').style.display = 'none';
+            // No page scrollbar while the game fills the screen.
+            document.body.classList.add('game-playing');
 
             const gameContainer = document.createElement('div');
             gameContainer.id = 'game-container-wrapper';
@@ -144,6 +146,7 @@ function returnToMenu() {
     // Update the menu before revealing it, so the old values never flash.
     syncMenuProgress(lastState);
     document.getElementById('main-menu').style.display = 'block';
+    document.body.classList.remove('game-playing');
     const siteNav = document.querySelector('.site-nav');
     if (siteNav) siteNav.style.display = '';
 }

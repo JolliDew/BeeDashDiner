@@ -207,11 +207,28 @@ a.menu-help:hover {
 /* --- In-Game Shell ---
    Only the full-screen shell lives here. The HUD, scene, dock and modals are
    styled in css/bee-game.css and css/bee-modals.css. Keeping the old copies
-   here caused specificity confusion, so they were removed. */
+   here caused specificity confusion, so they were removed.
+
+   The wrapper created by Mainmenu.js is fixed to the viewport. The game fills
+   that wrapper exactly (height:100%) instead of guessing with 100dvh, and the
+   wrapper clips overflow, so no gap can appear at the bottom or the side. */
+#game-container-wrapper {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    overflow: hidden;
+}
+
+/* No page scrollbar while the game is filling the screen. */
+body.game-playing {
+    overflow: hidden;
+}
+
 .game-screen {
     width: 100%;
-    height: 100vh;
-    height: 100dvh;
+    height: 100%;
     display: flex;
     flex-direction: column;
     background: #12121c;

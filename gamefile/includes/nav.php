@@ -44,7 +44,7 @@ $navHome = 'index.php';
 <header class="site-nav">
     <div class="site-nav-inner">
         <a class="site-brand" href="<?= htmlspecialchars($navHome) ?>"><span aria-hidden="true">🍯</span> BeeDashDiner</a>
-        <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav-links" aria-label="Open navigation">☰</button>
+        <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav-links" aria-label="Open navigation"><span class="nav-toggle-bars" aria-hidden="true"></span></button>
         <nav id="site-nav-links" class="site-nav-links" aria-label="Main navigation">
             <a href="index.php"<?= $navActive === 'home' ? ' aria-current="page"' : '' ?>>Home</a>
             <?php if (Auth::userId()): ?>
